@@ -154,7 +154,7 @@ func newTableReader(
 			LockStrength:               spec.LockingStrength,
 			LockWaitPolicy:             spec.LockingWaitPolicy,
 			LockDurability:             spec.LockingDurability,
-			LockTimeout:                flowCtx.EvalCtx.SessionData().LockTimeout,
+			LockTimeout:                flowCtx.EvalCtx.SessionData().DeadlockTimeout,
 			Alloc:                      &tr.alloc,
 			MemMonitor:                 flowCtx.Mon,
 			Spec:                       &spec.FetchSpec,

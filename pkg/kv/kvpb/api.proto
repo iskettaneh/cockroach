@@ -2962,8 +2962,11 @@ message Header {
   reserved 7, 10, 12, 14, 20;
 
   WriteOptions write_options = 35;
+
+  google.protobuf.Duration deadlock_timeout = 36 [(gogoproto.nullable) = false,
+    (gogoproto.stdduration) = true];
    
-  // Next ID: 36
+  // Next ID: 37
 }
 
 message WriteOptions {

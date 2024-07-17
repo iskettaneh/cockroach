@@ -320,7 +320,8 @@ type FetcherInitArgs struct {
 	// LockTimeout specifies the maximum amount of time that the fetcher will
 	// wait while attempting to acquire a lock on a key or while blocking on an
 	// existing lock in order to perform a non-locking read on a key.
-	LockTimeout time.Duration
+	LockTimeout     time.Duration
+	DeadlockTimeout time.Duration
 	// Alloc is used for buffered allocation of decoded datums.
 	Alloc      *tree.DatumAlloc
 	MemMonitor *mon.BytesMonitor
@@ -465,6 +466,7 @@ func (rf *Fetcher) Init(ctx context.Context, args FetcherInitArgs) error {
 			lockWaitPolicy:             args.LockWaitPolicy,
 			lockDurability:             args.LockDurability,
 			lockTimeout:                args.LockTimeout,
+			deadlockTimeout:            args.DeadlockTimeout,
 			acc:                        rf.kvFetcherMemAcc,
 			forceProductionKVBatchSize: args.ForceProductionKVBatchSize,
 			kvPairsRead:                &kvPairsRead,

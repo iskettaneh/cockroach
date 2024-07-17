@@ -1150,11 +1150,24 @@ var varGen = map[string]sessionVar{
 		GetStringVal: makeTimeoutVarGetter(`lock_timeout`),
 		Set:          lockTimeoutVarSet,
 		Get: func(evalCtx *extendedEvalContext, _ *kv.Txn) (string, error) {
+			//fmt.Println("!!! IBRAHIM !!! evalCtx.SessionData().LockTimeout:", evalCtx.SessionData().LockTimeout)
 			ms := evalCtx.SessionData().LockTimeout.Nanoseconds() / int64(time.Millisecond)
 			return strconv.FormatInt(ms, 10), nil
 		},
 		GlobalDefault: func(sv *settings.Values) string {
 			return clusterLockTimeout.String(sv)
+		},
+	},
+
+	`deadlock_timeout`: {
+		GetStringVal: makeTimeoutVarGetter(`deadlock_timeout`),
+		Set:          deadlockTimeoutVarSet,
+		Get: func(evalCtx *extendedEvalContext, _ *kv.Txn) (string, error) {
+			ms := evalCtx.SessionData().DeadlockTimeout.Nanoseconds() / int64(time.Millisecond)
+			return strconv.FormatInt(ms, 10), nil
+		},
+		GlobalDefault: func(sv *settings.Values) string {
+			return clusterDeadlockTimeout.String(sv)
 		},
 	},
 

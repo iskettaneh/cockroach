@@ -12,6 +12,7 @@ package concurrency
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"time"
 
@@ -173,6 +174,7 @@ func (w *lockTableWaiterImpl) WaitOn(
 				// determine whether the lock is abandoned or whether its holder is
 				// still active.
 				timeoutPush := req.LockTimeout != 0
+				//fmt.Println("!!!!!!!IBRAHIM!!!!!!: req.LockTimeout:", req.LockTimeout)
 
 				// If the pushee has the minimum priority or if the pusher has the
 				// maximum priority, push immediately to proceed without queueing.
@@ -201,7 +203,13 @@ func (w *lockTableWaiterImpl) WaitOn(
 				// transaction (one that's acquired a claim but not the lock).
 				delay := time.Duration(math.MaxInt64)
 				if deadlockOrLivenessPush {
-					delay = LockTableDeadlockOrLivenessDetectionPushDelay.Get(&w.st.SV)
+					if req.DeadlockTimeout.Seconds() == 0 {
+						fmt.Println("!!!!!!!IBRAHIM!!!!!!: req.DeadlockTimeout:", req.DeadlockTimeout)
+						delay = LockTableDeadlockOrLivenessDetectionPushDelay.Get(&w.st.SV)
+					} else {
+						fmt.Println("!!!!!!!IBRAHIM!!!!!!: req.DeadlockTimeout:", req.DeadlockTimeout)
+						delay = req.DeadlockTimeout
+					}
 				}
 				if timeoutPush {
 					// Only reset the lock timeout deadline if this is the first time

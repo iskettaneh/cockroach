@@ -735,6 +735,18 @@ var overrideAlterPrimaryRegionInSuperRegion = settings.RegisterBoolSetting(
 	false,
 	settings.WithPublic)
 
+var clusterDeadlockTimeout = settings.RegisterDurationSetting(
+	settings.ApplicationLevel,
+	"sql.defaults.deadlock_timeout",
+	"default value for the deadlock_timeout; "+
+		"default value for the deadlock_timeout session setting; controls the "+
+		"duration a query is permitted to wait while attempting to acquire "+
+		"a lock on a key or while blocking on an existing lock in order to "+
+		"perform a non-locking read on a key; if set to 0, there is no timeout",
+	0,
+	settings.NonNegativeDuration,
+	settings.WithPublic)
+
 var errNoTransactionInProgress = pgerror.New(pgcode.NoActiveSQLTransaction, "there is no transaction in progress")
 var errTransactionInProgress = pgerror.New(pgcode.ActiveSQLTransaction, "there is already a transaction in progress")
 
@@ -3388,6 +3400,10 @@ func (m *sessionDataMutator) SetStmtTimeout(timeout time.Duration) {
 
 func (m *sessionDataMutator) SetLockTimeout(timeout time.Duration) {
 	m.data.LockTimeout = timeout
+}
+
+func (m *sessionDataMutator) SetDeadlockTimeout(timeout time.Duration) {
+	m.data.DeadlockTimeout = timeout
 }
 
 func (m *sessionDataMutator) SetIdleInSessionTimeout(timeout time.Duration) {
