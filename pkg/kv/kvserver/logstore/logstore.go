@@ -434,6 +434,9 @@ func logAppend(
 		if kvpb.RaftIndex(ent.Index) > prev.LastIndex {
 			_, err = storage.MVCCBlindPut(ctx, rw, key, hlc.Timestamp{}, *value, opts)
 		} else {
+			if err := rw.SingleClearUnversioned(key); err != nil {
+				return RaftState{}, err
+			}
 			_, err = storage.MVCCPut(ctx, rw, key, hlc.Timestamp{}, *value, opts)
 		}
 		if err != nil {
@@ -496,9 +499,8 @@ func Compact(
 		// allocating when constructing Raft log keys (16 bytes).
 		prefix := prefixBuf.RaftLogPrefix()
 		for idx := prev.Index + 1; idx <= next.Index; idx++ {
-			if err := writer.ClearUnversioned(
+			if err := writer.SingleClearUnversioned(
 				keys.RaftLogKeyFromPrefix(prefix, idx),
-				storage.ClearOptions{},
 			); err != nil {
 				return errors.Wrapf(err, "unable to clear truncated Raft entries for %+v at index %d",
 					next, idx)
