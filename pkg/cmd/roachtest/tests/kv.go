@@ -736,7 +736,7 @@ func registerKVSplits(r registry.Registry) {
 		// ticking is not entirely negligible (see #133885), so each range isn't
 		// completely free. Currently, they should be able to support 80k ranges in
 		// this cluster configuration.
-		{false, 80_000, registry.LeaderLeases, 2 * time.Hour},
+		{false, 300_000, registry.LeaderLeases, 2 * time.Hour},
 	} {
 		item := item // for use in closure below
 		r.Add(registry.TestSpec{

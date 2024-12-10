@@ -31,9 +31,8 @@ import (
 // The Progress is only populated on the leader.
 type Status struct {
 	BasicStatus
-	Config           quorum.Config
-	Progress         map[pb.PeerID]tracker.Progress
-	LeadSupportUntil hlc.Timestamp
+	Config   quorum.Config
+	Progress map[pb.PeerID]tracker.Progress
 }
 
 // SparseStatus is a variant of Status without Config or Progress.Inflights,
@@ -59,7 +58,8 @@ type BasicStatus struct {
 
 	Applied uint64
 
-	LeadTransferee pb.PeerID
+	LeadTransferee   pb.PeerID
+	LeadSupportUntil hlc.Timestamp
 }
 
 // Empty returns true if the receiver is empty.
@@ -101,6 +101,11 @@ func getBasicStatus(r *raft) BasicStatus {
 	s.HardState = r.hardState()
 	s.SoftState = r.softState()
 	s.Applied = r.raftLog.applied
+	// NOTE: we assign to LeadSupportUntil even if RaftState is not currently
+	// StateLeader. The replica may have been the leader and stepped down to a
+	// follower before its lead support ran out.
+	//s.LeadSupportUntil = hlc.Timestamp{}
+	s.LeadSupportUntil = r.fortificationTracker.LeadSupportUntil(r.state)
 	if s.RaftState == pb.StateFollower && s.Lead == r.id {
 		// A raft leader's term ends when it is shut down. It'll rejoin its peers as
 		// a follower when it comes back up, but its Lead and Term field may still
@@ -129,10 +134,6 @@ func getStatus(r *raft) Status {
 		s.Progress = getProgressCopy(r)
 	}
 	s.Config = r.config.Clone()
-	// NOTE: we assign to LeadSupportUntil even if RaftState is not currently
-	// StateLeader. The replica may have been the leader and stepped down to a
-	// follower before its lead support ran out.
-	s.LeadSupportUntil = r.fortificationTracker.LeadSupportUntil(r.state)
 	return s
 }
 
@@ -148,15 +149,6 @@ func getSparseStatus(r *raft) SparseStatus {
 			s.Progress[id] = pr
 		})
 	}
-	return s
-}
-
-// getLeadSupportStatus gets a copy of the current raft status with only the
-// leader support information included.
-func getLeadSupportStatus(r *raft) LeadSupportStatus {
-	var s LeadSupportStatus
-	s.BasicStatus = getBasicStatus(r)
-	s.LeadSupportUntil = r.fortificationTracker.LeadSupportUntil(r.state)
 	return s
 }
 

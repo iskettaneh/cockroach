@@ -15,7 +15,6 @@ import (
 	pb "github.com/cockroachdb/cockroach/pkg/raft/raftpb"
 	"github.com/cockroachdb/cockroach/pkg/raft/raftstoreliveness"
 	"github.com/cockroachdb/cockroach/pkg/util/hlc"
-	"github.com/cockroachdb/cockroach/pkg/util/syncutil"
 )
 
 // FortificationTracker is used to track fortification from peers. This can
@@ -92,6 +91,9 @@ type FortificationTracker struct {
 	// to campaign at a lower term, then learns about the higher term, and then
 	// use it in the next campaign attempt.
 	steppingDownTerm uint64
+
+	lastComputedLeadSupportUntil hlc.Timestamp
+	lsuMap                       map[pb.PeerID]hlc.Timestamp
 }
 
 // NewFortificationTracker initializes a FortificationTracker.
@@ -103,6 +105,7 @@ func NewFortificationTracker(
 		storeLiveness: storeLiveness,
 		fortification: map[pb.PeerID]pb.Epoch{},
 		votersSupport: map[pb.PeerID]bool{},
+		lsuMap:        map[pb.PeerID]hlc.Timestamp{},
 		logger:        logger,
 	}
 	return &st
@@ -128,6 +131,7 @@ func (ft *FortificationTracker) RecordFortification(id pb.PeerID, epoch pb.Epoch
 	// The supported epoch should never regress. Guard against out of order
 	// delivery of fortify responses by using max.
 	ft.fortification[id] = max(ft.fortification[id], epoch)
+	ft.UpdateLeadSupportUntil(pb.StateLeader)
 }
 
 // Reset clears out any previously tracked fortification and prepares the
@@ -143,6 +147,7 @@ func (ft *FortificationTracker) Reset(term uint64) {
 	ft.leaderMaxSupported.Reset()
 	ft.steppingDown = false
 	ft.steppingDownTerm = 0
+	ft.lastComputedLeadSupportUntil = hlc.Timestamp{}
 }
 
 // IsFortifiedBy returns whether the follower fortifies the leader or not.
@@ -188,6 +193,33 @@ func (ft *FortificationTracker) LeadSupportUntil(state pb.StateType) hlc.Timesta
 	return ft.leaderMaxSupported.Forward(leadSupportUntil)
 }
 
+func (ft *FortificationTracker) UpdateLeadSupportUntil(state pb.StateType) hlc.Timestamp {
+	if state != pb.StateLeader {
+		panic("computeLeadSupportUntil should only be called by the leader")
+	}
+
+	if len(ft.fortification) == 0 {
+		ft.lastComputedLeadSupportUntil = hlc.Timestamp{}
+		return ft.lastComputedLeadSupportUntil // fast-path for no fortification
+	}
+	clear(ft.lsuMap)
+	ft.config.Voters.Visit(func(id pb.PeerID) {
+		if supportEpoch, ok := ft.fortification[id]; ok {
+			curEpoch, curExp := ft.storeLiveness.SupportFrom(id)
+			// NB: We can't assert that supportEpoch <= curEpoch because there may be
+			// a race between a successful MsgFortifyLeaderResp and the store liveness
+			// heartbeat response that lets the leader know the follower's store is
+			// supporting the leader's store at the epoch in the MsgFortifyLeaderResp
+			// message.
+			if curEpoch == supportEpoch {
+				ft.lsuMap[id] = curExp
+			}
+		}
+	})
+	ft.lastComputedLeadSupportUntil = ft.config.Voters.LeadSupportExpiration(ft.lsuMap)
+	return ft.lastComputedLeadSupportUntil
+}
+
 // computeLeadSupportUntil computes the timestamp until which the leader is
 // guaranteed fortification using the current quorum configuration.
 //
@@ -198,27 +230,7 @@ func (ft *FortificationTracker) computeLeadSupportUntil(state pb.StateType) hlc.
 	if state != pb.StateLeader {
 		panic("computeLeadSupportUntil should only be called by the leader")
 	}
-	if len(ft.fortification) == 0 {
-		return hlc.Timestamp{} // fast-path for no fortification
-	}
-
-	// TODO(arul): avoid this map allocation as we're calling LeadSupportUntil
-	// from hot paths.
-	supportExpMap := make(map[pb.PeerID]hlc.Timestamp)
-	ft.config.Voters.Visit(func(id pb.PeerID) {
-		if supportEpoch, ok := ft.fortification[id]; ok {
-			curEpoch, curExp := ft.storeLiveness.SupportFrom(id)
-			// NB: We can't assert that supportEpoch <= curEpoch because there may be
-			// a race between a successful MsgFortifyLeaderResp and the store liveness
-			// heartbeat response that lets the leader know the follower's store is
-			// supporting the leader's store at the epoch in the MsgFortifyLeaderResp
-			// message.
-			if curEpoch == supportEpoch {
-				supportExpMap[id] = curExp
-			}
-		}
-	})
-	return ft.config.Voters.LeadSupportExpiration(supportExpMap)
+	return ft.lastComputedLeadSupportUntil
 }
 
 // CanDefortify returns whether the caller can safely[1] de-fortify the term
@@ -355,6 +367,8 @@ func (ft *FortificationTracker) ConfigChangeSafe() bool {
 	// previous configuration, which is reflected in leaderMaxSupported.
 	//
 	// NB: Only run by the leader.
+	//fmt.Printf("!!! IBRAHIM !!! ft.computeLeadSupportUntil(pb.StateLeader): %v\n", ft.computeLeadSupportUntil(pb.StateLeader))
+	//fmt.Printf("!!! IBRAHIM !!! ft.leaderMaxSupported.Load(): %v\n", ft.leaderMaxSupported.Load())
 	return ft.leaderMaxSupported.Load().LessEq(ft.computeLeadSupportUntil(pb.StateLeader))
 }
 
@@ -413,27 +427,18 @@ func (ft *FortificationTracker) String() string {
 
 // atomicTimestamp is a thin wrapper to provide atomic access to a timestamp.
 type atomicTimestamp struct {
-	mu syncutil.Mutex
-
 	ts hlc.Timestamp
 }
 
 func (a *atomicTimestamp) Load() hlc.Timestamp {
-	a.mu.Lock()
-	defer a.mu.Unlock()
 	return a.ts
 }
 
 func (a *atomicTimestamp) Forward(ts hlc.Timestamp) hlc.Timestamp {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-
 	a.ts.Forward(ts)
 	return a.ts
 }
 
 func (a *atomicTimestamp) Reset() {
-	a.mu.Lock()
-	defer a.mu.Unlock()
 	a.ts = hlc.Timestamp{}
 }

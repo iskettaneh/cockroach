@@ -949,6 +949,35 @@ func BenchmarkStatus(b *testing.B) {
 	}
 }
 
+func BenchmarkLeadSupportStatus(b *testing.B) {
+	setup := func(members int) *RawNode {
+		peers := make([]pb.PeerID, members)
+		for i := range peers {
+			peers[i] = pb.PeerID(i + 1)
+		}
+
+		raftPeers := make([]stateMachine, members)
+		for i := range raftPeers {
+			raftPeers[i] = newTestRaft(pb.PeerID(i+1), 10, 1, newTestMemoryStorage(withPeers(peers...)), withLogger(raftlogger.DiscardLogger))
+		}
+
+		tt := newNetworkWithConfig(nil, raftPeers...)
+		tt.send(pb.Message{From: 1, To: 1, Type: pb.MsgHup})
+		return &RawNode{raft: raftPeers[0].(*raft)}
+	}
+
+	for _, members := range []int{3, 5, 7, 15, 100} {
+		b.Run(fmt.Sprintf("members=%d", members), func(b *testing.B) {
+			rn := setup(members)
+			b.ResetTimer()
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				_ = rn.BasicStatus()
+			}
+		})
+	}
+}
+
 func TestRawNodeConsumeReady(t *testing.T) {
 	// Check that readyWithoutAccept() does not call acceptReady (which resets
 	// the messages) but Ready() does.

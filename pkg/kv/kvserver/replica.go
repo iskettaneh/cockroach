@@ -1680,13 +1680,6 @@ func (r *Replica) raftBasicStatusRLocked() raft.BasicStatus {
 	return raft.BasicStatus{}
 }
 
-func (r *Replica) raftLeadSupportStatusRLocked() raft.LeadSupportStatus {
-	if rg := r.mu.internalRaftGroup; rg != nil {
-		return rg.LeadSupportStatus()
-	}
-	return raft.LeadSupportStatus{}
-}
-
 // State returns a copy of the internal state of the Replica, along with some
 // auxiliary information.
 func (r *Replica) State(ctx context.Context) kvserverpb.RangeInfo {

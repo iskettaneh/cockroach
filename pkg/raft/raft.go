@@ -1847,6 +1847,7 @@ func (r *raft) logMsgHigherTerm(m pb.Message, suffix redact.SafeString) {
 type stepFunc func(r *raft, m pb.Message) error
 
 func stepLeader(r *raft, m pb.Message) error {
+	r.fortificationTracker.UpdateLeadSupportUntil(r.state)
 	// These message types do not require any progress for m.From.
 	switch m.Type {
 	case pb.MsgBeat:
@@ -2742,6 +2743,8 @@ func (r *raft) switchToConfig(cfg quorum.Config, progressMap tracker.ProgressMap
 	if r.state != pb.StateLeader || len(cs.Voters) == 0 {
 		return cs
 	}
+
+	r.fortificationTracker.UpdateLeadSupportUntil(r.state)
 
 	if pr == nil {
 		// This node is leader and was removed. This should not be possible, as we
