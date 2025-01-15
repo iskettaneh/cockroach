@@ -1453,7 +1453,10 @@ func (tc *TestCluster) FindRangeLeaseHolder(
 		return roachpb.ReplicationTarget{}, err
 	}
 	if !replica.LeaseStatusAt(context.TODO(), now).IsValid() {
+		fmt.Printf("!!! IBRAHIM !!! replica: %+v, lease:%+v\n", replica, replica.LeaseStatusAt(context.TODO(), now))
 		return roachpb.ReplicationTarget{}, errors.New("no valid lease")
+	} else {
+		fmt.Printf("!!! IBRAHIM !!! replica: %+v, lease:%+v\n", replica, replica.LeaseStatusAt(context.TODO(), now))
 	}
 	replicaDesc := lease.Replica
 	return roachpb.ReplicationTarget{NodeID: replicaDesc.NodeID, StoreID: replicaDesc.StoreID}, nil

@@ -7,6 +7,9 @@ package testcluster
 
 import (
 	"context"
+	"fmt"
+	"github.com/cockroachdb/cockroach/pkg/kv/kvserver"
+	"github.com/cockroachdb/cockroach/pkg/settings/cluster"
 	"strconv"
 	"testing"
 	"time"
@@ -66,12 +69,17 @@ func TestClusterSqlDisabled(t *testing.T) {
 func TestManualReplication(t *testing.T) {
 	defer leaktest.AfterTest(t)()
 	defer log.Scope(t).Close(t)
+	ctx := context.Background()
+
+	st := cluster.MakeTestingClusterSettings()
+	kvserver.OverrideDefaultLeaseType(ctx, &st.SV, roachpb.LeaseLeader)
 
 	tc := StartTestCluster(t, 3,
 		base.TestClusterArgs{
 			ReplicationMode: base.ReplicationManual,
 			ServerArgs: base.TestServerArgs{
 				UseDatabase: "t",
+				Settings:    st,
 			},
 		})
 	defer tc.Stopper().Stop(context.Background())
@@ -132,29 +140,53 @@ func TestManualReplication(t *testing.T) {
 	}
 
 	// Transfer the lease to node 1.
+	//var leaseHolder roachpb.ReplicationTarget
+	//var target roachpb.ReplicationTarget
+	//testutils.SucceedsSoon(
+	//	t, func() error {
+	//		target = tc.Target(0)
+	//		leaseHolder, err = tc.FindRangeLeaseHolder(tableRangeDesc, &target)
+	//		return err
+	//	},
+	//)
+
 	target := tc.Target(0)
 	leaseHolder, err := tc.FindRangeLeaseHolder(tableRangeDesc, &target)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	if leaseHolder.StoreID != tc.Servers[0].StorageLayer().GetFirstStoreID() {
 		t.Fatalf("expected initial lease on server idx 0, but is on node: %+v",
 			leaseHolder)
 	}
 
+	fmt.Println("!!! IBRAHIM !!! start TransferRangeLease")
 	err = tc.TransferRangeLease(tableRangeDesc, tc.Target(1))
 	if err != nil {
 		t.Fatal(err)
 	}
+	fmt.Println("!!! IBRAHIM !!! start Done")
 
 	// Check that the lease holder has changed. We'll use the old lease holder as
 	// the hint, since it's guaranteed that the old lease holder has applied the
 	// new lease.
 	target = tc.Target(0)
-	leaseHolder, err = tc.FindRangeLeaseHolder(tableRangeDesc, &target)
-	if err != nil {
-		t.Fatal(err)
-	}
+
+	//tc.MaybeWaitForLeaseUpgrade(ctx, t, tableRangeDesc)
+	//leaseHolder, err = tc.FindRangeLeaseHolder(tableRangeDesc, &target)
+	//if err != nil {
+	//	t.Fatal(err)
+	//}
+
+	testutils.SucceedsSoon(
+		t, func() error {
+			target = tc.Target(0)
+			leaseHolder, err = tc.FindRangeLeaseHolder(tableRangeDesc, &target)
+			return err
+		},
+	)
+
 	if leaseHolder.StoreID != tc.Servers[1].StorageLayer().GetFirstStoreID() {
 		t.Fatalf("expected lease on server idx 1 (node: %d store: %d), but is on node: %+v",
 			tc.Server(1).NodeID(),

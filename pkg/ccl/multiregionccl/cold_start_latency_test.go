@@ -8,6 +8,7 @@ package multiregionccl
 import (
 	"context"
 	gosql "database/sql"
+	"github.com/cockroachdb/cockroach/pkg/kv/kvserver"
 	"net/url"
 	"sync"
 	"sync/atomic"
@@ -70,12 +71,18 @@ func TestColdStartLatency(t *testing.T) {
 	var latencyEnabled atomic.Bool
 	var addrsToNodeIDs syncutil.Map[string, int]
 
+	ctx := context.Background()
+	cs := cluster.MakeTestingClusterSettings()
+	kvserver.OverrideDefaultLeaseType(ctx, &cs.SV, roachpb.LeaseLeader)
+	//kvserver.OverrideLeaderLeaseMetamorphism(ctx, &cs.SV)
+
 	// Set up the host cluster.
 	perServerArgs := make(map[int]base.TestServerArgs, numNodes)
 	for i := 0; i < numNodes; i++ {
 		i := i
 		args := base.TestServerArgs{
 			Locality: localities[i],
+			Settings: cs,
 		}
 		signalAfter[i] = make(chan struct{})
 		serverKnobs := &server.TestingKnobs{
@@ -114,7 +121,7 @@ func TestColdStartLatency(t *testing.T) {
 		args.Knobs.Server = serverKnobs
 		perServerArgs[i] = args
 	}
-	cs := cluster.MakeTestingClusterSettings()
+
 	tc := testcluster.NewTestCluster(t, numNodes, base.TestClusterArgs{
 		ParallelStart:     true,
 		ServerArgsPerNode: perServerArgs,
@@ -123,6 +130,8 @@ func TestColdStartLatency(t *testing.T) {
 			Settings:          cs,
 		},
 	})
+	defer tc.Stopper().Stop(ctx)
+
 	go func() {
 		for _, c := range signalAfter {
 			<-c
@@ -131,8 +140,6 @@ func TestColdStartLatency(t *testing.T) {
 		close(pauseAfter)
 	}()
 	tc.Start(t)
-	ctx := context.Background()
-	defer tc.Stopper().Stop(ctx)
 	enableLatency := func() {
 		latencyEnabled.Store(true)
 		for i := 0; i < numNodes; i++ {
@@ -145,6 +152,11 @@ func TestColdStartLatency(t *testing.T) {
 		addrsToNodeIDs.Store(tc.Server(i).RPCAddr(), &nodeID)
 	}
 	tdb := sqlutils.MakeSQLRunner(tc.ServerConn(1))
+
+	//tdb.Exec(t, `SET CLUSTER SETTING server.cpu_profile.enabled = true`)
+	//tdb.Exec(t, `SET CLUSTER SETTING server.cpu_profile.cpu_usage_combined_threshold = 80`)
+	//tdb.Exec(t, `SET CLUSTER SETTING server.cpu_profile.duration = '2s'`)
+	//tdb.Exec(t, `SET CLUSTER SETTING server.cpu_profile.interval = '20'`)
 
 	// Shorten the closed timestamp target duration so that span configs
 	// propagate more rapidly.
