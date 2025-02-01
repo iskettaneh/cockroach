@@ -223,40 +223,78 @@ func (sm *SupportManager) startLoop(ctx context.Context) {
 	defer idleSupportFromTicker.Stop()
 
 	for {
-		// NOTE: only listen to the receive queue's signal if we don't already have
-		// stores to add, heartbeats to send, or support to check. This prevents a
-		// constant flow of inbound messages from delaying the other work due to the
-		// random selection between multiple enabled channels.
-		var receiveQueueSig <-chan struct{}
-		if len(heartbeatTicker.C) == 0 &&
-			len(supportExpiryTicker.C) == 0 &&
-			len(sm.storesToAdd.sig) == 0 {
-			receiveQueueSig = sm.receiveQueue.Sig()
-		}
-
 		select {
-		case <-sm.storesToAdd.sig:
-			sm.maybeAddStores(ctx)
-			sm.sendHeartbeats(ctx)
-
 		case <-heartbeatTicker.C:
 			sm.sendHeartbeats(ctx)
-
-		case <-supportExpiryTicker.C:
-			sm.withdrawSupport(ctx)
-
-		case <-idleSupportFromTicker.C:
-			sm.requesterStateHandler.markIdleStores(ctx)
-
-		case <-receiveQueueSig:
+		case <-sm.receiveQueue.Sig():
 			// Decrementing the queue metrics is done in handleMessages.
 			msgs := sm.receiveQueue.Drain()
 			sm.handleMessages(ctx, msgs)
+		default:
+			select {
+			case <-heartbeatTicker.C:
+				sm.sendHeartbeats(ctx)
 
-		case <-sm.stopper.ShouldQuiesce():
-			return
+			case <-sm.receiveQueue.Sig():
+				// Decrementing the queue metrics is done in handleMessages.
+				msgs := sm.receiveQueue.Drain()
+				sm.handleMessages(ctx, msgs)
+
+			case <-sm.storesToAdd.sig:
+				sm.maybeAddStores(ctx)
+				sm.sendHeartbeats(ctx)
+
+			case <-supportExpiryTicker.C:
+				sm.withdrawSupport(ctx)
+
+			case <-idleSupportFromTicker.C:
+				sm.requesterStateHandler.markIdleStores(ctx)
+
+			case <-sm.stopper.ShouldQuiesce():
+				return
+			}
 		}
 	}
+	//
+	//var counter uint64
+	//for {
+	//	switch counter % 3 {
+	//	case 0:
+	//		select {
+	//		case <-heartbeatTicker.C:
+	//			sm.sendHeartbeats(ctx)
+	//		default:
+	//			time.Sleep(10 * time.Millisecond)
+	//		}
+	//	case 1:
+	//		select {
+	//		case <-sm.receiveQueue.Sig():
+	//			// Decrementing the queue metrics is done in handleMessages.
+	//			msgs := sm.receiveQueue.Drain()
+	//			sm.handleMessages(ctx, msgs)
+	//		default:
+	//			time.Sleep(10 * time.Millisecond)
+	//		}
+	//	case 2:
+	//		select {
+	//		case <-sm.storesToAdd.sig:
+	//			sm.maybeAddStores(ctx)
+	//			sm.sendHeartbeats(ctx)
+	//
+	//		case <-supportExpiryTicker.C:
+	//			sm.withdrawSupport(ctx)
+	//
+	//		case <-idleSupportFromTicker.C:
+	//			sm.requesterStateHandler.markIdleStores(ctx)
+	//
+	//		case <-sm.stopper.ShouldQuiesce():
+	//			return
+	//		default:
+	//			time.Sleep(10 * time.Millisecond)
+	//		}
+	//	}
+	//	counter++
+	//}
 }
 
 // maybeAddStores drains storesToAdd and delegates adding any new stores to the

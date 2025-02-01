@@ -228,12 +228,12 @@ var (
 	// defaultStoreLivenessHeartbeatInterval is the default value for
 	// StoreLivenessHeartbeatInterval.
 	defaultStoreLivenessHeartbeatInterval = envutil.EnvOrDefaultDuration(
-		"COCKROACH_STORE_LIVENESS_HEARTBEAT_INTERVAL", time.Second)
+		"COCKROACH_STORE_LIVENESS_HEARTBEAT_INTERVAL", 3*time.Second)
 
 	// defaultStoreLivenessSupportDuration is the default value for
 	// StoreLivenessSupportDuration.
 	defaultStoreLivenessSupportDuration = envutil.EnvOrDefaultDuration(
-		"COCKROACH_STORE_LIVENESS_SUPPORT_DURATION", 3*time.Second)
+		"COCKROACH_STORE_LIVENESS_SUPPORT_DURATION", 15*time.Second)
 
 	// defaultRaftTickInterval is the default resolution of the Raft timer.
 	defaultRaftTickInterval = envutil.EnvOrDefaultDuration(
