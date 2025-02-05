@@ -10,6 +10,7 @@ package spanconfigsqltranslator
 
 import (
 	"context"
+	"github.com/cockroachdb/cockroach/pkg/util/log"
 
 	"github.com/cockroachdb/cockroach/pkg/config/zonepb"
 	"github.com/cockroachdb/cockroach/pkg/keys"
@@ -100,11 +101,14 @@ func (s *SQLTranslator) Translate(
 	seen := make(map[descpb.ID]struct{})
 	var leafIDs descpb.IDs
 	for _, id := range ids {
+		log.VEventf(ctx, 0, "findDescendantLeafIDs id:%+v", id)
 		descendantLeafIDs, err := s.findDescendantLeafIDs(ctx, id)
 		if err != nil {
 			return nil, err
 		}
 		for _, descendantLeafID := range descendantLeafIDs {
+			log.VEventf(ctx, 0, "descendantLeafID returned: %+v", descendantLeafID)
+
 			if _, found := seen[descendantLeafID]; !found {
 				seen[descendantLeafID] = struct{}{}
 				leafIDs = append(leafIDs, descendantLeafID)
@@ -128,6 +132,7 @@ func (s *SQLTranslator) Translate(
 
 	// For every unique leaf ID, generate span configurations.
 	for _, leafID := range leafIDs {
+		log.VEventf(ctx, 0, "generating span configurations for leaf ID %d", leafID)
 		translatedRecords, err := s.generateSpanConfigurations(ctx, leafID, ptsStateReader)
 		if err != nil {
 			return nil, err
@@ -198,7 +203,9 @@ func (s *SQLTranslator) generateSystemSpanConfigRecords(
 func (s *SQLTranslator) generateSpanConfigurations(
 	ctx context.Context, id descpb.ID, ptsStateReader *spanconfig.ProtectedTimestampStateReader,
 ) (_ []spanconfig.Record, err error) {
+	log.VEventf(ctx, 0, "!!! IBRAHIM !!! generateSpanConfigurations id:%+v", id)
 	if zonepb.IsNamedZoneID(uint32(id)) {
+		log.VEventf(ctx, 0, "!!! IBRAHIM !!! zonepb.IsNamedZoneID(uint32(id)), id:%+v", id)
 		return s.generateSpanConfigurationsForNamedZone(ctx, s.txn.KV(), id)
 	}
 
@@ -226,7 +233,11 @@ func (s *SQLTranslator) generateSpanConfigurations(
 			"can only generate span configurations for tables, but got %s", desc.DescriptorType(),
 		)
 	}
-	return s.generateSpanConfigurationsForTable(ctx, s.txn.KV(), table, ptsStateReader)
+	rcrds, err := s.generateSpanConfigurationsForTable(ctx, s.txn.KV(), table, ptsStateReader)
+	for _, rcrd := range rcrds {
+		log.VEventf(ctx, 0, "!!! IBRAHIM !!! generateSpanConfigurations rcrd:%+v", rcrd)
+	}
+	return rcrds, err
 }
 
 // generateSpanConfigurationsForNamedZone expects an ID corresponding to a named
@@ -496,9 +507,11 @@ func (s *SQLTranslator) findDescendantLeafIDs(
 func (s *SQLTranslator) findDescendantLeafIDsForDescriptor(
 	ctx context.Context, id descpb.ID,
 ) (descpb.IDs, error) {
+	log.VEventf(ctx, 0, "!!! IBRAHIM !!! findDescendantLeafIDsForDescriptor id:%+v", id)
 	desc, err := s.txn.Descriptors().ByIDWithoutLeased(s.txn.KV()).Get().Desc(ctx, id)
 	if err != nil {
 		if errors.Is(err, catalog.ErrDescriptorNotFound) {
+			log.VEventf(ctx, 0, "!!! IBRAHIM !!! ErrDescriptorNotFound id:%+v", id)
 			return nil, nil // the descriptor has been deleted; nothing to do here
 		}
 		return nil, err
@@ -522,7 +535,9 @@ func (s *SQLTranslator) findDescendantLeafIDsForDescriptor(
 	}
 
 	// There's nothing for us to do if the descriptor has been dropped.
+	log.VEventf(ctx, 0, "!!! IBRAHIM !!! findDescendantLeafIDsForDescriptor db:%+v", db)
 	if db.Dropped() {
+		log.VEventf(ctx, 0, "!!! IBRAHIM !!! findDescendantLeafIDsForDescriptor db.dropped()")
 		return nil, nil
 	}
 
@@ -554,6 +569,7 @@ func (s *SQLTranslator) findDescendantLeafIDsForDescriptor(
 func (s *SQLTranslator) findDescendantLeafIDsForNamedZone(
 	ctx context.Context, id descpb.ID,
 ) (descpb.IDs, error) {
+	log.VEventf(ctx, 0, "!!! IBRAHIM !!! findDescendantLeafIDsForNamedZone id:%+v", id)
 	name, ok := zonepb.NamedZonesByID[uint32(id)]
 	if !ok {
 		return nil, errors.AssertionFailedf("id %d does not belong to a named zone", id)
@@ -572,6 +588,7 @@ func (s *SQLTranslator) findDescendantLeafIDsForNamedZone(
 	}
 	var descendantIDs descpb.IDs
 	for _, dbDesc := range databases {
+		log.VEventf(ctx, 0, "IBRAHIM GetAllDatabaseDescriptors db: %+v", dbDesc)
 		tableIDs, err := s.findDescendantLeafIDsForDescriptor(
 			ctx, dbDesc.GetID(),
 		)

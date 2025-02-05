@@ -7,6 +7,7 @@ package gcjob
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -149,7 +150,10 @@ func deleteTableData(
 			// We shouldn't drop this table yet.
 			continue
 		}
+
+		log.Infof(ctx, "IBRAHIM table %d is being GCed", droppedTable.ID)
 		if err := DeleteAllTableData(ctx, cfg.DB, cfg.DistSender, cfg.Codec, table); err != nil {
+			log.Infof(ctx, "IBRAHIM error while deleting table data: %v", err)
 			return err
 		}
 
@@ -394,6 +398,7 @@ func (r schemaChangeGCResumer) deleteDataAndWaitForGC(
 	}
 	persistProgress(ctx, &execCfg, r.job, progress, sql.RunningStatusWaitingForMVCCGC)
 	r.job.MarkIdle(true)
+	fmt.Printf("!!! IBRAHIM !!! waitForGC\n")
 	return waitForGC(ctx, &execCfg, details, progress)
 }
 
@@ -470,15 +475,18 @@ func waitForEmptyPrefix(
 
 func checkForEmptySpan(ctx context.Context, db *kv.DB, from, to roachpb.Key) (empty bool, _ error) {
 	var ba kv.Batch
-	ba.Header.MaxSpanRequestKeys = 1
+	ba.Header.MaxSpanRequestKeys = 0
 	ba.AddRawRequest(&kvpb.IsSpanEmptyRequest{
 		RequestHeader: kvpb.RequestHeader{
 			Key: from, EndKey: to,
 		},
 	})
 	if err := db.Run(ctx, &ba); err != nil {
+		fmt.Printf("!!! IBRAHIM !!! from: %+v, to: %+v checkForEmptySpan err: %v\n", from, to, err)
 		return false, err
 	}
+	fmt.Printf("!!! IBRAHIM !!! from: %+v, to: %+v, checkForEmptySpan ba.RawResponse().Responses[0]: %v\n", from, to, ba.RawResponse().Responses[0].GetIsSpanEmpty().IsEmpty())
+	fmt.Printf("!!! IBRAHIM !!! from: %+v, to: %+v, checkForEmptySpan ba.RawResponse().Responses[0].numkeys: %v\n", from, to, ba.RawResponse().Responses[0].GetIsSpanEmpty().NumKeys)
 	return ba.RawResponse().Responses[0].GetIsSpanEmpty().IsEmpty(), nil
 }
 

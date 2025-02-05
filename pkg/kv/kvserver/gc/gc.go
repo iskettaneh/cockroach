@@ -334,6 +334,7 @@ func Run(
 ) (Info, error) {
 
 	txnExp := now.Add(-options.TxnCleanupThreshold.Nanoseconds(), 0)
+	fmt.Printf("!!! IBRAHIM !!! setting newThreshold: %+v\n", newThreshold)
 	if err := gcer.SetGCThreshold(ctx, Threshold{
 		Key: newThreshold,
 		Txn: txnExp,

@@ -1028,6 +1028,8 @@ func (tc *Collection) aggregateAllLayers(
 			}
 			if !desc.Dropped() && !desc.SkipNamespace() {
 				ret.UpsertNamespaceEntry(desc, desc.GetID(), desc.GetModificationTime())
+			} else {
+				log.VEventf(ctx, 0, "IBRAHIM desc id: %+v dropped: %+v", desc.GetID(), desc.Dropped())
 			}
 			return nil
 		})

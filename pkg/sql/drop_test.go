@@ -9,7 +9,9 @@ import (
 	"context"
 	gosql "database/sql"
 	"fmt"
+	"github.com/cockroachdb/cockroach/pkg/spanconfig"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -265,6 +267,15 @@ func TestDropDatabaseDeleteData(t *testing.T) {
 	// Speed up mvcc queue scan.
 	params.ScanMaxIdleTime = time.Millisecond
 
+	var atomicBool int32
+
+	params.Knobs.SpanConfig = &spanconfig.TestingKnobs{
+		OnWatchForZoneConfigUpdatesEstablished: func() {
+			// Set the atomic boolean to true
+			atomic.StoreInt32(&atomicBool, 1)
+		},
+	}
+
 	srv, sqlDB, kvDB := serverutils.StartServer(t, params)
 	defer srv.Stopper().Stop(context.Background())
 	ctx := context.Background()
@@ -274,6 +285,12 @@ func TestDropDatabaseDeleteData(t *testing.T) {
 	_, err := systemDB.Exec(`SET CLUSTER SETTING sql.gc_job.wait_for_gc.interval = '1s';`)
 	require.NoError(t, err)
 
+	//_, err = systemDB.Exec(`SET CLUSTER SETTING kv.raft.leader_fortification.fraction_enabled = '0';`)
+	//require.NoError(t, err)
+	//
+	//_, err = systemDB.Exec(`SET CLUSTER SETTING kv.lease.expiration_leases_only.enabled= 'true';`)
+	//require.NoError(t, err)
+
 	// Refresh protected timestamp cache immediately to make MVCC GC queue to
 	// process GC immediately.
 	_, err = systemDB.Exec(`SET CLUSTER SETTING kv.protectedts.poll_interval = '1s';`)
@@ -282,6 +299,16 @@ func TestDropDatabaseDeleteData(t *testing.T) {
 	// Disable strict GC TTL enforcement because we're going to shove a zero-value
 	// TTL into the system with AddImmediateGCZoneConfig.
 	defer sqltestutils.DisableGCTTLStrictEnforcement(t, systemDB)()
+
+	//time.Sleep(10 * time.Second)
+	fmt.Printf("!!! IBRAHIM !!! creating  db and table\n")
+
+	//testutils.SucceedsSoon(t, func() error {
+	//	if x := atomic.LoadInt32(&atomicBool); x != 1 {
+	//		return errors.Errorf("Not ready")
+	//	}
+	//	return nil
+	//})
 
 	// Fix the column families so the key counts below don't change if the
 	// family heuristics are updated.
@@ -295,6 +322,16 @@ INSERT INTO t.kv2 VALUES ('c', 'd'), ('a', 'b'), ('e', 'a');
 		t.Fatal(err)
 	}
 
+	if _, err := sqlDB.Exec(`
+CREATE DATABASE t2;
+CREATE TABLE t2.kv (k CHAR PRIMARY KEY, v CHAR, FAMILY (k), FAMILY (v));
+INSERT INTO t2.kv VALUES ('c', 'e'), ('a', 'c'), ('b', 'd');
+CREATE TABLE t2.kv2 (k CHAR PRIMARY KEY, v CHAR, FAMILY (k), FAMILY (v));
+INSERT INTO t2.kv2 VALUES ('c', 'd'), ('a', 'b'), ('e', 'a');
+`); err != nil {
+		t.Fatal(err)
+	}
+
 	tbDesc := desctestutils.TestingGetPublicTableDescriptor(kvDB, s.Codec(), "t", "kv")
 	tb2Desc := desctestutils.TestingGetPublicTableDescriptor(kvDB, s.Codec(), "t", "kv2")
 	var dbDesc catalog.DatabaseDescriptor
@@ -302,6 +339,20 @@ INSERT INTO t.kv2 VALUES ('c', 'd'), ('a', 'b'), ('e', 'a');
 		dbDesc, err = col.ByIDWithoutLeased(txn.KV()).Get().Database(ctx, tbDesc.GetParentID())
 		return err
 	}))
+
+	tbDesc2 := desctestutils.TestingGetPublicTableDescriptor(kvDB, s.Codec(), "t2", "kv")
+	tb2Desc2 := desctestutils.TestingGetPublicTableDescriptor(kvDB, s.Codec(), "t2", "kv2")
+	var dbDesc2 catalog.DatabaseDescriptor
+	require.NoError(t, sql.TestingDescsTxn(ctx, s, func(ctx context.Context, txn isql.Txn, col *descs.Collection) (err error) {
+		dbDesc2, err = col.ByIDWithoutLeased(txn.KV()).Get().Database(ctx, tbDesc2.GetParentID())
+		return err
+	}))
+
+	fmt.Printf("!!! IBRAHIM TEST !!! dbDesc.GetID(): %+v\n", dbDesc.GetID())
+	
+	fmt.Printf("!!! IBRAHIM TEST !!! dbDesc2.GetID(): %+v\n", dbDesc2.GetID())
+	fmt.Printf("!!! IBRAHIM TEST !!! tbDesc2.GetID(): %+v\n", tbDesc2.GetID())
+	fmt.Printf("!!! IBRAHIM TEST !!! tb2Desc2.GetID(): %+v\n", tb2Desc2.GetID())
 
 	tableSpan := tbDesc.TableSpan(s.Codec())
 	table2Span := tb2Desc.TableSpan(s.Codec())
@@ -339,7 +390,33 @@ INSERT INTO t.kv2 VALUES ('c', 'd'), ('a', 'b'), ('e', 'a');
 		t.Fatal(err)
 	}
 
+	fmt.Printf("!!! IBRAHIM !!! tbDesc: %+v\n", tbDesc)
+	rows, err := sqlDB.Query("select id, config from system.zones")
+	require.NoError(t, err)
+	for rows.Next() {
+		var zoneID int
+		var buf []byte
+		cfg := zonepb.ZoneConfig{}
+		require.NoError(t, rows.Scan(&zoneID, &buf))
+		require.NoError(t, protoutil.Unmarshal(buf, &cfg))
+		fmt.Printf("IBRAHIM zoneID: %d, config: %+v\n", zoneID, cfg)
+	}
+	require.NoError(t, rows.Err())
+
 	testutils.SucceedsSoon(t, func() error {
+		fmt.Printf("!!! IBRAHIM !!! tbDesc: %+v\n", tbDesc)
+		rows, err := sqlDB.Query("select id, config from system.zones")
+		require.NoError(t, err)
+		for rows.Next() {
+			var zoneID int
+			var buf []byte
+			cfg := zonepb.ZoneConfig{}
+			require.NoError(t, rows.Scan(&zoneID, &buf))
+			require.NoError(t, protoutil.Unmarshal(buf, &cfg))
+			fmt.Printf("IBRAHIM zoneID: %d, config: %+v\n", zoneID, cfg)
+		}
+		require.NoError(t, rows.Err())
+
 		if err := descExists(sqlDB, false, tbDesc.GetID()); err != nil {
 			return err
 		}
@@ -348,40 +425,42 @@ INSERT INTO t.kv2 VALUES ('c', 'd'), ('a', 'b'), ('e', 'a');
 
 	// Table 1 data is deleted.
 	tests.CheckKeyCountIncludingTombstoned(t, srv.StorageLayer(), tableSpan, 0)
-	tests.CheckKeyCountIncludingTombstoned(t, srv.StorageLayer(), table2Span, 6)
 
-	def := zonepb.DefaultZoneConfig()
-	if err := zoneExists(sqlDB, &def, dbDesc.GetID()); err != nil {
-		t.Fatal(err)
-	}
-
-	testutils.SucceedsSoon(t, func() error {
-		return jobutils.VerifySystemJob(t, sqlRun, 0, jobspb.TypeSchemaChangeGC, jobs.StatusRunning, jobs.Record{
-			Username:    username.NodeUserName(),
-			Description: "GC for DROP DATABASE t CASCADE",
-			DescriptorIDs: descpb.IDs{
-				tbDesc.GetID(), tb2Desc.GetID(), dbDesc.GetID(),
-			},
-		})
-	})
-
-	if _, err := sqltestutils.AddImmediateGCZoneConfig(sqlDB, tb2Desc.GetID()); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := sqltestutils.AddImmediateGCZoneConfig(sqlDB, dbDesc.GetID()); err != nil {
-		t.Fatal(err)
-	}
-
-	testutils.SucceedsSoon(t, func() error {
-		if err := descExists(sqlDB, false, tb2Desc.GetID()); err != nil {
-			return err
+	if err := tests.CheckKeyCountIncludingTombstonedE(t, srv.StorageLayer(), table2Span, 0); err != nil {
+		tests.CheckKeyCountIncludingTombstoned(t, srv.StorageLayer(), table2Span, 6)
+		def := zonepb.DefaultZoneConfig()
+		if err := zoneExists(sqlDB, &def, dbDesc.GetID()); err != nil {
+			t.Fatal(err)
 		}
 
-		return zoneExists(sqlDB, nil, tb2Desc.GetID())
-	})
+		testutils.SucceedsSoon(t, func() error {
+			return jobutils.VerifySystemJob(t, sqlRun, 0, jobspb.TypeSchemaChangeGC, jobs.StatusRunning, jobs.Record{
+				Username:    username.NodeUserName(),
+				Description: "GC for DROP DATABASE t CASCADE",
+				DescriptorIDs: descpb.IDs{
+					tbDesc.GetID(), tb2Desc.GetID(), dbDesc.GetID(),
+				},
+			})
+		})
 
-	// Table 2 data is deleted.
-	tests.CheckKeyCountIncludingTombstoned(t, srv.StorageLayer(), table2Span, 0)
+		if _, err := sqltestutils.AddImmediateGCZoneConfig(sqlDB, tb2Desc.GetID()); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := sqltestutils.AddImmediateGCZoneConfig(sqlDB, dbDesc.GetID()); err != nil {
+			t.Fatal(err)
+		}
+
+		testutils.SucceedsSoon(t, func() error {
+			if err := descExists(sqlDB, false, tb2Desc.GetID()); err != nil {
+				return err
+			}
+
+			return zoneExists(sqlDB, nil, tb2Desc.GetID())
+		})
+
+		// Table 2 data is deleted.
+		tests.CheckKeyCountIncludingTombstoned(t, srv.StorageLayer(), table2Span, 0)
+	}
 
 	testutils.SucceedsSoon(t, func() error {
 		return jobutils.VerifySystemJob(t, sqlRun, 0, jobspb.TypeSchemaChangeGC, jobs.StatusSucceeded, jobs.Record{

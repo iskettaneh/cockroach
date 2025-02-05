@@ -156,7 +156,12 @@ func (r *Reconciler) Reconcile(
 		tenID:                r.tenID,
 		knobs:                r.knobs,
 	}
+
+	time.Sleep(5 * time.Second)
+	log.VEventf(ctx, 0, "!!! IBRAHIM !!! full reconcile started with startTime:%+v\n", startTS)
 	latestStore, reconciledUpUntil, err := full.reconcile(ctx)
+	log.VEventf(ctx, 0, "!!! IBRAHIM !!! full reconcile returned reconciledUpUntil:%+v, err:%+v\n", reconciledUpUntil, err)
+
 	if err != nil {
 		return err
 	}
@@ -237,6 +242,7 @@ func (f *fullReconciler) reconcile(
 	}); err != nil {
 		return nil, hlc.Timestamp{}, err
 	}
+	log.VEventf(ctx, 0, "IBRAHIM iso level:%+v", kvTxn.IsoLevel())
 	readTimestamp, err := kvTxn.CommitTimestamp()
 	if err != nil {
 		return nil, hlc.Timestamp{}, err
@@ -245,6 +251,7 @@ func (f *fullReconciler) reconcile(
 	updates := make([]spanconfig.Update, len(records))
 	for i, record := range records {
 		updates[i] = spanconfig.Update(record)
+		log.VEventf(ctx, 0, "IBRAHIM updates[i]: %+v", updates[i])
 	}
 
 	toDelete, toUpsert := storeWithExistingSpanConfigs.Apply(ctx, updates...)

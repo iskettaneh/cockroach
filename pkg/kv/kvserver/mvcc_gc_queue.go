@@ -258,6 +258,7 @@ func (mgcq *mvccGCQueue) shouldQueue(
 	// Consult the protected timestamp state to determine whether we can GC and
 	// the timestamp which can be used to calculate the score.
 	conf, err := repl.LoadSpanConfig(ctx)
+	log.VErrEventf(ctx, 2, "!!! IBRAHIM !!! shouldQueue conf.TTL(): %v", conf.TTL())
 	if err != nil {
 		log.VErrEventf(ctx, 2, "failed to load span config: %v", err)
 		return false, 0

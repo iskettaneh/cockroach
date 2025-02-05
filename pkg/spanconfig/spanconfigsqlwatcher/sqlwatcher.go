@@ -282,6 +282,7 @@ func (s *SQLWatcher) watchForZoneConfigUpdates(
 		}
 		onEvent(ctx, rangefeedEvent)
 	}
+	log.VEventf(ctx, 0, "IBRAHIM attempting to establish range feed over system.zones with startTime: %+v\n", startTS)
 	rf, err := s.rangeFeedFactory.RangeFeed(
 		ctx,
 		"sql-watcher-zones-rangefeed",
@@ -298,6 +299,11 @@ func (s *SQLWatcher) watchForZoneConfigUpdates(
 	}
 
 	log.Infof(ctx, "established range feed over system.zones starting at time %s", startTS)
+
+	if s.knobs != nil && s.knobs.OnWatchForZoneConfigUpdatesEstablished != nil {
+		s.knobs.OnWatchForZoneConfigUpdatesEstablished()
+	}
+
 	return rf, nil
 }
 

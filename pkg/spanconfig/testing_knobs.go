@@ -126,6 +126,8 @@ type TestingKnobs struct {
 	// OverrideFallbackConf, if set, allows tests to override fields in the
 	// fallback config that will be applied to the span.
 	OverrideFallbackConf func(roachpb.SpanConfig) roachpb.SpanConfig
+
+	OnWatchForZoneConfigUpdatesEstablished func()
 }
 
 // ModuleTestingKnobs is part of the base.ModuleTestingKnobs interface.

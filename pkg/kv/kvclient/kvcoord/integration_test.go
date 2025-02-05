@@ -85,7 +85,11 @@ func TestWaiterOnRejectedCommit(t *testing.T) {
 					if !ba.Txn.ID.Equal(v.(uuid.UUID)) {
 						return nil
 					}
-					commitCmdID.Store(args.CmdID)
+					fmt.Printf("!!! IBRAHIM !!! storing commit command id: %+v\n", args.CmdID)
+					fmt.Printf("!!! IBRAHIM !!! storing commit command args: %+v\n", args)
+					if commitCmdID.Load() == nil {
+						commitCmdID.Store(args.CmdID)
+					}
 					return nil
 				},
 				TestingApplyCalledTwiceFilter: func(args kvserverbase.ApplyFilterArgs) (int, *kvpb.Error) {
@@ -97,6 +101,7 @@ func TestWaiterOnRejectedCommit(t *testing.T) {
 					}
 					cmdID := v.(kvserverbase.CmdIDKey)
 					if args.CmdID == cmdID {
+						fmt.Printf("!!! IBRAHIM !!! injecting error to: %+v\n", args.CmdID)
 						if illegalLeaseIndex {
 							illegalLeaseIndex = false
 							// NB: 1 is proposalIllegalLeaseIndex.

@@ -2680,6 +2680,8 @@ func (s *Store) removeReplicaWithRangefeed(rangeID roachpb.RangeID) {
 // onSpanConfigUpdate is the callback invoked whenever this store learns of a
 // span config update.
 func (s *Store) onSpanConfigUpdate(ctx context.Context, updated roachpb.Span) {
+	log.VEventf(ctx, 0, "!!! IBRAHIM !!! onSpanConfigUpdate updated:%+v\n", updated)
+
 	sp, err := keys.SpanAddr(updated)
 	if err != nil {
 		log.Errorf(ctx, "skipped applying update (%s), unexpected error resolving span address: %v",

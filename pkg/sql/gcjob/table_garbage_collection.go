@@ -7,6 +7,7 @@ package gcjob
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/cockroachdb/cockroach/pkg/jobs/jobspb"
@@ -276,6 +277,7 @@ func deleteTableDescriptorsAfterGC(
 	details *jobspb.SchemaChangeGCDetails,
 	progress *jobspb.SchemaChangeGCProgress,
 ) error {
+	fmt.Printf("!!! IBRAHIM !!! called deleteTableDescriptorsAfterGC\n")
 	checkImmediatelyOnWait := false
 	for _, droppedTable := range progress.Tables {
 		if droppedTable.Status == jobspb.SchemaChangeGCProgress_CLEARED {

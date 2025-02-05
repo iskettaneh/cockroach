@@ -1293,7 +1293,7 @@ func (tc *TestCluster) MoveRangeLeaseNonCooperatively(
 				// hope that the new leader be in the right place, we should instead
 				// establish leadership in the right place first.
 				if err :=
-					tc.ensureLeaderStepsDown(t, ctx, rangeDesc, manual); err != nil {
+					tc.ensureLeaderStepsDown(t, ctx, rangeDesc, manual, dest); err != nil {
 					return err
 				}
 			}
@@ -1306,6 +1306,27 @@ func (tc *TestCluster) MoveRangeLeaseNonCooperatively(
 	return newLease, err
 }
 
+// unreliableRaftHandler drops all Raft messages that are addressed to the
+// specified rangeID, but lets all other messages through.
+type unreliableRaftHandler struct {
+	name    string
+	rangeID roachpb.RangeID
+	kvserver.IncomingRaftMessageHandler
+	unreliableRaftHandlerFuncs
+}
+
+type unreliableRaftHandlerFuncs struct {
+	// If non-nil, can return false to avoid dropping the msg to
+	// unreliableRaftHandler.rangeID. If nil, all messages pertaining to the
+	// respective range are dropped.
+	dropReq  func(*kvserverpb.RaftMessageRequest) bool
+	dropHB   func(*kvserverpb.RaftHeartbeat) bool
+	dropResp func(*kvserverpb.RaftMessageResponse) bool
+	// snapErr and delegateErr default to returning nil.
+	snapErr     func(*kvserverpb.SnapshotRequest_Header) error
+	delegateErr func(request *kvserverpb.DelegateSendSnapshotRequest) error
+}
+
 // ensureLeaderStepsDown withdraws store liveness support from the leader, and
 // waits for it to step down.
 func (tc *TestCluster) ensureLeaderStepsDown(
@@ -1313,6 +1334,7 @@ func (tc *TestCluster) ensureLeaderStepsDown(
 	ctx context.Context,
 	rangeDesc roachpb.RangeDescriptor,
 	manual *hlc.HybridManualClock,
+	dest roachpb.ReplicationTarget,
 ) error {
 	var leaderStore *kvserver.Store
 	var leaderNode serverutils.TestServerInterface

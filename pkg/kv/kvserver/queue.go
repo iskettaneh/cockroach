@@ -1053,8 +1053,10 @@ func (bq *baseQueue) replicaCanBeProcessed(
 				switch v := pErr.GetDetail().(type) {
 				case *kvpb.NotLeaseHolderError, *kvpb.RangeNotFoundError:
 					log.VEventf(ctx, 3, "%s; skipping", v)
+					fmt.Printf("!!! IBRAHIM !!! %s; skipping\n", v)
 					return nil, errMarkNotAcquirableLease
 				}
+				fmt.Printf("!!! IBRAHIM !!! could not obtain lease: %s", pErr)
 				log.VErrEventf(ctx, 2, "could not obtain lease: %s", pErr)
 				return nil, errors.Wrapf(pErr.GoError(), "%s: could not obtain lease", repl)
 			}
@@ -1070,6 +1072,7 @@ func (bq *baseQueue) replicaCanBeProcessed(
 			st := repl.CurrentLeaseStatus(ctx)
 			if st.IsValid() && !st.OwnedBy(repl.StoreID()) {
 				log.VEventf(ctx, 1, "needs lease; not adding: %v", st.Lease)
+				fmt.Printf("!!! IBRAHIM !!! needs lease; not adding: %v\n", st.Lease)
 				// NB: this is an expected error, so make sure it doesn't get
 				// logged loudly.
 				return nil, benignerror.New(errors.Newf("needs lease, not adding: %v", st.Lease))

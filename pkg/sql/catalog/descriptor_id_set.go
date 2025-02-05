@@ -6,6 +6,7 @@
 package catalog
 
 import (
+	"fmt"
 	"github.com/cockroachdb/cockroach/pkg/sql/catalog/descpb"
 	"github.com/cockroachdb/cockroach/pkg/util/intsets"
 	"github.com/cockroachdb/redact"
@@ -79,6 +80,7 @@ func (d DescriptorIDSet) Ordered() []descpb.ID {
 
 // Remove removes the ID from the set.
 func (d *DescriptorIDSet) Remove(id descpb.ID) {
+	fmt.Printf("!!! IBRAHIM !!! removing id %d from set %v\n", id, d)
 	d.set.Remove(int(id))
 }
 

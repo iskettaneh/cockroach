@@ -48,7 +48,9 @@ func UpdateGCZoneConfig(
 	if err != nil {
 		return cfg, err
 	}
+	fmt.Printf("!!! IBRAHIM !!! running UpdateGCZoneConfig\n")
 	_, err = sqlDB.Exec(`UPSERT INTO system.zones VALUES ($1, $2)`, id, buf)
+	fmt.Printf("!!! IBRAHIM !!! finished running UpdateGCZoneConfig. cfg:%+v, err:%+v\n", cfg, err)
 	return cfg, err
 }
 
