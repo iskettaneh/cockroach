@@ -217,6 +217,7 @@ type fullReconciler struct {
 func (f *fullReconciler) reconcile(
 	ctx context.Context,
 ) (storeWithLatestSpanConfigs *spanconfigstore.Store, _ hlc.Timestamp, _ error) {
+	log.VEventf(ctx, 0, "!!! IBRAHIM !!! full reconciler started")
 	storeWithExistingSpanConfigs, err := f.fetchExistingSpanConfigs(ctx)
 	if err != nil {
 		return nil, hlc.Timestamp{}, err
@@ -462,7 +463,7 @@ func updateSpanConfigRecords(
 			return err // not a retryable error, bubble up
 		}
 
-		if log.V(3) {
+		if log.V(2) {
 			log.Infof(ctx, "successfully updated span config records: deleted = %+#v; upserted = %+#v", toDelete, toUpsert)
 		}
 		return nil // we performed the update; we're done here
@@ -571,7 +572,18 @@ func (r *incrementalReconciler) reconcile(
 				updates = append(updates, del)
 			}
 
+			for _, update := range updates {
+				log.VEventf(ctx, 0, "!!! IBRAHIM !!! incremental reconciler update target: %s with ttl:%+v", update.GetTarget(), update.GetConfig().GCPolicy.TTLSeconds)
+			}
+
 			toDelete, toUpsert := r.storeWithKVContents.Apply(ctx, updates...)
+			for _, tod := range toDelete {
+				log.VEventf(ctx, 0, "!!! IBRAHIM !!! incremental reconciler to delete: %s", tod)
+			}
+			for _, tou := range toUpsert {
+				log.VEventf(ctx, 0, "!!! IBRAHIM !!! incremental reconciler to add: %s with ttl:%+v", tou.GetTarget(), tou.GetConfig().GCPolicy.TTLSeconds)
+			}
+
 			if len(toDelete) != 0 || len(toUpsert) != 0 {
 				if err := updateSpanConfigRecords(
 					ctx, r.kvAccessor, toDelete, toUpsert, r.session,

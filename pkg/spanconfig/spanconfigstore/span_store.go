@@ -108,6 +108,8 @@ func (s *spanConfigStore) computeSplitKey(
 ) (roachpb.RKey, error) {
 	sp := roachpb.Span{Key: start.AsRawKey(), EndKey: end.AsRawKey()}
 
+	log.VEventf(ctx, 0, "computeSplitKey with start: %s, end: %s", start, end)
+
 	// Generally split keys are going to be the start keys of span config entries.
 	// When computing a split key over ['b', 'z'), 'b' is not a valid split key;
 	// in the iteration below we'll find all entries overlapping with the given
@@ -118,6 +120,7 @@ func (s *spanConfigStore) computeSplitKey(
 		iter, query := s.btree.MakeIter(), makeQueryEntry(sp)
 		for iter.FirstOverlap(query); iter.Valid(); iter.NextOverlap(query) {
 			interned := iter.Cur().spanConfigPairInterned
+			log.VEventf(ctx, 0, "potential split key: %s, %s", interned.span.Key, interned.span.EndKey)
 			if interned.span.Key.Compare(sp.Key) <= 0 {
 				continue // more
 			}
@@ -126,9 +129,12 @@ func (s *spanConfigStore) computeSplitKey(
 			break // we found our split key, we're done
 		}
 		if match.isEmpty() {
+			log.VEventf(ctx, 0, "computeSplitKey with start: %s, end: %s found no split key", start, end)
 			return nil, nil // no overlapping entries == no split key
 		}
 	}
+
+	log.VEventf(ctx, 0, "computeSplitKey with start: %s, end: %s found potential split key: %+v", start, end, match.span.Key)
 
 	if s.knobs.StoreDisableCoalesceAdjacent {
 		return roachpb.RKey(match.span.Key), nil
@@ -154,10 +160,12 @@ func (s *spanConfigStore) computeSplitKey(
 			systemTableUpperBound := keys.SystemSQLCodec.TablePrefix(keys.MaxReservedDescID + 1)
 			if roachpb.Key(rem).Compare(systemTableUpperBound) < 0 ||
 				!StorageCoalesceAdjacentSetting.Get(&s.settings.SV) {
+				log.VEventf(ctx, 0, "systemTableUpperBound")
 				return roachpb.RKey(match.span.Key), nil
 			}
 		} else {
 			if !tenantCoalesceAdjacentSetting.Get(&s.settings.SV) {
+				log.VEventf(ctx, 0, "tenantCoalesceAdjacentSetting")
 				return roachpb.RKey(match.span.Key), nil
 			}
 		}
@@ -254,6 +262,10 @@ func (s *spanConfigStore) apply(
 	})
 	updates = sorted // re-use the same variable
 
+	for _, update := range updates {
+		log.VEventf(ctx, 0, "applying update to: %s which sets the TTL to:%+v", update.GetTarget().GetSpan(), update.GetConfig().GCPolicy.TTLSeconds)
+	}
+
 	entriesToDelete, entriesToAdd, err := s.accumulateOpsFor(ctx, updates)
 	if err != nil {
 		return nil, nil, err
@@ -262,7 +274,11 @@ func (s *spanConfigStore) apply(
 	deleted = make([]roachpb.Span, len(entriesToDelete))
 	for i := range entriesToDelete {
 		entry := &entriesToDelete[i]
+		log.VEventf(ctx, 0, "deleting entry: %s", entry.span)
 		s.btree.Delete(entry)
+
+		log.VEventf(ctx, 0, "current btree state %s", s.btree.String())
+
 		s.interner.remove(ctx, entry.canonical)
 		deleted[i] = entry.span
 	}
@@ -270,7 +286,12 @@ func (s *spanConfigStore) apply(
 	added = make([]entry, len(entriesToAdd))
 	for i := range entriesToAdd {
 		entry := &entriesToAdd[i]
+		log.VEventf(ctx, 0, "adding entry: %s", entry.span)
+
 		s.btree.Set(entry)
+		
+		log.VEventf(ctx, 0, "current btree state %s", s.btree.String())
+
 		added[i] = *entry
 	}
 
