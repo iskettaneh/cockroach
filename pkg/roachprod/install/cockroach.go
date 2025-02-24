@@ -482,6 +482,13 @@ func (c *SyncedCluster) Start(ctx context.Context, l *logger.Logger, startOpts S
 			// We reserve a few special operations (bootstrapping, and setting
 			// cluster settings) to the InitTarget.
 			if startOpts.GetInitTarget() != node {
+
+				// Wait for the node to acquire a node ID, which indicates it's properly started
+				// and has joined the cluster. Use a reasonable timeout.
+				nodeIDTimeout := 45 * time.Second
+				if err := c.waitForNodeID(ctx, l, node, nodeIDTimeout); err != nil {
+					return err
+				}
 				continue
 			}
 
@@ -819,7 +826,62 @@ func (c *SyncedCluster) startNodeWithResult(
 		}
 	}
 
-	return c.runCmdOnSingleNode(ctx, l, node, runScriptCmd, defaultCmdOpts("run-start-script"))
+	res, err := c.runCmdOnSingleNode(ctx, l, node, runScriptCmd, defaultCmdOpts("run-start-script"))
+	if err != nil || res.Err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+// waitForNodeID waits for the node to report its node ID, which indicates
+// it has properly started and joined the cluster.
+func (c *SyncedCluster) waitForNodeID(
+	ctx context.Context, l *logger.Logger, node Node, timeout time.Duration,
+) error {
+	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	l.Printf("waiting for node %d to acquire node ID", node)
+
+	r := retry.StartWithCtx(timeoutCtx, retry.Options{
+		InitialBackoff: 100 * time.Millisecond,
+		MaxBackoff:     2 * time.Second,
+		Multiplier:     2,
+	})
+
+	for r.Next() {
+		// Try to query the node ID using SQL
+		results, err := c.ExecSQL(
+			timeoutCtx,
+			l,
+			[]Node{node},
+			SystemInterfaceName,
+			0,
+			DefaultAuthMode(),
+			"defaultdb",
+			[]string{"-e", "SELECT node_id FROM crdb_internal.node_runtime_info LIMIT 1"},
+		)
+
+		if err != nil {
+			l.Printf("error querying node ID for node %d: %v, retrying...", node, err)
+			continue
+		}
+
+		if len(results) > 0 && results[0].Stdout != "" {
+			nodeID := strings.TrimSpace(results[0].Stdout)
+			l.Printf("node %d acquired node ID: %s", node, nodeID)
+			return nil
+		}
+
+		l.Printf("node %d not ready yet, retrying...", node)
+	}
+
+	if errors.Is(timeoutCtx.Err(), context.DeadlineExceeded) {
+		return errors.Errorf("timed out waiting for node %d to acquire node ID after %s", node, timeout)
+	}
+
+	return timeoutCtx.Err()
 }
 
 // N.B. not thread-safe because startOpts is shared and may be mutated.
