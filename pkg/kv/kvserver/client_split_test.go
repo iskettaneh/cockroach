@@ -4499,6 +4499,9 @@ func TestSplitWithExternalFilesFastStats(t *testing.T) {
 			require.NoError(t, err)
 			require.Greater(t, origStats.ContainsEstimates, int64(0), "range expected to have estimated stats")
 
+			err = extStore.Delete(ctx, fileName)
+			require.NoError(t, err)
+
 			// Split the range.
 			args := adminSplitArgs(splitKey)
 			if _, pErr := kv.SendWrapped(ctx, store.TestSender(), args); pErr != nil {

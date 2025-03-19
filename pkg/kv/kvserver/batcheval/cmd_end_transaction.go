@@ -8,6 +8,7 @@ package batcheval
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"sync/atomic"
 	"time"
 
@@ -555,6 +556,8 @@ func EndTxn(
 			ctx, cArgs.EvalCtx, readWriter.(storage.Batch), ms, args, reply.Txn,
 		)
 		if err != nil {
+			//fmt.Printf("!!! IBRAHIM !!! HERE\n")
+			//reply.Txn.Status = roachpb.ABORTED
 			return result.Result{}, err
 		}
 		if err := txnResult.MergeAndDestroy(triggerResult); err != nil {
@@ -868,7 +871,9 @@ func RunCommitTrigger(
 			ctx, rec, batch, *ms, ct.SplitTrigger, txn.WriteTimestamp,
 		)
 		if err != nil {
-			return result.Result{}, kvpb.MaybeWrapReplicaCorruptionError(ctx, err)
+			fmt.Printf("!!! IBRAHIM !!! splitTrigger Error\n")
+			return result.Result{}, errors.Errorf("IBRAHIM ERROR")
+			//return result.Result{}, kvpb.MaybeWrapReplicaCorruptionError(ctx, err)
 		}
 		*ms = newMS
 		return res, nil
@@ -876,6 +881,7 @@ func RunCommitTrigger(
 	if mt := ct.GetMergeTrigger(); mt != nil {
 		res, err := mergeTrigger(ctx, rec, batch, ms, mt, txn.WriteTimestamp)
 		if err != nil {
+			fmt.Printf("!!! IBRAHIM !!! mergeTrigger Error\n")
 			return result.Result{}, kvpb.MaybeWrapReplicaCorruptionError(ctx, err)
 		}
 		return res, nil
