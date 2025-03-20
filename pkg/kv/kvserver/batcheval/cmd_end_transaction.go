@@ -556,7 +556,7 @@ func EndTxn(
 			ctx, cArgs.EvalCtx, readWriter.(storage.Batch), ms, args, reply.Txn,
 		)
 		if err != nil {
-			//fmt.Printf("!!! IBRAHIM !!! HERE\n")
+			fmt.Printf("!!! IBRAHIM !!! HERE\n")
 			//reply.Txn.Status = roachpb.ABORTED
 			return result.Result{}, err
 		}
@@ -845,6 +845,7 @@ func RunCommitTrigger(
 	args *kvpb.EndTxnRequest,
 	txn *roachpb.Transaction,
 ) (result.Result, error) {
+
 	ct := args.InternalCommitTrigger
 	if ct == nil {
 		return result.Result{}, nil
@@ -1099,6 +1100,7 @@ func splitTrigger(
 	split *roachpb.SplitTrigger,
 	ts hlc.Timestamp,
 ) (enginepb.MVCCStats, result.Result, error) {
+
 	desc := rec.Desc()
 	if !bytes.Equal(desc.StartKey, split.LeftDesc.StartKey) ||
 		!bytes.Equal(desc.EndKey, split.RightDesc.EndKey) {

@@ -70,6 +70,13 @@ func putArgs(key roachpb.Key, value []byte) *kvpb.PutRequest {
 	}
 }
 
+// putArgs returns a PutRequest for the specified key / value.
+func gcAndExciseArgs(span roachpb.Span) *kvpb.GCAndExciseRangeRequest {
+	return &kvpb.GCAndExciseRangeRequest{
+		RequestHeader: kvpb.RequestHeader{Key: span.Key, EndKey: span.EndKey},
+	}
+}
+
 // cPutArgs returns a ConditionPutRequest to the default replica
 // for the specified key and value, with the given expected value.
 func cPutArgs(key roachpb.Key, value, expValue []byte) *kvpb.ConditionalPutRequest {

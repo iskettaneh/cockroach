@@ -171,6 +171,7 @@ const (
 	// IsSpanEmpty is a non-transaction read request used to determine whether
 	// a span contains any keys whatsoever (garbage or otherwise).
 	IsSpanEmpty
+	GCAndExciseRange
 	// MaxMethod is the maximum method.
 	MaxMethod Method = iota - 1
 	// NumMethods represents the total number of API methods.

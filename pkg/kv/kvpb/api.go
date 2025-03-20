@@ -971,6 +971,9 @@ func (*AddSSTableRequest) Method() Method { return AddSSTable }
 func (*LinkExternalSSTableRequest) Method() Method { return LinkExternalSSTable }
 
 // Method implements the Request interface.
+func (*GCAndExciseRangeRequest) Method() Method { return GCAndExciseRange }
+
+// Method implements the Request interface.
 func (*MigrateRequest) Method() Method { return Migrate }
 
 // Method implements the Request interface.
@@ -1232,6 +1235,12 @@ func (r *AddSSTableRequest) ShallowCopy() Request {
 
 // ShallowCopy implements the Request interface.
 func (r *LinkExternalSSTableRequest) ShallowCopy() Request {
+	shallowCopy := *r
+	return &shallowCopy
+}
+
+// ShallowCopy implements the Request interface.
+func (r *GCAndExciseRangeRequest) ShallowCopy() Request {
 	shallowCopy := *r
 	return &shallowCopy
 }
@@ -1524,6 +1533,12 @@ func (r *AddSSTableResponse) ShallowCopy() Response {
 
 // ShallowCopy implements the Response interface.
 func (r *LinkExternalSSTableResponse) ShallowCopy() Response {
+	shallowCopy := *r
+	return &shallowCopy
+}
+
+// ShallowCopy implements the Response interface.
+func (r *GCAndExciseRangeResponse) ShallowCopy() Response {
 	shallowCopy := *r
 	return &shallowCopy
 }
@@ -2100,6 +2115,11 @@ func (r *LinkExternalSSTableRequest) flags() flag {
 	}
 	return flags
 }
+
+func (r *GCAndExciseRangeRequest) flags() flag {
+	return isWrite | isRange | isAlone | bypassesReplicaCircuitBreaker
+}
+
 func (*MigrateRequest) flags() flag { return isWrite | isRange | isAlone }
 
 // RefreshRequest and RefreshRangeRequest both determine which timestamp cache

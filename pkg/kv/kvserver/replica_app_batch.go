@@ -411,6 +411,30 @@ func (b *replicaAppBatch) runPostAddTriggersReplicaOnly(
 		res.State.GCThreshold = nil
 	}
 
+	exciseRes := cmd.ReplicatedCmd.ReplicatedResult()
+	if exciseRes.GCAndExciseRange != nil {
+		log.Infof(ctx, "!!! IBRAHIM !!! apply GCAndExciseRange called with args: %+v", exciseRes.GCAndExciseRange)
+		err := b.r.store.TODOEngine().Excise(ctx, exciseRes.GCAndExciseRange.Span)
+		if err != nil {
+			log.Fatalf(ctx, "error while excising span:%v, err:%s", exciseRes.GCAndExciseRange.Span, err)
+		}
+		err = b.r.store.TODOEngine().Excise(ctx, exciseRes.GCAndExciseRange.LockTableSpan)
+		if err != nil {
+			log.Fatalf(ctx, "error while excising span:%v, err:%s", exciseRes.GCAndExciseRange.LockTableSpan, err)
+		}
+		//err = b.r.store.TODOEngine().Excise(ctx, exciseRes.GCAndExciseRange.RangeSpan)
+		//if err != nil {
+		//	log.Fatalf(ctx, "error while excising span:%v, err:%s", exciseRes.GCAndExciseRange.RangeSpan, err)
+		//}
+	}
+
+	if res.GCAndExciseRange != nil {
+		// All watching rangefeeds should error until we teach clients how to
+		// process linked external ssts.
+		b.r.disconnectRangefeedSpanWithErr(res.GCAndExciseRange.Span, kvpb.NewError(errors.New("GCAndExciseRange not supported in rangefeeds")))
+		res.GCAndExciseRange = nil
+	}
+
 	if truncatedState := res.GetRaftTruncatedState(); truncatedState != nil {
 		var err error
 		// Typically one should not be checking the cluster version below raft,
@@ -704,6 +728,7 @@ func (b *replicaAppBatch) ApplyToStateMachine(ctx context.Context) error {
 	}
 
 	b.recordStatsOnCommit()
+
 	return nil
 }
 

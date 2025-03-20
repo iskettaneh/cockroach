@@ -7,7 +7,6 @@ package kvserver
 
 import (
 	"context"
-
 	"github.com/cockroachdb/cockroach/pkg/kv/kvpb"
 	"github.com/cockroachdb/cockroach/pkg/kv/kvserver/kvserverbase"
 	"github.com/cockroachdb/cockroach/pkg/kv/kvserver/kvserverpb"
@@ -198,5 +197,13 @@ func (b *appBatch) runPostAddTriggers(
 			cmd.Index(),
 			*res.LinkExternalSSTable)
 	}
+
+	//if res.GCAndExciseRange != nil {
+	//	log.Infof(ctx, "!!! IBRAHIM !!! apply GCAndExciseRange called with args: %+v", res.GCAndExciseRange)
+	//	err := env.eng.Excise(ctx, res.GCAndExciseRange.Span)
+	//	if err != nil {
+	//		log.Fatalf(ctx, "error while excising span:%v, err:%s", res.GCAndExciseRange.Span, err)
+	//	}
+	//}
 	return nil
 }

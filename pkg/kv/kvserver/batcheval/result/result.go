@@ -358,6 +358,13 @@ func (p *Result) MergeAndDestroy(q Result) error {
 	}
 	q.Replicated.LinkExternalSSTable = nil
 
+	if p.Replicated.GCAndExciseRange == nil {
+		p.Replicated.GCAndExciseRange = q.Replicated.GCAndExciseRange
+	} else if q.Replicated.GCAndExciseRange != nil {
+		return errors.AssertionFailedf("conflicting GCAndExciseRange")
+	}
+	q.Replicated.GCAndExciseRange = nil
+
 	if p.Replicated.MVCCHistoryMutation == nil {
 		p.Replicated.MVCCHistoryMutation = q.Replicated.MVCCHistoryMutation
 	} else if q.Replicated.MVCCHistoryMutation != nil {

@@ -504,6 +504,16 @@ func (db *DB) scan(
 	return r.Rows, err
 }
 
+func (db *DB) GCAndExciseRange(
+	ctx context.Context,
+	begin, end interface{},
+) ([]KeyValue, error) {
+	b := &Batch{}
+	b.GCAndExciseRange(begin, end)
+	r, err := getOneResult(db.Run(ctx, b), b)
+	return r.Rows, err
+}
+
 // Scan retrieves the rows between begin (inclusive) and end (exclusive) in
 // ascending order.
 //
