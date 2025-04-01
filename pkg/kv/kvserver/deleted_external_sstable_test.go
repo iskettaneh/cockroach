@@ -8,6 +8,7 @@ package kvserver_test
 import (
 	"context"
 	"fmt"
+	"github.com/cockroachdb/pebble"
 	"testing"
 
 	"github.com/cockroachdb/cockroach/pkg/base"
@@ -312,15 +313,39 @@ func (etc *externalSSTTestCluster) deleteRangeHelper(
 
 // mergeHelper issues an AdminMergeRequest for the provided key.
 func (etc *externalSSTTestCluster) mergeHelper(ctx context.Context, key roachpb.Key) error {
-	b := kv.Batch{}
-	b.AddRawRequest(adminMergeArgs(key))
-	return etc.db.Run(ctx, &b)
+	_, pErr := kv.SendWrapped(ctx, etc.tc.Servers[0].DistSenderI().(kv.Sender), adminMergeArgs(key))
+	fmt.Printf("pErr: %v\n", pErr)
+	return pErr.GoError()
+
+	//b := kv.Batch{}
+	//b.AddRawRequest(adminMergeArgs(key))
+	//return etc.db.Run(ctx, &b)
 }
 
 // adminSplitArgs issues an AdminSplitRequest for the provided key.
 func (etc *externalSSTTestCluster) splitHelper(ctx context.Context, key roachpb.Key) error {
-	_, _, err := etc.tc.SplitRange(key)
-	return err
+
+	_, pErr := kv.SendWrapped(ctx, etc.tc.Servers[0].DistSenderI().(kv.Sender), adminSplitArgs(key))
+	fmt.Printf("pErr: %v\n", pErr)
+
+	// Keep unwrapping the error and printing it
+	var currentErr error = pErr.GoError()
+	for currentErr != nil {
+		fmt.Printf("IBRAHIM Error: %+v\n", currentErr)
+		//nolint
+		if unwrapped := errors.Unwrap(currentErr); unwrapped == currentErr {
+			break
+		} else {
+			currentErr = unwrapped
+		}
+	}
+
+	info := pebble.ExtractDataCorruptionInfo(pErr.GoError())
+	fmt.Printf("!!! IBRAHIM !!! info: %+v\n", info)
+	return pErr.GoError()
+
+	//_, _, err := etc.tc.SplitRange(key)
+	//return err
 }
 
 // exciseHelper excises the provided key range from the store.
