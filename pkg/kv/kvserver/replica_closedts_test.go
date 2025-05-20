@@ -691,7 +691,7 @@ func TestRejectedLeaseDoesntDictateClosedTimestamp(t *testing.T) {
 // TODO(nvanbenschoten,andrei): Currently, the benchmark indicates that a call
 // takes about 130ns. This exceeds the latency budget we've allocated to the
 // call. However, it looks like there is some low-hanging fruit. 70% of the time
-// is spent in leaseStatusForRequest, within which 24% of the total time
+// is spent in leaseStatusForRequestRLocked, within which 24% of the total time
 // is spent zeroing and copying memory and 30% of the total time is spent in
 // (*NodeLiveness).GetLiveness, grabbing the current node's liveness record. If
 // we eliminate some memory copying and pass the node liveness record in to the
@@ -1231,9 +1231,9 @@ func TestRefreshPolicyWithVariousLatencies(t *testing.T) {
 // 4. Replica tries to use a latency-based policy but the policy map from step 1
 // doesn't include it yet.
 //
-// The logic in replica.getTargetByPolicyRLocked handles this race condition by
-// falling back to no-latency based policies if no-latency based policies were
-// included from the map provided by the side transport sender.
+// The logic in replica.getTargetByPolicy handles this race condition by falling
+// back to no-latency based policies if no-latency based policies were included
+// from the map provided by the side transport sender.
 //
 // This test simulates a race condition by using a testing knob to allow the
 // policy refresher to use latency based policies on replicas while the rest of

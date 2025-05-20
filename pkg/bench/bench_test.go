@@ -15,8 +15,10 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/cockroachdb/cockroach/pkg/base"
 	"github.com/cockroachdb/cockroach/pkg/security/username"
@@ -1592,4 +1594,63 @@ func BenchmarkFuncExprTypeCheck(b *testing.B) {
 			}
 		})
 	}
+}
+
+func BenchmarkTestMutexContention(b *testing.B) {
+	m := sync.RWMutex{}
+	count := 0
+	write := func() {
+		m.Lock()
+		defer m.Unlock()
+		time.Sleep(100 * time.Millisecond)
+		count++
+		fmt.Printf("count now: %d\n", count)
+	}
+
+	read := func() int {
+		m.RLock()
+		defer m.RUnlock()
+		time.Sleep(10 * time.Millisecond)
+		return count
+	}
+
+	numGoRoutines := 10
+	writeChan := make(chan struct{}, 4)
+	readChan := make(chan struct{}, 1024*1024)
+
+	// Start worker goroutines
+	for i := 0; i < numGoRoutines; i++ {
+		go func() {
+			for {
+				select {
+				case <-writeChan:
+					write()
+				case <-readChan:
+					read()
+				}
+
+				// If the channel is closed, exit the loop.
+				if _, ok := <-writeChan; !ok {
+					break
+				}
+				if _, ok := <-readChan; !ok {
+					break
+				}
+			}
+		}()
+	}
+
+	// Send work items
+	fmt.Printf("N: %d\n", b.N)
+	for i := 0; i < b.N; i++ {
+		writeChan <- struct{}{}
+		for j := 0; j < numGoRoutines; j++ {
+			readChan <- struct{}{}
+		}
+	}
+
+	close(writeChan)
+	close(readChan)
+
+	fmt.Printf("count: %d\n", read())
 }
