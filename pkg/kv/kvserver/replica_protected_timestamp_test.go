@@ -17,7 +17,6 @@ import (
 	"github.com/cockroachdb/cockroach/pkg/util/hlc"
 	"github.com/cockroachdb/cockroach/pkg/util/leaktest"
 	"github.com/cockroachdb/cockroach/pkg/util/log"
-	"github.com/cockroachdb/cockroach/pkg/util/protoutil"
 	"github.com/cockroachdb/cockroach/pkg/util/stop"
 	"github.com/stretchr/testify/require"
 )
@@ -42,10 +41,8 @@ func TestCheckProtectedTimestampsForGC(t *testing.T) {
 		{
 			name: "lease is too new",
 			test: func(t *testing.T, r *Replica, _ *manualPTSReader) {
-				newLease := protoutil.Clone(r.shMu.state.Lease).(*roachpb.Lease)
-				newLease.Start = r.store.Clock().NowAsClockTimestamp()
-				r.shMu.state.Lease = newLease
-				canGC, gcTimestamp, _, _, err := r.checkProtectedTimestampsForGC(ctx, makeTTLDuration(10))
+				r.shMu.state.Lease.Start = r.store.Clock().NowAsClockTimestamp()
+				canGC, _, gcTimestamp, _, _, err := r.checkProtectedTimestampsForGC(ctx, makeTTLDuration(10))
 				require.NoError(t, err)
 				require.False(t, canGC)
 				require.Zero(t, gcTimestamp)
@@ -55,7 +52,7 @@ func TestCheckProtectedTimestampsForGC(t *testing.T) {
 			name: "no PTS information is available",
 			test: func(t *testing.T, r *Replica, mp *manualPTSReader) {
 				mp.asOf = hlc.Timestamp{}
-				canGC, gcTimestamp, _, _, err := r.checkProtectedTimestampsForGC(ctx, makeTTLDuration(10))
+				canGC, _, gcTimestamp, _, _, err := r.checkProtectedTimestampsForGC(ctx, makeTTLDuration(10))
 				require.NoError(t, err)
 				require.False(t, canGC)
 				require.Zero(t, gcTimestamp)
@@ -72,7 +69,7 @@ func TestCheckProtectedTimestampsForGC(t *testing.T) {
 				})
 				// We should allow gc to proceed with the normal new threshold if that
 				// threshold is earlier than all of the records.
-				canGC, gcTimestamp, _, _, err := r.checkProtectedTimestampsForGC(ctx, makeTTLDuration(10))
+				canGC, _, gcTimestamp, _, _, err := r.checkProtectedTimestampsForGC(ctx, makeTTLDuration(10))
 				require.NoError(t, err)
 				require.True(t, canGC)
 				require.Equal(t, mp.asOf, gcTimestamp)
@@ -171,9 +168,7 @@ func TestCheckProtectedTimestampsForGC(t *testing.T) {
 				r.raftMu.Lock()
 				r.mu.Lock()
 				r.shMu.state.GCThreshold = &tsMinus60s
-				newLease := protoutil.Clone(r.shMu.state.Lease).(*roachpb.Lease)
-				newLease.Start = ts.UnsafeToClockTimestamp()
-				r.shMu.state.Lease = newLease
+				r.shMu.state.Lease.Start = ts.UnsafeToClockTimestamp()
 				r.raftMu.Unlock()
 				r.mu.Unlock()
 

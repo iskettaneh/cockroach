@@ -125,7 +125,7 @@ func (r *Replica) Metrics(
 		paused:                   r.mu.pausedFollowers,
 		pendingRaftProposalCount: r.numPendingProposalsRLocked(),
 		slowRaftProposalCount:    r.mu.slowProposalCount,
-		closedTimestampPolicy:    *r.cachedClosedTimestampPolicy.Load(),
+		closedTimestampPolicy:    ctpb.RangeClosedTimestampPolicy(r.cachedClosedTimestampPolicy.Load()),
 	}
 
 	r.mu.RUnlock()
@@ -383,8 +383,7 @@ func (r *Replica) LoadStats() load.ReplicaLoadStats {
 }
 
 func (r *Replica) needsSplitBySizeRLocked() bool {
-	exceeded, _ := exceedsMultipleOfSplitSize(1, r.mu.conf.RangeMaxBytes,
-		r.mu.largestPreviousMaxRangeSizeBytes, r.shMu.state.Stats.Total())
+	exceeded, _ := r.exceedsMultipleOfSplitSizeRLocked(1)
 	return exceeded
 }
 
@@ -409,20 +408,18 @@ func (r *Replica) needsRaftLogTruncationLocked() bool {
 	return checkRaftLog
 }
 
-// exceedsMultipleOfSplitSize returns whether the current size of the
+// exceedsMultipleOfSplitSizeRLocked returns whether the current size of the
 // range exceeds the max size times mult. If so, the bytes overage is also
 // returned. Note that the max size is determined by either the current maximum
 // size as dictated by the span config or a previous max size indicating that
 // the max size has changed relatively recently and thus we should not
 // backpressure for being over.
-func exceedsMultipleOfSplitSize(
-	mult float64, rangeMaxBytes int64, largestPreviousMaxRangeSizeBytes int64, totalRangeSize int64,
-) (exceeded bool, bytesOver int64) {
-	maxBytes := rangeMaxBytes
-	if largestPreviousMaxRangeSizeBytes > maxBytes {
-		maxBytes = largestPreviousMaxRangeSizeBytes
+func (r *Replica) exceedsMultipleOfSplitSizeRLocked(mult float64) (exceeded bool, bytesOver int64) {
+	maxBytes := r.mu.conf.RangeMaxBytes
+	if r.mu.largestPreviousMaxRangeSizeBytes > maxBytes {
+		maxBytes = r.mu.largestPreviousMaxRangeSizeBytes
 	}
-	size := totalRangeSize
+	size := r.shMu.state.Stats.Total()
 	maxSize := int64(float64(maxBytes)*mult) + 1
 	if maxBytes <= 0 || size <= maxSize {
 		return false, 0

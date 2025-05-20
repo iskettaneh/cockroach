@@ -603,8 +603,7 @@ func (r *Replica) ReadCachedProtectedTS() (readAt, earliestProtectionTimestamp h
 func (r *Replica) ClosedTimestampPolicy() roachpb.RangeClosedTimestampPolicy {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	return toClientClosedTsPolicy(closedTimestampPolicy(r.descRLocked(),
-		*r.cachedClosedTimestampPolicy.Load()))
+	return toClientClosedTsPolicy(r.closedTimestampPolicyRLocked())
 }
 
 // TripBreaker synchronously trips the breaker.
@@ -702,9 +701,10 @@ func NewRangefeedTxnPusher(
 	}
 }
 
-// descRLocked exports (*Replica).descRLocked() for testing purposes.
-func (r *Replica) DescRLocked() *roachpb.RangeDescriptor {
-	return r.descRLocked()
+// SupportFromEnabled exports (replicaRLockedStoreLiveness).SupportFromEnabled
+// for testing purposes.
+func (r *Replica) SupportFromEnabled() bool {
+	return (*replicaRLockedStoreLiveness)(r).SupportFromEnabled()
 }
 
 // RaftFortificationEnabledForRangeID exports raftFortificationEnabledForRangeID
