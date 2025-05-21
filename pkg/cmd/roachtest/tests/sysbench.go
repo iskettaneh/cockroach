@@ -262,14 +262,14 @@ func runSysbench(ctx context.Context, t test.Test, c cluster.Cluster, opts sysbe
 			return err
 		}
 
-		t.Status("running 75 second workload to collect profiles")
+		t.Status("running 180 second workload to collect profiles")
 		{
 			m := t.NewGroup(task.WithContext(ctx))
 			m.Go(
 				func(ctx context.Context, l *logger.Logger) error {
 					opts := opts
 					opts.duration = 180 * time.Second
-					opts.concurrency = 30
+					opts.concurrency = 32
 					result, err = c.RunWithDetailsSingleNode(ctx, t.L(), option.WithNodes(c.WorkloadNode()),
 						opts.cmd(useHAProxy)+" run")
 
