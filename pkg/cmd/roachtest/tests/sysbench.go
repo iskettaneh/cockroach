@@ -92,10 +92,10 @@ func (o *sysbenchOptions) cmd(haproxy bool) string {
 		pghost = "127.0.0.1"
 		pgport = "26257"
 	}
-	distribution := "uniform"
-	if o.distribution != "" {
-		distribution = o.distribution
-	}
+	distribution := "pareto"
+	//if o.distribution != "" {
+	//	distribution = o.distribution
+	//}
 	return fmt.Sprintf(`sysbench \
 		--db-driver=pgsql \
 		--pgsql-host=%s \
@@ -231,97 +231,141 @@ func runSysbench(ctx context.Context, t test.Test, c cluster.Cluster, opts sysbe
 
 		t.Status("running workload")
 		start = timeutil.Now()
-		result, err := c.RunWithDetailsSingleNode(ctx, t.L(), option.WithNodes(c.WorkloadNode()), roachtestutil.PrefixCmdOutputWithTimestamp(cmd+" run"))
 
-		if msg, crashed := detectSysbenchCrash(result); crashed {
-			t.Skipf("%s; skipping test", msg)
-		}
+		m := t.NewErrorGroup(task.WithContext(ctx))
+		m.Go(
+			func(ctx context.Context, l *logger.Logger) error {
+				result, err := c.RunWithDetailsSingleNode(ctx, t.L(), option.WithNodes(c.WorkloadNode()), roachtestutil.PrefixCmdOutputWithTimestamp(cmd+" run"))
+				if msg, crashed := detectSysbenchCrash(result); crashed {
+					t.Skipf("%s; skipping test", msg)
+				}
 
-		if err != nil {
-			return err
-		}
-
-		t.Status("exporting results")
-		idx := strings.Index(result.Stdout, "SQL statistics:")
-		if idx < 0 {
-			return errors.Errorf("no SQL statistics found in sysbench output:\n%s", result.Stdout)
-		}
-		t.L().Printf("sysbench results:\n%s", result.Stdout[idx:])
-
-		if err := exportSysbenchResults(t, c, result.Stdout, start, opts); err != nil {
-			return err
-		}
-
-		// Also produce standard Go benchmark output. This can be used to run
-		// benchstat comparisons.
-		goBenchOutput, err := sysbenchToGoBench(t.Name(), result.Stdout[idx:])
-		if err != nil {
-			return err
-		}
-		if err := os.WriteFile(filepath.Join(t.ArtifactsDir(), "bench.txt"), []byte(goBenchOutput), 0666); err != nil {
-			return err
-		}
-
-		t.Status("running 75 second workload to collect profiles")
-		{
-			// Create the profiles directory in the artifacts directory.
-			profilesDir := filepath.Join(t.ArtifactsDir(), "profiles")
-			require.NoError(t, os.MkdirAll(profilesDir, 0755))
-
-			// Start a short sysbench test in order to collect the profiles from an
-			// active cluster.
-			m := t.NewErrorGroup(task.WithContext(ctx))
-			m.Go(
-				func(ctx context.Context, l *logger.Logger) error {
-					opts := opts
-					opts.duration = 75 * time.Second
-					result, err = c.RunWithDetailsSingleNode(ctx, t.L(), option.WithNodes(c.WorkloadNode()),
-						opts.cmd(useHAProxy)+" run")
-
-					if msg, crashed := detectSysbenchCrash(result); crashed {
-						t.L().Printf("%s; sysbench run to collect profiles failed", msg)
-					}
+				if err != nil {
 					return err
-				},
-			)
+				}
 
-			// Wait for 30 seconds to give a chance to the workload to start, and then
-			// collect CPU, mutex diffs, allocs diffs profiles.
-			time.Sleep(30 * time.Second)
-			collectionDuration := 30 * time.Second
+				t.Status("exporting results")
+				idx := strings.Index(result.Stdout, "SQL statistics:")
+				if idx < 0 {
+					return errors.Errorf("no SQL statistics found in sysbench output:\n%s", result.Stdout)
+				}
+				t.L().Printf("sysbench results:\n%s", result.Stdout[idx:])
 
-			// Collect the profiles.
-			profiles := map[string][]*profile.Profile{"cpu": {}, "allocs": {}, "mutex": {}}
-			for typ := range profiles {
-				m.Go(
-					func(ctx context.Context, l *logger.Logger) error {
-						var err error
-						profiles[typ], err = roachtestutil.GetProfile(ctx, c, l, typ,
-							collectionDuration, c.CRDBNodes())
-						return err
-					},
-				)
+				if err := exportSysbenchResults(t, c, result.Stdout, start, opts); err != nil {
+					return err
+				}
+
+				// Also produce standard Go benchmark output. This can be used to run
+				// benchstat comparisons.
+				goBenchOutput, err := sysbenchToGoBench(t.Name(), result.Stdout[idx:])
+				if err != nil {
+					return err
+				}
+				if err := os.WriteFile(filepath.Join(t.ArtifactsDir(), "bench.txt"), []byte(goBenchOutput), 0666); err != nil {
+					return err
+				}
+
+				return nil
+			})
+
+		time.Sleep(4 * time.Minute)
+
+		// Create the profiles directory in the artifacts directory.
+		profilesDir := filepath.Join(t.ArtifactsDir(), "profiles")
+		require.NoError(t, os.MkdirAll(profilesDir, 0755))
+
+		var profiles []*profile.Profile
+		m.Go(
+			func(ctx context.Context, l *logger.Logger) error {
+				var err error
+				profiles, err = roachtestutil.GetProfile(ctx, c, l, "mutex",
+					3*time.Minute, c.CRDBNodes())
+				return err
+			},
+		)
+
+		if err := m.WaitE(); err != nil {
+			require.NoError(t, os.RemoveAll(profilesDir))
+			return err
+		}
+
+		if mergedProfiles, err := profile.Merge(profiles); err != nil {
+			require.NoError(t, os.RemoveAll(profilesDir))
+			return errors.Wrapf(err, "failed to merge profiles type")
+		} else {
+			if err := roachtestutil.ExportProfile(mergedProfiles, profilesDir,
+				fmt.Sprintf("merged.mutex.pb.gz")); err != nil {
+				return errors.Wrapf(err, "failed to export merged profiles")
 			}
 
-			// If there is a problem executing the workload or there is a problem
-			// collecting the profiles we need to clean up the directory and return
-			// the error.
-			if err := m.WaitE(); err != nil {
-				require.NoError(t, os.RemoveAll(profilesDir))
-				return err
-			}
-
-			// At this point we know that the workload has not crashed, and we have
-			// collected all the individual profiles. We can now merge and export
-			// them. If exporting or merging fails for some reason, we clean up the
-			// profiles directory and return the error to avoid leaving potentially
-			// corrupt profiles.
-			if err := mergeAndExportSysbenchProfiles(c, collectionDuration, profiles,
-				profilesDir); err != nil {
-				require.NoError(t, os.RemoveAll(profilesDir))
-				return err
+			for i := range len(c.CRDBNodes()) {
+				if err := roachtestutil.ExportProfile(profiles[i], profilesDir,
+					fmt.Sprintf("n%d.mutex%s.pb.gz", i+1, 3*time.Minute)); err != nil {
+					return errors.Wrapf(err, "failed to export individual profile type mutex")
+				}
 			}
 		}
+
+		//t.Status("running 75 second workload to collect profiles")
+		//{
+		//	// Create the profiles directory in the artifacts directory.
+		//	profilesDir := filepath.Join(t.ArtifactsDir(), "profiles")
+		//	require.NoError(t, os.MkdirAll(profilesDir, 0755))
+		//
+		//	// Start a short sysbench test in order to collect the profiles from an
+		//	// active cluster.
+		//	m := t.NewErrorGroup(task.WithContext(ctx))
+		//	m.Go(
+		//		func(ctx context.Context, l *logger.Logger) error {
+		//			opts := opts
+		//			opts.duration = 75 * time.Second
+		//			result, err = c.RunWithDetailsSingleNode(ctx, t.L(), option.WithNodes(c.WorkloadNode()),
+		//				opts.cmd(useHAProxy)+" run")
+		//
+		//			if msg, crashed := detectSysbenchCrash(result); crashed {
+		//				t.L().Printf("%s; sysbench run to collect profiles failed", msg)
+		//			}
+		//			return err
+		//		},
+		//	)
+		//
+		//	// Wait for 30 seconds to give a chance to the workload to start, and then
+		//	// collect CPU, mutex diffs, allocs diffs profiles.
+		//	time.Sleep(30 * time.Second)
+		//	collectionDuration := 30 * time.Second
+		//
+		//	// Collect the profiles.
+		//	profiles := map[string][]*profile.Profile{"cpu": {}, "allocs": {}, "mutex": {}}
+		//	for typ := range profiles {
+		//		m.Go(
+		//			func(ctx context.Context, l *logger.Logger) error {
+		//				var err error
+		//				profiles[typ], err = roachtestutil.GetProfile(ctx, c, l, typ,
+		//					collectionDuration, c.CRDBNodes())
+		//				return err
+		//			},
+		//		)
+		//	}
+		//
+		//	// If there is a problem executing the workload or there is a problem
+		//	// collecting the profiles we need to clean up the directory and return
+		//	// the error.
+		//	if err := m.WaitE(); err != nil {
+		//		require.NoError(t, os.RemoveAll(profilesDir))
+		//		return err
+		//	}
+		//
+		//	// At this point we know that the workload has not crashed, and we have
+		//	// collected all the individual profiles. We can now merge and export
+		//	// them. If exporting or merging fails for some reason, we clean up the
+		//	// profiles directory and return the error to avoid leaving potentially
+		//	// corrupt profiles.
+		//	if err := mergeAndExportSysbenchProfiles(c, collectionDuration, profiles,
+		//		profilesDir); err != nil {
+		//		require.NoError(t, os.RemoveAll(profilesDir))
+		//		return err
+		//	}
+		//}
 
 		return nil
 	}
