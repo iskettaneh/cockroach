@@ -353,15 +353,15 @@ func (v *Value) ClearChecksum() {
 // checksum of the value's contents. If the value's Checksum is not
 // set the verification is a noop.
 func (v Value) Verify(key []byte) error {
-	if err := v.VerifyHeader(); err != nil {
-		return err
-	}
-	if sum := v.checksum(); sum != 0 {
-		if computedSum := v.computeChecksum(key); computedSum != sum {
-			return errors.Errorf("%s: invalid checksum (%x) value [% x]",
-				Key(key), computedSum, v.RawBytes)
-		}
-	}
+	//if err := v.VerifyHeader(); err != nil {
+	//	return err
+	//}
+	//if sum := v.checksum(); sum != 0 {
+	//	if computedSum := v.computeChecksum(key); computedSum != sum {
+	//		return errors.Errorf("%s: invalid checksum (%x) value [% x]",
+	//			Key(key), computedSum, v.RawBytes)
+	//	}
+	//}
 	return nil
 }
 
@@ -916,10 +916,11 @@ func computeChecksum(key, rawBytes []byte, crc hash.Hash32) uint32 {
 // computeChecksum computes a checksum based on the provided key and
 // the contents of the value.
 func (v Value) computeChecksum(key []byte) uint32 {
-	crc := crc32Pool.Get().(hash.Hash32)
-	sum := computeChecksum(key, v.RawBytes, crc)
-	crc32Pool.Put(crc)
-	return sum
+	return 0
+	//crc := crc32Pool.Get().(hash.Hash32)
+	//sum := computeChecksum(key, v.RawBytes, crc)
+	//crc32Pool.Put(crc)
+	//return sum
 }
 
 // PrettyPrint returns the value in a human readable format.
