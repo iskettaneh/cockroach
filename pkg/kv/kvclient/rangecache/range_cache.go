@@ -871,7 +871,7 @@ func tryLookupImpl(
 	// Since we don't inherit any other cancelation, let's put in a generous
 	// timeout as some protection against unavailable meta ranges.
 	var rs, preRs []roachpb.RangeDescriptor
-	if err := timeutil.RunWithTimeout(ctx, "range lookup", 10*time.Second,
+	if err := timeutil.RunWithTimeout(ctx, "range lookup", 1*time.Second,
 		func(ctx context.Context) error {
 			var err error
 			rs, preRs, err = rc.performRangeLookup(ctx, key, consistency, useReverseScan)

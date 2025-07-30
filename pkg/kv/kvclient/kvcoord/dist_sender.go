@@ -369,7 +369,7 @@ const (
 	RangeLookupPrefetchCount = 8
 	// The maximum number of times a replica is retried when it repeatedly returns
 	// stale lease info.
-	sameReplicaRetryLimit = 10
+	sameReplicaRetryLimit = 1
 )
 
 var rangeDescriptorCacheSize = settings.RegisterIntSetting(

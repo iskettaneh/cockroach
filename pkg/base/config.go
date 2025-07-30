@@ -151,7 +151,7 @@ var (
 	//
 	// The NetworkTimeout is therefore set to 2 seconds: 600ms RTT plus 900ms RTO
 	// plus a 500ms safety margin.
-	NetworkTimeout = envutil.EnvOrDefaultDuration("COCKROACH_NETWORK_TIMEOUT", 2*time.Second)
+	NetworkTimeout = envutil.EnvOrDefaultDuration("COCKROACH_NETWORK_TIMEOUT", 1500*time.Millisecond)
 
 	// DialTimeout is the timeout used when dialing a node. gRPC connections take
 	// up to 3 roundtrips for the TCP + TLS handshakes. NetworkTimeout allows for
@@ -240,12 +240,12 @@ var (
 	// initial heartbeat), see:
 	// https://github.com/cockroachdb/cockroach/issues/93397.
 	DefaultRPCHeartbeatTimeout = envutil.EnvOrDefaultDuration(
-		"COCKROACH_RPC_HEARTBEAT_TIMEOUT", 3*NetworkTimeout)
+		"COCKROACH_RPC_HEARTBEAT_TIMEOUT", NetworkTimeout)
 
 	// defaultStoreLivenessHeartbeatInterval is the default value for
 	// StoreLivenessHeartbeatInterval.
 	defaultStoreLivenessHeartbeatInterval = envutil.EnvOrDefaultDuration(
-		"COCKROACH_STORE_LIVENESS_HEARTBEAT_INTERVAL", time.Second)
+		"COCKROACH_STORE_LIVENESS_HEARTBEAT_INTERVAL", 500*time.Microsecond)
 
 	// defaultStoreLivenessSupportDuration is the default value for
 	// StoreLivenessSupportDuration.
@@ -872,7 +872,7 @@ func DefaultRetryOptions() retry.Options {
 	// estimate of latency.
 	return retry.Options{
 		InitialBackoff: 50 * time.Millisecond,
-		MaxBackoff:     1 * time.Second,
+		MaxBackoff:     50 * time.Millisecond,
 		Multiplier:     2,
 	}
 }

@@ -8,8 +8,10 @@ package tests
 import (
 	"context"
 	gosql "database/sql"
+	"encoding/json"
 	"fmt"
 	"math/rand"
+	"os"
 	"sync"
 	"time"
 
@@ -25,6 +27,7 @@ import (
 	"github.com/cockroachdb/cockroach/pkg/roachprod/install"
 	"github.com/cockroachdb/cockroach/pkg/testutils"
 	"github.com/cockroachdb/cockroach/pkg/util/randutil"
+	"github.com/cockroachdb/cockroach/pkg/util/timeutil"
 	"github.com/cockroachdb/errors"
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/require"
@@ -37,6 +40,100 @@ var rangeLeaseRenewalDuration = func() time.Duration {
 }()
 
 var failoverAggregateFunction = func(test string, histogram *roachtestutil.HistogramMetric) (roachtestutil.AggregatedPerfMetrics, error) {
+	// Timeout threshold: 100ms
+	const timeoutThresholdMs = 100.0
+	// Interval size: 100ms (now recording every 100ms, so 1 snapshot per interval)
+	const intervalSizeMs = 100
+	const snapshotsPerInterval = 1 // Now recording every 100ms
+
+	fmt.Printf("DEBUG: Processing histogram with %d summaries\n", len(histogram.Summaries))
+
+	type intervalData struct {
+		IntervalStartMs int64 `json:"interval_start_ms"`
+		IntervalEndMs   int64 `json:"interval_end_ms"`
+		TimeoutCount    int64 `json:"timeout_count"`
+		TotalRequests   int64 `json:"total_requests"`
+	}
+
+	var intervals []intervalData
+
+	// Process each summary (typically one for the workload)
+	for summaryIdx, summary := range histogram.Summaries {
+		fmt.Printf("DEBUG: Summary %d has %d values\n", summaryIdx, len(summary.Values))
+
+		// Group snapshots into 100ms intervals
+		for i := 0; i < len(summary.Values); i += snapshotsPerInterval {
+			var timeoutCount int64
+			var totalRequests int64
+
+			intervalStartMs := int64(i * 100) // Each snapshot is now 100ms
+			intervalEndMs := intervalStartMs + intervalSizeMs
+
+			// Process up to snapshotsPerInterval snapshots for this interval
+			endIdx := i + snapshotsPerInterval
+			if endIdx > len(summary.Values) {
+				endIdx = len(summary.Values)
+			}
+
+			prevCount := int64(0)
+			if i > 0 {
+				prevCount = int64(summary.Values[i-1].Count)
+			}
+
+			for j := i; j < endIdx; j++ {
+				snapshot := summary.Values[j]
+
+				// Calculate requests in this snapshot
+				currentCount := int64(snapshot.Count)
+				requestsInSnapshot := currentCount - prevCount
+				prevCount = currentCount
+
+				totalRequests += requestsInSnapshot
+
+				fmt.Printf("DEBUG: Interval %d-%d, snapshot %d: count=%d, prev=%d, requests=%d, max=%.2f\n",
+					intervalStartMs, intervalEndMs, j, currentCount, prevCount-requestsInSnapshot, requestsInSnapshot, float64(snapshot.Max))
+
+				// Check if max latency in this snapshot exceeded timeout threshold
+				if float64(snapshot.Max) >= timeoutThresholdMs {
+					timeoutCount += requestsInSnapshot
+				}
+			}
+
+			fmt.Printf("DEBUG: Interval %d-%d: total_requests=%d, timeout_count=%d\n",
+				intervalStartMs, intervalEndMs, totalRequests, timeoutCount)
+
+			// Only add interval if there were requests
+			if totalRequests > 0 {
+				intervals = append(intervals, intervalData{
+					IntervalStartMs: intervalStartMs,
+					IntervalEndMs:   intervalEndMs,
+					TimeoutCount:    timeoutCount,
+					TotalRequests:   totalRequests,
+				})
+			}
+		}
+	}
+
+	fmt.Printf("DEBUG: Created %d intervals total\n", len(intervals))
+
+	// Write interval data to file
+	if len(intervals) > 0 {
+		jsonData, err := json.MarshalIndent(intervals, "", "  ")
+		if err == nil {
+			writeerr := os.WriteFile("timeouts_per_interval.json", jsonData, 0644)
+			if writeerr != nil {
+				fmt.Printf("error writing timeouts_per_interval.json: %v\n", writeerr)
+			} else {
+				fmt.Printf("DEBUG: Successfully wrote %d intervals to timeouts_per_interval.json\n", len(intervals))
+			}
+		} else {
+			fmt.Printf("DEBUG: JSON marshal error: %v\n", err)
+		}
+	} else {
+		fmt.Printf("DEBUG: No intervals to write - len(intervals) = 0\n")
+	}
+
+	// Also return the traditional max metric
 	totalMax := roachtestutil.MetricPoint(0.0)
 	for _, summary := range histogram.Summaries {
 		for _, value := range summary.Values {
@@ -138,7 +235,7 @@ func registerFailover(r registry.Registry) {
 			Name:                   "failover/partial/lease-leader" + leasesStr,
 			Owner:                  registry.OwnerKV,
 			Benchmark:              true,
-			Timeout:                45 * time.Minute,
+			Timeout:                10 * time.Hour,
 			Cluster:                r.MakeClusterSpec(7, spec.CPU(2), spec.WorkloadNode(), spec.WorkloadNodeCPU(2)),
 			CompatibleClouds:       registry.AllExceptAWS,
 			Suites:                 registry.Suites(registry.Nightly),
@@ -183,7 +280,7 @@ func registerFailover(r registry.Registry) {
 				Name:                   fmt.Sprintf("failover/non-system/%s%s", failureMode, leasesStr),
 				Owner:                  registry.OwnerKV,
 				Benchmark:              true,
-				Timeout:                45 * time.Minute,
+				Timeout:                10 * time.Hour,
 				SkipPostValidations:    postValidation,
 				Cluster:                r.MakeClusterSpec(7, clusterOpts...),
 				CompatibleClouds:       clouds,
@@ -624,7 +721,7 @@ func runFailoverPartialLeaseLeader(ctx context.Context, t test.Test, c cluster.C
 	require.NoError(t, err)
 	configureZone(t, ctx, conn, `DATABASE kv`, zoneConfig{replicas: 3, onlyNodes: []int{4, 5, 6}})
 
-	c.Run(ctx, option.WithNodes(c.Node(6)), `./cockroach workload init kv --splits 1000 {pgurl:1}`)
+	c.Run(ctx, option.WithNodes(c.Node(6)), `./cockroach workload init kv --splits 9 {pgurl:1}`)
 
 	// Move ranges to the appropriate nodes. Precreating the database/range and
 	// moving it to the correct nodes first is not sufficient, since workload will
@@ -634,23 +731,24 @@ func runFailoverPartialLeaseLeader(ctx context.Context, t test.Test, c cluster.C
 
 	// Run workload on n7 via n1-n3 gateways until test ends (context cancels).
 	t.L().Printf("running workload")
-	cancelWorkload := m.GoWithCancel(func(ctx context.Context) error {
-		err := c.RunE(ctx, option.WithNodes(c.WorkloadNode()), `./cockroach workload run kv --read-percent 50 `+
-			`--concurrency 256 --max-rate 2048 --timeout 1m --tolerate-errors `+
-			roachtestutil.GetWorkloadHistogramString(t, c, getKVLabels(256, 0, 50), true)+` {pgurl:1-3}`)
-		if ctx.Err() != nil {
-			return nil // test requested workload shutdown
-		}
-		return err
-	})
+	// cancelWorkload := m.GoWithCancel(func(ctx context.Context) error {
+	// 	err := c.RunE(ctx, option.WithNodes(c.WorkloadNode()), `./cockroach workload run kv --read-percent 50 `+
+	// 		`--concurrency 256 --max-rate 2048 --timeout 250ms --tolerate-errors --display-every=500ms `+
+	// 		roachtestutil.GetWorkloadHistogramString(t, c, getKVLabels(256, 0, 50), true)+` {pgurl:1-3}`)
+	// 	if ctx.Err() != nil {
+	// 		return nil // test requested workload shutdown
+	// 	}
+	// 	return err
+	// })
 
 	// Start a worker to fail and recover partial partitions between each of n4-n6
 	// and the other two nodes for 3 cycles (9 failures total).
 	m.Go(func(ctx context.Context) error {
-		defer cancelWorkload()
+		// defer cancelWorkload()
 
 		nodes := []int{4, 5, 6}
-		for i := 0; i < 3; i++ {
+		curKey := 1
+		for i := 0; i < 100; i++ {
 			for _, node := range nodes {
 				var peers []int
 				for _, peer := range nodes {
@@ -659,25 +757,50 @@ func runFailoverPartialLeaseLeader(ctx context.Context, t test.Test, c cluster.C
 					}
 				}
 
-				sleepFor(ctx, t, time.Minute)
+				sleepFor(ctx, t, 20*time.Second)
 
 				// Ranges may occasionally escape their constraints. Move them to where
 				// they should be.
 				relocateRanges(t, ctx, conn, `database_name = 'kv'`, []int{1, 2, 3}, []int{4, 5, 6})
 				relocateRanges(t, ctx, conn, `database_name != 'kv'`, []int{4, 5, 6}, []int{1, 2, 3})
+				relocateLeases(t, ctx, conn, `database_name = 'kv'`, node)
 
 				// Randomly sleep up to the lease renewal interval, to vary the time
 				// between the last lease renewal and the failure.
-				sleepFor(ctx, t, randutil.RandDuration(rng, rangeLeaseRenewalDuration))
+				randSleep := randutil.RandDuration(rng, rangeLeaseRenewalDuration)
+				t.L().Printf("!!!!!! Sleeping for %s", randSleep)
+				sleepFor(ctx, t, randSleep)
 
 				failer.Ready(ctx, node)
 
+				// Record the current time and measure recovery time
+				startTime := timeutil.Now()
 				for _, peer := range peers {
 					t.L().Printf("failing n%d to n%d (%s lease/leader)", node, peer, failer)
+					startTime = timeutil.Now()
 					failer.FailPartial(ctx, node, []int{peer})
 				}
 
-				sleepFor(ctx, t, time.Minute)
+				t.L().Printf("Starting recovery measurement at %s", startTime)
+
+				// Keep sending the query with a timeout of 200ms until it succeeds
+				for {
+					queryCtx, cancel := context.WithTimeout(ctx, 200*time.Millisecond)
+					_, err := conn.ExecContext(queryCtx, fmt.Sprintf("UPSERT INTO kv.kv VALUES (%d, 'one')", curKey))
+					cancel()
+					curKey++
+
+					if err == nil {
+						// Query succeeded, log the duration
+						duration := timeutil.Since(startTime)
+						t.L().Printf("!!!!! Recovery completed after %s - query succeeded", duration)
+						break
+					}
+
+					t.L().Printf("!!!!! Recovery error: %v", err)
+				}
+
+				// sleepFor(ctx, t, time.Minute)
 
 				for _, peer := range peers {
 					t.L().Printf("recovering n%d to n%d (%s lease/leader)", node, peer, failer)
@@ -842,7 +965,9 @@ func runFailoverNonSystem(
 	failer.Setup(ctx)
 	defer failer.Cleanup(ctx)
 
-	c.Start(ctx, t.L(), failoverStartOpts(), settings, c.CRDBNodes())
+	startOpts := failoverStartOpts()
+	startOpts.RoachprodOpts.ExtraArgs = []string{"--vmodule=replica_range_lease=3,raft=4,replica_raft_quiesce=3"}
+	c.Start(ctx, t.L(), startOpts, settings, c.CRDBNodes())
 
 	conn := c.Conn(ctx, t.L(), 1)
 	setMaxLifetime(conn)
@@ -859,7 +984,7 @@ func runFailoverNonSystem(
 	_, err := conn.ExecContext(ctx, `CREATE DATABASE kv`)
 	require.NoError(t, err)
 	configureZone(t, ctx, conn, `DATABASE kv`, zoneConfig{replicas: 3, onlyNodes: []int{4, 5, 6}})
-	c.Run(ctx, option.WithNodes(c.Node(7)), `./cockroach workload init kv --splits 1000 {pgurl:1}`)
+	c.Run(ctx, option.WithNodes(c.Node(7)), `./cockroach workload init kv --splits 9 {pgurl:1}`)
 
 	// The replicate queue takes forever to move the kv ranges from n1-n3 to
 	// n4-n6, so we do it ourselves. Precreating the database/range and moving it
@@ -869,29 +994,30 @@ func runFailoverNonSystem(
 
 	// Run workload on n7 via n1-n3 gateways until test ends (context cancels).
 	t.L().Printf("running workload")
-	cancelWorkload := m.GoWithCancel(func(ctx context.Context) error {
-		err := c.RunE(ctx, option.WithNodes(c.WorkloadNode()), `./cockroach workload run kv --read-percent 50 `+
-			`--concurrency 256 --max-rate 2048 --timeout 1m --tolerate-errors `+
-			roachtestutil.GetWorkloadHistogramString(t, c, getKVLabels(256, 0, 50), true)+` {pgurl:1-3}`)
-		if ctx.Err() != nil {
-			return nil // test requested workload shutdown
-		}
-		return err
-	})
+	// cancelWorkload := m.GoWithCancel(func(ctx context.Context) error {
+	// 	err := c.RunE(ctx, option.WithNodes(c.WorkloadNode()), `./cockroach workload run kv --read-percent 50 `+
+	// 		`--concurrency 256 --max-rate 2048 --timeout 1m --tolerate-errors `+
+	// 		roachtestutil.GetWorkloadHistogramString(t, c, getKVLabels(256, 0, 50), true)+` {pgurl:1-3}`)
+	// 	if ctx.Err() != nil {
+	// 		return nil // test requested workload shutdown
+	// 	}
+	// 	return err
+	// })
 
 	// Start a worker to fail and recover n4-n6 in order.
 	m.Go(func(ctx context.Context) error {
-		defer cancelWorkload()
-
-		for i := 0; i < 3; i++ {
+		// defer cancelWorkload()
+		curKey := 1
+		for i := 0; i < 100; i++ {
 			for _, node := range []int{4, 5, 6} {
-				sleepFor(ctx, t, time.Minute)
+				sleepFor(ctx, t, 60*time.Second)
 
 				// Ranges may occasionally escape their constraints. Move them
 				// to where they should be.
 				relocateRanges(t, ctx, conn, `database_name = 'kv'`, []int{1, 2, 3}, []int{4, 5, 6})
 				relocateRanges(t, ctx, conn, `database_name != 'kv'`, []int{node}, []int{1, 2, 3})
-
+				relocateLeases(t, ctx, conn, `database_name = 'kv'`, node)
+				sleepFor(ctx, t, 5*time.Second)
 				// Randomly sleep up to the lease renewal interval, to vary the time
 				// between the last lease renewal and the failure.
 				sleepFor(ctx, t, randutil.RandDuration(rng, rangeLeaseRenewalDuration))
@@ -899,9 +1025,28 @@ func runFailoverNonSystem(
 				failer.Ready(ctx, node)
 
 				t.L().Printf("failing n%d (%s)", node, failer)
+				// Record the current time and measure recovery time
+				startTime := timeutil.Now()
 				failer.Fail(ctx, node)
 
-				sleepFor(ctx, t, time.Minute)
+				t.L().Printf("Starting recovery measurement at %s", startTime)
+
+				// Keep sending the query with a timeout of 200ms until it succeeds
+				for {
+					queryCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+					_, err := conn.ExecContext(queryCtx, fmt.Sprintf("UPSERT INTO kv.kv VALUES (%d, 'one')", curKey))
+					cancel()
+					curKey++
+
+					if err == nil {
+						// Query succeeded, log the duration
+						duration := timeutil.Since(startTime)
+						t.L().Printf("!!!!! Recovery completed after %s - query succeeded", duration)
+						break
+					}
+
+					t.L().Printf("!!!!! Recovery error: %v", err)
+				}
 
 				t.L().Printf("recovering n%d (%s)", node, failer)
 				failer.Recover(ctx, node)
@@ -1644,7 +1789,10 @@ func (f *diskStallFailer) Recover(ctx context.Context, nodeID int) {
 	// Pebble's disk stall detector should have terminated the node, but in case
 	// it didn't, we explicitly stop it first.
 	f.c.Stop(ctx, f.t.L(), option.DefaultStopOpts(), f.c.Node(nodeID))
-	f.c.Start(ctx, f.t.L(), failoverRestartOpts(), f.startSettings, f.c.Node(nodeID))
+
+	startOpts := failoverStartOpts()
+	startOpts.RoachprodOpts.ExtraArgs = []string{"--vmodule=replica_range_lease=3,raft=4,replica_raft_quiesce=3"}
+	f.c.Start(ctx, f.t.L(), startOpts, f.startSettings, f.c.Node(nodeID))
 }
 
 // pauseFailer pauses the process, but keeps the OS (and thus network

@@ -652,6 +652,11 @@ func (o *kvOp) run(ctx context.Context) (retErr error) {
 		}
 		rows, err := readStmt.Query(ctx, args...)
 		if err != nil {
+			// Log if this is a context timeout error
+			if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+				fmt.Printf("IBRAHIM Context timeout error during read operation\n")
+				o.hists.Get(opName).Record(24 * 24 * 1000 * time.Hour)
+			}
 			return err
 		}
 		empty := true
@@ -776,6 +781,11 @@ func (o *kvOp) run(ctx context.Context) (retErr error) {
 		_, err = o.writeStmt.Exec(ctx, writeArgs...)
 	}
 	if err != nil {
+		// Log if this is a context timeout error
+		if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+			fmt.Printf("IBRAHIM Context timeout error during write operation\n")
+			o.hists.Get(`write`).Record(24 * 24 * 1000 * time.Hour)
+		}
 		return err
 	}
 	elapsed := timeutil.Since(start)
