@@ -878,7 +878,7 @@ func TestReplicateQueueTracingOnError(t *testing.T) {
 	var rejectSnapshots int64
 	ctx := context.Background()
 	tc := testcluster.StartTestCluster(
-		t, 4, base.TestClusterArgs{
+		t, 3, base.TestClusterArgs{
 			ReplicationMode: base.ReplicationManual,
 			ServerArgs: base.TestServerArgs{Knobs: base.TestingKnobs{Store: &kvserver.StoreTestingKnobs{
 				ReceiveSnapshot: func(_ context.Context, _ *kvserverpb.SnapshotRequest_Header) error {
@@ -931,7 +931,7 @@ func TestReplicateQueueTracingOnError(t *testing.T) {
 	// before calling store.Enqueue(..).
 	log.FlushFiles()
 	entries, err := log.FetchEntriesFromFiles(testStartTs.UnixNano(),
-		math.MaxInt64, 100, regexp.MustCompile(`replicate_queue\.go`), log.WithMarkedSensitiveData)
+		math.MaxInt64, 100, regexp.MustCompile(`replicate_queue\.go`), log.WithoutSensitiveData)
 	require.NoError(t, err)
 
 	opName := "process replica"
@@ -947,6 +947,8 @@ func TestReplicateQueueTracingOnError(t *testing.T) {
 	foundEntry := false
 	var entry logpb.Entry
 	for _, entry = range entries {
+
+		fmt.Printf("IBRAHIM ENTRIES: %+v", entry)
 		if errRegexp.MatchString(entry.Message) {
 			foundEntry = true
 			break

@@ -158,7 +158,7 @@ var RejectLeaseOnLeaderUnknown = settings.RegisterBoolSetting(
 	settings.SystemOnly,
 	"kv.lease.reject_on_leader_unknown.enabled",
 	"reject lease requests on a replica that does not know the raft leader",
-	true,
+	false,
 )
 
 // OverrideDefaultLeaseType overrides the default lease type for the cluster

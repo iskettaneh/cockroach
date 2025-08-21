@@ -245,7 +245,7 @@ var (
 	// defaultStoreLivenessHeartbeatInterval is the default value for
 	// StoreLivenessHeartbeatInterval.
 	defaultStoreLivenessHeartbeatInterval = envutil.EnvOrDefaultDuration(
-		"COCKROACH_STORE_LIVENESS_HEARTBEAT_INTERVAL", 500*time.Microsecond)
+		"COCKROACH_STORE_LIVENESS_HEARTBEAT_INTERVAL", 1*time.Second)
 
 	// defaultStoreLivenessSupportDuration is the default value for
 	// StoreLivenessSupportDuration.

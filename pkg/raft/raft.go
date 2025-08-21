@@ -2298,6 +2298,9 @@ func (r *raft) checkQuorumActive() {
 	assertTrue(r.state == pb.StateLeader, "checkQuorum in a non-leader state")
 
 	quorumActiveByHeartbeats := r.trk.QuorumActive()
+	if r.fortificationTracker.FortificationEnabledForTerm() {
+		quorumActiveByHeartbeats = false
+	}
 	quorumActiveByFortification := r.fortificationTracker.QuorumActive()
 	if !quorumActiveByHeartbeats {
 		r.logger.Debugf(

@@ -966,7 +966,7 @@ func runFailoverNonSystem(
 	defer failer.Cleanup(ctx)
 
 	startOpts := failoverStartOpts()
-	startOpts.RoachprodOpts.ExtraArgs = []string{"--vmodule=replica_range_lease=3,raft=4,replica_raft_quiesce=3"}
+	startOpts.RoachprodOpts.ExtraArgs = []string{"--vmodule=replica_range_lease=3,raft=4,replica_raft_quiesce=3,support_manager=3,requester_state=3,supporter_state=3"}
 	c.Start(ctx, t.L(), startOpts, settings, c.CRDBNodes())
 
 	conn := c.Conn(ctx, t.L(), 1)
@@ -984,7 +984,7 @@ func runFailoverNonSystem(
 	_, err := conn.ExecContext(ctx, `CREATE DATABASE kv`)
 	require.NoError(t, err)
 	configureZone(t, ctx, conn, `DATABASE kv`, zoneConfig{replicas: 3, onlyNodes: []int{4, 5, 6}})
-	c.Run(ctx, option.WithNodes(c.Node(7)), `./cockroach workload init kv --splits 9 {pgurl:1}`)
+	c.Run(ctx, option.WithNodes(c.Node(7)), `./cockroach workload init kv {pgurl:1}`)
 
 	// The replicate queue takes forever to move the kv ranges from n1-n3 to
 	// n4-n6, so we do it ourselves. Precreating the database/range and moving it
@@ -1005,9 +1005,9 @@ func runFailoverNonSystem(
 	// })
 
 	// Start a worker to fail and recover n4-n6 in order.
+	curKey := 1
 	m.Go(func(ctx context.Context) error {
 		// defer cancelWorkload()
-		curKey := 1
 		for i := 0; i < 100; i++ {
 			for _, node := range []int{4, 5, 6} {
 				sleepFor(ctx, t, 60*time.Second)
@@ -1033,8 +1033,8 @@ func runFailoverNonSystem(
 
 				// Keep sending the query with a timeout of 200ms until it succeeds
 				for {
-					queryCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
-					_, err := conn.ExecContext(queryCtx, fmt.Sprintf("UPSERT INTO kv.kv VALUES (%d, 'one')", curKey))
+					queryCtx, cancel := context.WithTimeout(ctx, 500*time.Millisecond)
+					_, err := conn.ExecContext(queryCtx, fmt.Sprintf("INSERT INTO kv.kv VALUES (%d, 'one')", curKey))
 					cancel()
 					curKey++
 
@@ -1787,11 +1787,11 @@ func (f *diskStallFailer) Recover(ctx context.Context, nodeID int) {
 		f.t.Fatalf("failed to unstall disk %v", err)
 	}
 	// Pebble's disk stall detector should have terminated the node, but in case
-	// it didn't, we explicitly stop it first.
+	// it didn't, we explicitly stop it first.has not received messages from a quorum of
 	f.c.Stop(ctx, f.t.L(), option.DefaultStopOpts(), f.c.Node(nodeID))
 
 	startOpts := failoverStartOpts()
-	startOpts.RoachprodOpts.ExtraArgs = []string{"--vmodule=replica_range_lease=3,raft=4,replica_raft_quiesce=3"}
+	startOpts.RoachprodOpts.ExtraArgs = []string{"--vmodule=replica_range_lease=3,raft=4,replica_raft_quiesce=3,support_manager=4,requester_state=4,supporter_state=4"}
 	f.c.Start(ctx, f.t.L(), startOpts, f.startSettings, f.c.Node(nodeID))
 }
 
