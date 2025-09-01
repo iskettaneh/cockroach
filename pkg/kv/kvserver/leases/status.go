@@ -180,6 +180,7 @@ func Status(ctx context.Context, nl NodeLiveness, i StatusInput) kvserverpb.Leas
 				if !knownSuccessor {
 					status.State = kvserverpb.LeaseState_ERROR
 					status.ErrInfo = "leader lease is not held locally, cannot determine validity"
+					// log.Infof(ctx, "IBRAHIM leader lease is not held locally, cannot determine validity: %+v\nStack trace:\n%s", status, debug.Stack())
 					return status
 				}
 				// We know of a newer raft leader. We still don't know the exact extent

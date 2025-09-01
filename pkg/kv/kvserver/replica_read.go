@@ -151,6 +151,7 @@ func (r *Replica) executeReadOnlyBatch(
 			}
 		}
 		pErr = maybeAttachLease(pErr, &st.Lease)
+		// log.Infof(ctx, "IBRAHIM maybeAttachLease pErr: %+v", pErr)
 		return nil, g, nil, pErr
 	}
 

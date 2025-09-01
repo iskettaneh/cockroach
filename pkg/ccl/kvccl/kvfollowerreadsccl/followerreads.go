@@ -130,10 +130,19 @@ func canSendToFollower(
 	ctPolicy roachpb.RangeClosedTimestampPolicy,
 	ba *kvpb.BatchRequest,
 ) bool {
+	// Check if follower reads are force-enabled, which overrides the normal
+	// closed timestamp check. This should only be used for testing or debugging.
+	if kvserver.OverrideFollowerReadsForceEnabled.Get(&st.SV) {
+		return kvserver.FollowerReadsForceEnabled.Get(&st.SV) &&
+			kvserver.BatchCanBeEvaluatedOnFollower(ctx, ba) &&
+			checkFollowerReadsEnabled(ctx, st)
+	}
+
 	result := kvserver.BatchCanBeEvaluatedOnFollower(ctx, ba) &&
 		closedTimestampLikelySufficient(ctx, st, clock, ctPolicy, ba.RequiredFrontier()) &&
 		// NOTE: this call can be expensive, so perform it last. See #62447.
 		checkFollowerReadsEnabled(ctx, st)
+
 	return result
 }
 

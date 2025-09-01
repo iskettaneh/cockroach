@@ -2997,6 +2997,12 @@ func (ds *DistSender) sendToReplicas(
 					ambiguousError = br.Error.GoError()
 				}
 			case *kvpb.NotLeaseHolderError:
+				// // Print the error details, also, print the batch entries.
+				// log.Infof(ctx, "NotLeaseHolderError: %+v", tErr)
+				// log.Infof(ctx, "Batch details - ReadConsistency: %v, RoutingPolicy: %v, Txn: %v", ba.ReadConsistency, ba.RoutingPolicy, ba.Txn)
+				// for i, req := range ba.Requests {
+				// 	log.Infof(ctx, "Batch request %d: %T - %+v", i, req.GetInner(), req.GetInner())
+				// }
 				ds.metrics.NotLeaseHolderErrCount.Inc(1)
 				// Update the leaseholder in the range cache. Naively this would also
 				// happen when the next RPC comes back, but we don't want to wait out

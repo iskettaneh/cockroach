@@ -31,6 +31,26 @@ var FollowerReadsEnabled = settings.RegisterBoolSetting(
 	settings.WithName("kv.closed_timestamp.follower_reads.enabled"),
 	settings.WithPublic)
 
+var OverrideFollowerReadsForceEnabled = settings.RegisterBoolSetting(
+	settings.SystemVisible,
+	"kv.closed_timestamp.follower_reads.override_force_enabled",
+	"override the force follower reads setting",
+	false,
+	settings.WithName("kv.closed_timestamp.follower_reads.override_force.enabled"),
+	settings.WithPublic)
+
+// FollowerReadsForceEnabled forces follower reads to be allowed even when the
+// closed timestamp is not sufficiently advanced. This bypasses the normal
+// closed timestamp checks and should only be used for testing or debugging purposes.
+// WARNING: Enabling this setting may result in stale reads.
+var FollowerReadsForceEnabled = settings.RegisterBoolSetting(
+	settings.SystemVisible,
+	"kv.closed_timestamp.follower_reads.force_enabled",
+	"force follower reads to be allowed even when closed timestamp is not sufficiently advanced (WARNING: may result in stale reads)",
+	false,
+	settings.WithName("kv.closed_timestamp.follower_reads.force.enabled"),
+	settings.WithPublic)
+
 // BatchCanBeEvaluatedOnFollower determines if a batch consists exclusively of
 // requests that can be evaluated on a follower replica, given a sufficiently
 // advanced closed timestamp.
@@ -102,11 +122,13 @@ func (r *Replica) canServeFollowerRead(
 	eligible := BatchCanBeEvaluatedOnFollower(ctx, ba) && FollowerReadsEnabled.Get(&r.store.cfg.Settings.SV)
 	if !eligible {
 		// We couldn't do anything with the error, propagate it.
+		// log.Infof(ctx, "can't serve follower read; batch not eligible: %s", ba.Summary())
 		return false
 	}
 
 	repDesc, err := getReplicaDescriptor(desc, r.RangeID, r.StoreID())
 	if err != nil {
+		// log.Infof(ctx, "can't serve follower read; error getting replica descriptor: %s", err)
 		return false
 	}
 
@@ -114,6 +136,7 @@ func (r *Replica) canServeFollowerRead(
 	case roachpb.VOTER_FULL, roachpb.VOTER_INCOMING, roachpb.NON_VOTER:
 	default:
 		log.Eventf(ctx, "%s replicas cannot serve follower reads", repDesc.Type)
+		// log.Infof(ctx, "can't serve follower read; %s replicas cannot serve follower reads", repDesc.Type)
 		return false
 	}
 
@@ -122,6 +145,13 @@ func (r *Replica) canServeFollowerRead(
 		leaseholderNodeId, raftClosed)
 	canServeFollowerRead := requiredFrontier.LessEq(maxClosed)
 	tsDiff := requiredFrontier.GoTime().Sub(maxClosed.GoTime())
+
+	// Check if follower reads are force-enabled, which overrides the normal
+	// closed timestamp check. This should only be used for testing or debugging.
+	if OverrideFollowerReadsForceEnabled.Get(&r.store.cfg.Settings.SV) {
+		canServeFollowerRead = FollowerReadsForceEnabled.Get(&r.store.cfg.Settings.SV)
+	}
+
 	if !canServeFollowerRead {
 		uncertaintyLimitStr := "n/a"
 		if ba.Txn != nil {
@@ -132,6 +162,8 @@ func (r *Replica) canServeFollowerRead(
 		// Signal the clients that we want an update so that future requests can succeed.
 		log.Eventf(ctx, "can't serve follower read; closed timestamp too low by: %s; maxClosed: %s ts: %s uncertaintyLimit: %s",
 			tsDiff, maxClosed, ba.Timestamp, uncertaintyLimitStr)
+		// log.Infof(ctx, "can't serve follower read; closed timestamp too low by: %s; maxClosed: %s ts: %s uncertaintyLimit: %s",
+		// 	tsDiff, maxClosed, ba.Timestamp, uncertaintyLimitStr)
 		return false
 	}
 

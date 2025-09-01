@@ -2112,6 +2112,7 @@ func (r *Replica) checkExecutionCanProceedBeforeStorageSnapshot(
 	st, err := r.checkLease(ctx, ba, desc, minLeaseProposedTS, minValidObservedTimestamp,
 		lease, raftBasicStatus, lai, closedTS)
 	if err != nil {
+		// log.Infof(ctx, "checkLease error: %+v", err)
 		return kvserverpb.LeaseStatus{}, err
 	}
 
@@ -2259,6 +2260,7 @@ func (r *Replica) checkLease(
 			// we may continue.
 			if !r.canServeFollowerRead(ctx, ba, desc, lai, lease.Replica.NodeID, raftClosed) {
 				// If not, return the error.
+				// log.Infof(ctx, "IBRAHIM cant serve follower read: %+v", err)
 				return kvserverpb.LeaseStatus{}, err
 			}
 			// Otherwise, suppress the error. Also, remember that we're not serving

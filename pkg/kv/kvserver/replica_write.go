@@ -720,6 +720,7 @@ func (r *Replica) evaluateWriteBatchWithServersideRefreshes(
 		if pErr == nil || retries > 0 {
 			break
 		}
+		// log.Infof(ctx, "server-side retry of batch; retries: %d, pErr: %s", retries, pErr)
 		// If we can retry, set a higher batch timestamp and continue.
 		var ok bool
 		ba, ok = canDoServersideRetry(ctx, pErr, ba, g, deadline)

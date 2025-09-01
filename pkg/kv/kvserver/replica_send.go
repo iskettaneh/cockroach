@@ -510,6 +510,9 @@ func (r *Replica) executeBatchWithConcurrencyRetries(
 		latchSpans, lockSpans = nil, nil // ownership released
 
 		br, g, writeBytes, pErr = fn(r, ctx, ba, g)
+		// if pErr != nil {
+		// 	log.Infof(ctx, "IBRAHIM pErr: %+v", pErr)
+		// }
 		if pErr == nil {
 			// Success.
 			return br, writeBytes, nil
