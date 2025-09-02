@@ -154,6 +154,9 @@ const (
 	// QueryResolvedTimestamp requests the resolved timestamp of the key span it
 	// is issued over.
 	QueryResolvedTimestamp
+	// EstablishResolvedTimestamp is used by followers to request that the
+	// leaseholder establish a resolved timestamp for consistent follower reads.
+	EstablishResolvedTimestamp
 	// Barrier is a command that ensures all conflicting in-flight operations on
 	// this range before this command have finished by the time it returns. It
 	// does not block new operations that started after this command's evaluation.

@@ -2463,6 +2463,40 @@ message QueryResolvedTimestampResponse {
     (gogoproto.nullable) = false, (gogoproto.customname) = "ResolvedTS"];
 }
 
+// EstablishResolvedTimestampRequest is the argument to the EstablishResolvedTimestamp()
+// method. It is used by followers to request that the leaseholder establish a resolved
+// timestamp for consistent follower reads. This enables the follower-coordinated 
+// approach described in RFC issue #72593.
+//
+// The leaseholder will grab latches, check the lock table, bump the timestamp cache
+// over the specified span, and return the current lease_applied_index. The follower
+// can then wait for its Raft log to catch up to this index before serving the read.
+message EstablishResolvedTimestampRequest {
+  RequestHeader header = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+
+  // Transaction is needed for deadlock detection when grabbing latches.
+  Transaction txn = 2;
+
+  // Timestamp is the timestamp at which we want to establish the resolved timestamp.
+  util.hlc.Timestamp timestamp = 3 [(gogoproto.nullable) = false];
+
+  // Span is the key span for which we want to establish the resolved timestamp.
+  Span span = 4 [(gogoproto.nullable) = false];
+}
+
+// EstablishResolvedTimestampResponse is the response to an EstablishResolvedTimestampRequest.
+message EstablishResolvedTimestampResponse {
+  ResponseHeader header = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+
+  // LeaseAppliedIndex is the lease applied index at which the resolved timestamp
+  // was established. The follower should wait for its Raft log to catch up to
+  // at least this index before serving the read.
+  uint64 lease_applied_index = 2 [(gogoproto.casttype) = "LeaseAppliedIndex"];
+
+  // ObservedTimestamp can be used to help avoid some uncertainty restarts.
+  util.hlc.Timestamp observed_timestamp = 3 [(gogoproto.nullable) = false];
+}
+
 // BarrierRequest is the request for a Barrier operation. This guarantees that
 // all past and ongoing writes to a key span have completed and applied on the
 // leaseholder. It does this by waiting for all conflicting write latches and
@@ -2570,6 +2604,7 @@ message RequestUnion {
     RangeStatsRequest range_stats = 44;
     MigrateRequest migrate = 50;
     QueryResolvedTimestampRequest query_resolved_timestamp = 51;
+    EstablishResolvedTimestampRequest establish_resolved_timestamp = 60;
     BarrierRequest barrier = 53;
     ProbeRequest probe = 54;
     IsSpanEmptyRequest is_span_empty = 56;
@@ -2626,6 +2661,7 @@ message ResponseUnion {
     RangeStatsResponse range_stats = 44;
     MigrateResponse migrate = 50;
     QueryResolvedTimestampResponse query_resolved_timestamp = 51;
+    EstablishResolvedTimestampResponse establish_resolved_timestamp = 60;
     BarrierResponse barrier = 53;
     ProbeResponse probe = 54;
     IsSpanEmptyResponse is_span_empty = 56;

@@ -130,10 +130,20 @@ func canSendToFollower(
 	ctPolicy roachpb.RangeClosedTimestampPolicy,
 	ba *kvpb.BatchRequest,
 ) bool {
+	if kvserver.ConsistentFollowerReadsEnabled.Get(&st.SV) {
+		for _, ru := range ba.Requests {
+			if _, ok := ru.GetInner().(*kvpb.EstablishResolvedTimestampRequest); ok {
+				return false
+			}
+		}
+		return kvserver.BatchCanBeEvaluatedOnFollower(ctx, ba) && checkFollowerReadsEnabled(ctx, st)
+	}
+
 	result := kvserver.BatchCanBeEvaluatedOnFollower(ctx, ba) &&
 		closedTimestampLikelySufficient(ctx, st, clock, ctPolicy, ba.RequiredFrontier()) &&
 		// NOTE: this call can be expensive, so perform it last. See #62447.
 		checkFollowerReadsEnabled(ctx, st)
+
 	return result
 }
 

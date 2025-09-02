@@ -12,6 +12,7 @@ go_library(
         "cmd_delete_range.go",
         "cmd_end_transaction.go",
         "cmd_excise.go",
+        "cmd_establish_resolved_timestamp.go",
         "cmd_export.go",
         "cmd_flush_lock_table.go",
         "cmd_gc.go",

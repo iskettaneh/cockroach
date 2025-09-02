@@ -979,6 +979,9 @@ func (*RangeStatsRequest) Method() Method { return RangeStats }
 func (*QueryResolvedTimestampRequest) Method() Method { return QueryResolvedTimestamp }
 
 // Method implements the Request interface.
+func (*EstablishResolvedTimestampRequest) Method() Method { return EstablishResolvedTimestamp }
+
+// Method implements the Request interface.
 func (*BarrierRequest) Method() Method { return Barrier }
 
 // Method implements the Request interface.
@@ -1259,6 +1262,12 @@ func (r *RangeStatsRequest) ShallowCopy() Request {
 
 // ShallowCopy implements the Request interface.
 func (r *QueryResolvedTimestampRequest) ShallowCopy() Request {
+	shallowCopy := *r
+	return &shallowCopy
+}
+
+// ShallowCopy implements the Request interface.
+func (r *EstablishResolvedTimestampRequest) ShallowCopy() Request {
 	shallowCopy := *r
 	return &shallowCopy
 }
@@ -1551,6 +1560,12 @@ func (r *RangeStatsResponse) ShallowCopy() Response {
 
 // ShallowCopy implements the Response interface.
 func (r *QueryResolvedTimestampResponse) ShallowCopy() Response {
+	shallowCopy := *r
+	return &shallowCopy
+}
+
+// ShallowCopy implements the Response interface.
+func (r *EstablishResolvedTimestampResponse) ShallowCopy() Response {
 	shallowCopy := *r
 	return &shallowCopy
 }
@@ -2092,6 +2107,9 @@ func (*SubsumeRequest) flags() flag    { return isWrite | isAlone | updatesTSCac
 func (*RangeStatsRequest) flags() flag { return isRead }
 func (*QueryResolvedTimestampRequest) flags() flag {
 	return isRead | isRange | requiresClosedTSOlderThanStorageSnapshot
+}
+func (*EstablishResolvedTimestampRequest) flags() flag {
+	return isRead | isRange | isTxn | updatesTSCache
 }
 func (r *BarrierRequest) flags() flag {
 	flags := isWrite | isRange | isAlone
