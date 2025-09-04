@@ -229,7 +229,16 @@ func runSysbench(ctx context.Context, t test.Test, c cluster.Cluster, opts sysbe
 			require.NoError(t, err)
 		}
 
+		time.Sleep(20 * time.Second)
+		conn := c.Conn(ctx, t.L(), 1)
+		runner := sqlutils.MakeSQLRunner(conn)
+
+		stmt1 := `SET CLUSTER SETTING kv.closed_timestamp.consistent_follower_reads_enabled = true`
+		runner.Exec(t, stmt1)
+		t.L().Printf(`executed extra setup statement: %s`, stmt1)
+
 		t.Status("running workload")
+		time.Sleep(60 * time.Second)
 		start = timeutil.Now()
 		result, err := c.RunWithDetailsSingleNode(ctx, t.L(), option.WithNodes(c.WorkloadNode()), roachtestutil.PrefixCmdOutputWithTimestamp(cmd+" run"))
 
@@ -242,6 +251,8 @@ func runSysbench(ctx context.Context, t test.Test, c cluster.Cluster, opts sysbe
 		}
 
 		t.Status("exporting results")
+		time.Sleep(60 * time.Second)
+
 		idx := strings.Index(result.Stdout, "SQL statistics:")
 		if idx < 0 {
 			return errors.Errorf("no SQL statistics found in sysbench output:\n%s", result.Stdout)
