@@ -34,6 +34,22 @@ import (
 	"github.com/kr/pretty"
 )
 
+// isLightweightCoordinationBatch returns true if the batch contains only
+// lightweight coordination commands that don't actually read data.
+func isLightweightCoordinationBatch(ba *kvpb.BatchRequest) bool {
+	for _, union := range ba.Requests {
+		inner := union.GetInner()
+		switch inner.(type) {
+		case *kvpb.EstablishResolvedTimestampRequest:
+			// This is a lightweight coordination command
+		default:
+			// Any other command means this is not a lightweight batch
+			return false
+		}
+	}
+	return len(ba.Requests) > 0
+}
+
 // executeReadOnlyBatch is the execution logic for client requests which do not
 // mutate the range's replicated state. The method uses a single RocksDB
 // iterator to evaluate the batch and then updates the timestamp cache to
@@ -46,6 +62,11 @@ func (r *Replica) executeReadOnlyBatch(
 	_ *kvadmission.StoreWriteBytes,
 	pErr *kvpb.Error,
 ) {
+	// Check if this is a lightweight coordination batch that can use
+	// the optimized execution path
+	if isLightweightCoordinationBatch(ba) {
+		return r.executeLightweightCoordinationBatch(ctx, ba, g)
+	}
 	r.readOnlyCmdMu.RLock()
 	defer r.readOnlyCmdMu.RUnlock()
 
@@ -81,17 +102,29 @@ func (r *Replica) executeReadOnlyBatch(
 	// based off the state of the engine as of this point and are mutually
 	// consistent.
 	readCategory := fs.BatchEvalReadCategory
+	onlyEstablishResolvedTimestamp := true
 	for _, union := range ba.Requests {
 		inner := union.GetInner()
 		switch inner.(type) {
 		case *kvpb.ScanRequest, *kvpb.ReverseScanRequest:
 			readCategory = batcheval.ScanReadCategory(ba.AdmissionHeader)
+			onlyEstablishResolvedTimestamp = false
+
+		case *kvpb.EstablishResolvedTimestampRequest:
+
+		default:
+			onlyEstablishResolvedTimestamp = false
 		}
+
 		break
 	}
-	if err := rw.PinEngineStateForIterators(readCategory); err != nil {
-		return nil, g, nil, kvpb.NewError(err)
+
+	if !onlyEstablishResolvedTimestamp {
+		if err := rw.PinEngineStateForIterators(readCategory); err != nil {
+			return nil, g, nil, kvpb.NewError(err)
+		}
 	}
+
 	if util.RaceEnabled {
 		rw = spanset.NewReadWriterAt(rw, g.LatchSpans(), ba.Timestamp)
 	}
@@ -104,6 +137,9 @@ func (r *Replica) executeReadOnlyBatch(
 	if pErr != nil {
 		return nil, g, nil, pErr
 	}
+
+	reqEvalKind := g.EvalKind
+
 	evalPath := readOnlyDefault
 	if ok {
 		// Since the concurrency manager has sequenced this request all the intents
@@ -151,7 +187,15 @@ func (r *Replica) executeReadOnlyBatch(
 			}
 		}
 		pErr = maybeAttachLease(pErr, &st.Lease)
-		return nil, g, nil, pErr
+		if pErr != nil {
+			// If we get invalid lease error, we need to increment the metric
+			if _, ok := pErr.GetDetail().(*kvpb.InvalidLeaseError); ok {
+				r.store.Metrics().FollowerReadsEmptyLeaseCounter.Inc(1)
+			}
+		}
+		if pErr != nil {
+			return nil, g, nil, pErr
+		}
 	}
 
 	if g != nil && g.EvalKind == concurrency.OptimisticEval {
@@ -238,6 +282,20 @@ func (r *Replica) executeReadOnlyBatch(
 		keysRead, bytesRead := getBatchResponseReadStats(br)
 		r.loadStats.RecordReadKeys(keysRead)
 		r.loadStats.RecordReadBytes(bytesRead)
+
+		// Log and record metrics for bytes served based on evaluation kind
+		switch reqEvalKind {
+		case concurrency.OptimisticEval:
+			log.VEventf(ctx, 2, "optimistic read completed: keys=%d bytes=%d", int64(keysRead), int64(bytesRead))
+			r.store.metrics.ReplicaReadBatchOptimisticEvalBytes.Inc(int64(bytesRead))
+		case concurrency.PessimisticEval:
+			log.VEventf(ctx, 2, "pessimistic read completed: keys=%d bytes=%d", int64(keysRead), int64(bytesRead))
+			r.store.metrics.ReplicaReadBatchPessimisticEvalBytes.Inc(int64(bytesRead))
+		case concurrency.PessimisticAfterFailedOptimisticEval:
+			log.VEventf(ctx, 2, "pessimistic read after failed optimistic completed: keys=%d bytes=%d", int64(keysRead), int64(bytesRead))
+			r.store.metrics.ReplicaReadBatchPessimisticAfterFailedOptimisticEvalBytes.Inc(int64(bytesRead))
+		}
+
 		log.Event(ctx, "read completed")
 	}
 	return br, nil, nil, pErr
@@ -343,9 +401,13 @@ func (r *Replica) canDropLatchesBeforeEval(
 		}
 	}
 	if len(intents) > 0 {
-		return false /* ok */, false /* stillNeedsIntentInterleaving */, maybeAttachLease(
+		lease := maybeAttachLease(
 			kvpb.NewError(&kvpb.LockConflictError{Locks: roachpb.AsLocks(intents)}), &st.Lease,
 		)
+		if _, ok := lease.GetDetail().(*kvpb.InvalidLeaseError); ok {
+			r.store.Metrics().FollowerReadsEmptyLeaseCounter.Inc(1)
+		}
+		return false /* ok */, false /* stillNeedsIntentInterleaving */, lease
 	}
 	// If there were no conflicts, then the request can drop its latches and
 	// proceed with evaluation.
@@ -656,4 +718,76 @@ func getBatchResponseReadStats(br *kvpb.BatchResponse) (float64, float64) {
 		}
 	}
 	return keys, bytes
+}
+
+// executeLightweightCoordinationBatch is a specialized execution path for
+// coordination commands like EstablishResolvedTimestamp that don't actually
+// read data but need basic concurrency control and timestamp cache updates.
+// This bypasses most of the heavy read-only infrastructure.
+func (r *Replica) executeLightweightCoordinationBatch(
+	ctx context.Context, ba *kvpb.BatchRequest, g *concurrency.Guard,
+) (
+	br *kvpb.BatchResponse,
+	_ *concurrency.Guard,
+	_ *kvadmission.StoreWriteBytes,
+	pErr *kvpb.Error,
+) {
+	// Verify that the batch can be executed.
+	st, err := r.checkExecutionCanProceedBeforeStorageSnapshot(ctx, ba, g)
+	if err != nil {
+		return nil, g, nil, kvpb.NewError(err)
+	}
+
+	// Create a minimal evaluation context without the heavy machinery
+	rec := NewReplicaEvalContext(ctx, r, g.LatchSpans(), false /* requiresClosedTS */, ba.AdmissionHeader)
+	defer rec.Release()
+
+	// We don't need a storage reader for coordination commands, but the
+	// evaluateBatch function expects one. Use a minimal reader.
+	rw := r.store.TODOEngine().NewReadOnly(storage.StandardDurability)
+	defer rw.Close()
+
+	// Skip all the heavy read-only infrastructure:
+	// - No uncertainty interval computation
+	// - No engine state pinning
+	// - No lock table scanning
+	// - No memory accounting setup
+	// - No server-side retry logic
+
+	log.Event(ctx, "executing lightweight coordination batch")
+
+	// Evaluate the batch directly without retries or complex error handling
+	br, result, pErr := evaluateBatch(
+		ctx, kvserverbase.CmdIDKey(""), rw, rec, nil /* ms */, ba, g,
+		&st, uncertainty.Interval{}, readOnlyDefault, false, /* omitInRangefeeds */
+	)
+
+	if pErr != nil {
+		log.VErrEventf(ctx, 3, "%v", pErr.String())
+		pErr = maybeAttachLease(pErr, &st.Lease)
+		if _, ok := pErr.GetDetail().(*kvpb.InvalidLeaseError); ok {
+			r.store.Metrics().FollowerReadsEmptyLeaseCounter.Inc(1)
+			pErr = nil
+		}
+		return nil, g, nil, pErr
+	}
+
+	// Handle minimal local side effects - coordination commands shouldn't
+	// have complex side effects like intent resolution
+	if !result.Local.IsZero() {
+		// Only allow simple metrics and similar lightweight side effects
+		if result.Local.AcquiredLocks != nil ||
+			len(result.Local.DetachEncounteredIntents()) > 0 ||
+			len(result.Local.DetachMissingLocks()) > 0 {
+			log.Fatalf(ctx, "unexpected side effects in coordination command: %+v", result.Local)
+		}
+	}
+
+	// Update timestamp cache and drop latches - this is the main purpose
+	// of coordination commands like EstablishResolvedTimestamp
+	r.updateTimestampCacheAndDropLatches(ctx, g, ba, br, nil /* pErr */, st)
+	g = nil
+
+	log.Event(ctx, "coordination command completed")
+	return br, nil, nil, nil
 }

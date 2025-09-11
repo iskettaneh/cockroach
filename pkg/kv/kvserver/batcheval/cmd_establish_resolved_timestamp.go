@@ -7,33 +7,40 @@ package batcheval
 
 import (
 	"context"
+	"time"
 
 	"github.com/cockroachdb/cockroach/pkg/kv/kvpb"
 	"github.com/cockroachdb/cockroach/pkg/kv/kvserver/batcheval/result"
+	"github.com/cockroachdb/cockroach/pkg/kv/kvserver/lockspanset"
+	"github.com/cockroachdb/cockroach/pkg/kv/kvserver/spanset"
 	"github.com/cockroachdb/cockroach/pkg/storage"
 )
 
-func init() {
-	RegisterReadOnlyCommand(kvpb.EstablishResolvedTimestamp, DefaultDeclareKeys, EstablishResolvedTimestamp)
+// declareKeysEstablishResolvedTimestamp declares the minimal key spans needed
+// for EstablishResolvedTimestamp, which is a lightweight coordination command.
+func declareKeysEstablishResolvedTimestamp(
+	rs ImmutableRangeState,
+	header *kvpb.Header,
+	req kvpb.Request,
+	latchSpans *spanset.SpanSet,
+	lockSpans *lockspanset.LockSpanSet,
+	maxOffset time.Duration,
+) error {
+	// We need to grab latches over the specified span to ensure proper
+	// concurrency control and ordering with other operations.
+	// Use NonMVCC latches since this is purely a coordination operation.
+	latchSpans.AddNonMVCC(spanset.SpanReadOnly, req.Header().Span())
+
+	// Don't declare lock spans - EstablishResolvedTimestamp doesn't read data
+	// so it can't conflict with intents. This avoids unnecessary lock table
+	// scanning and wait queue management.
+
+	return nil
 }
 
-// func declareKeysEstablishResolvedTimestamp(
-// 	rs ImmutableRangeState,
-// 	header *kvpb.Header,
-// 	req kvpb.Request,
-// 	latchSpans *spanset.SpanSet,
-// 	lockSpans *lockspanset.LockSpanSet,
-// 	maxOffset time.Duration,
-// ) error {
-// 	// We need to grab latches over the specified span to ensure proper
-// 	// concurrency control, as mentioned in the RFC.
-// 	latchSpans.AddNonMVCC(spanset.SpanReadOnly, req.Header().Span())
-
-// 	// Declare lock spans to ensure we can check the lock table.
-// 	lockSpans.Add(lock.Intent, req.Header().Span())
-
-// 	return nil
-// }
+func init() {
+	RegisterReadOnlyCommand(kvpb.EstablishResolvedTimestamp, declareKeysEstablishResolvedTimestamp, EstablishResolvedTimestamp)
+}
 
 // EstablishResolvedTimestamp is used by followers to request that the leaseholder
 // establish a resolved timestamp for consistent follower reads. This implements

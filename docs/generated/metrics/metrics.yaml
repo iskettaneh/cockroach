@@ -3244,6 +3244,18 @@ layers:
       unit: COUNT
       aggregation: AVG
       derivative: NON_NEGATIVE_DERIVATIVE
+    - name: distsender.rpc.establishresolvedtimestamp.sent
+      exported_name: distsender_rpc_establishresolvedtimestamp_sent
+      description: |-
+        Number of EstablishResolvedTimestamp requests processed.
+
+        This counts the requests in batches handed to DistSender, not the RPCs
+        sent to individual Ranges as a result.
+      y_axis_label: RPCs
+      type: COUNTER
+      unit: COUNT
+      aggregation: AVG
+      derivative: NON_NEGATIVE_DERIVATIVE
     - name: distsender.rpc.excise.sent
       exported_name: distsender_rpc_excise_sent
       description: |-
@@ -3384,6 +3396,14 @@ layers:
         This counts the requests in batches handed to DistSender, not the RPCs
         sent to individual Ranges as a result.
       y_axis_label: RPCs
+      type: COUNTER
+      unit: COUNT
+      aggregation: AVG
+      derivative: NON_NEGATIVE_DERIVATIVE
+    - name: distsender.rpc.nearest_policy_cross_zone
+      exported_name: distsender_rpc_nearest_policy_cross_zone
+      description: Number of requests with NEAREST routing policy that were sent outside the local zone
+      y_axis_label: Requests
       type: COUNTER
       unit: COUNT
       aggregation: AVG
@@ -12275,6 +12295,22 @@ layers:
       unit: COUNT
       aggregation: AVG
       derivative: NON_NEGATIVE_DERIVATIVE
+    - name: follower_reads.wait_sleep_count
+      exported_name: follower_reads_wait_sleep_count
+      description: Number of times we slept 1ms while waiting for lease applied index during follower reads
+      y_axis_label: Sleep Events
+      type: COUNTER
+      unit: COUNT
+      aggregation: AVG
+      derivative: NON_NEGATIVE_DERIVATIVE
+    - name: follower_reads.wait_timeout_count
+      exported_name: follower_reads_wait_timeout_count
+      description: Number of times we exhausted max wait time while waiting for lease applied index during follower reads
+      y_axis_label: Timeout Events
+      type: COUNTER
+      unit: COUNT
+      aggregation: AVG
+      derivative: NON_NEGATIVE_DERIVATIVE
     - name: gcbytesage
       exported_name: gcbytesage
       description: Cumulative age of non-live data
@@ -13095,6 +13131,14 @@ layers:
       unit: COUNT
       aggregation: AVG
       derivative: NON_NEGATIVE_DERIVATIVE
+    - name: kv.replica_read_batch_evaluate.forced_optimistic_eval.count
+      exported_name: kv_replica_read_batch_evaluate_forced_optimistic_eval_count
+      description: Number of read batches that were forced to use optimistic evaluation.
+      y_axis_label: Batches
+      type: COUNTER
+      unit: COUNT
+      aggregation: AVG
+      derivative: NON_NEGATIVE_DERIVATIVE
     - name: kv.replica_read_batch_evaluate.latency
       exported_name: kv_replica_read_batch_evaluate_latency
       description: |-
@@ -13106,6 +13150,46 @@ layers:
       unit: NANOSECONDS
       aggregation: AVG
       derivative: NONE
+    - name: kv.replica_read_batch_evaluate.optimistic_eval.bytes
+      exported_name: kv_replica_read_batch_evaluate_optimistic_eval_bytes
+      description: Total bytes returned by read batches that completed with OptimisticEval.
+      y_axis_label: Bytes
+      type: COUNTER
+      unit: BYTES
+      aggregation: AVG
+      derivative: NON_NEGATIVE_DERIVATIVE
+    - name: kv.replica_read_batch_evaluate.optimistic_eval.count
+      exported_name: kv_replica_read_batch_evaluate_optimistic_eval_count
+      description: Number of read batches that were forced to use optimistic evaluation for skip locked.
+      y_axis_label: Batches
+      type: COUNTER
+      unit: COUNT
+      aggregation: AVG
+      derivative: NON_NEGATIVE_DERIVATIVE
+    - name: kv.replica_read_batch_evaluate.optimistic_eval.count_for_limit
+      exported_name: kv_replica_read_batch_evaluate_optimistic_eval_count_for_limit
+      description: Number of read batches that were forced to use optimistic evaluation for limit.
+      y_axis_label: Batches
+      type: COUNTER
+      unit: COUNT
+      aggregation: AVG
+      derivative: NON_NEGATIVE_DERIVATIVE
+    - name: kv.replica_read_batch_evaluate.pessimistic_after_failed_optimistic_eval.bytes
+      exported_name: kv_replica_read_batch_evaluate_pessimistic_after_failed_optimistic_eval_bytes
+      description: Total bytes returned by read batches that completed with PessimisticAfterFailedOptimisticEval.
+      y_axis_label: Bytes
+      type: COUNTER
+      unit: BYTES
+      aggregation: AVG
+      derivative: NON_NEGATIVE_DERIVATIVE
+    - name: kv.replica_read_batch_evaluate.pessimistic_eval.bytes
+      exported_name: kv_replica_read_batch_evaluate_pessimistic_eval_bytes
+      description: Total bytes returned by read batches that completed with PessimisticEval.
+      y_axis_label: Bytes
+      type: COUNTER
+      unit: BYTES
+      aggregation: AVG
+      derivative: NON_NEGATIVE_DERIVATIVE
     - name: kv.replica_read_batch_evaluate.without_interleaving_iter
       exported_name: kv_replica_read_batch_evaluate_without_interleaving_iter
       description: Number of read-only batches evaluated without an intent interleaving iter.
@@ -16088,6 +16172,14 @@ layers:
     - name: rpc.method.endtxn.recv
       exported_name: rpc_method_endtxn_recv
       description: Number of EndTxn requests processed
+      y_axis_label: RPCs
+      type: COUNTER
+      unit: COUNT
+      aggregation: AVG
+      derivative: NON_NEGATIVE_DERIVATIVE
+    - name: rpc.method.establishresolvedtimestamp.recv
+      exported_name: rpc_method_establishresolvedtimestamp_recv
+      description: Number of EstablishResolvedTimestamp requests processed
       y_axis_label: RPCs
       type: COUNTER
       unit: COUNT

@@ -165,7 +165,7 @@ func (sd *StoreDetailMu) status(
 	//      |                                                          |
 	//      |  +-------------------------+                             |
 	//      +->|  storeStatusUnavailable |-----------------------------+
-	//         +-------------------------+    Successful liveness
+	//         +----------LeaseAppliedIndex github_com_cockroachdb_cockroach_pkg_kv_kvpb---------------+    Successful liveness
 	//                                        heartbeat
 	//
 

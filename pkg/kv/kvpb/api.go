@@ -2109,7 +2109,9 @@ func (*QueryResolvedTimestampRequest) flags() flag {
 	return isRead | isRange | requiresClosedTSOlderThanStorageSnapshot
 }
 func (*EstablishResolvedTimestampRequest) flags() flag {
-	return isRead | isRange | isTxn | updatesTSCache
+	// return isRead | isRange | isTxn | updatesTSCache
+	return isRead | isRange | updatesTSCache | isTxn
+
 }
 func (r *BarrierRequest) flags() flag {
 	flags := isWrite | isRange | isAlone

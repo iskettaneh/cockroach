@@ -96,6 +96,7 @@ type kv struct {
 	txnQoS                               string
 	prepareReadOnly                      bool
 	writesUseSelect1                     bool
+	printStatements                      bool
 }
 
 func init() {
@@ -135,6 +136,7 @@ var kvMeta = workload.Meta{
 			`timeout`:                     {RuntimeOnly: true},
 			`prepare-read-only`:           {RuntimeOnly: true},
 			`sel1-writes`:                 {RuntimeOnly: true},
+			`print-statements`:            {RuntimeOnly: true},
 		}
 		g.flags.IntVar(&g.batchSize, `batch`, 1,
 			`Number of blocks to read/insert in a single SQL statement.`)
@@ -191,6 +193,8 @@ var kvMeta = workload.Meta{
 		g.flags.BoolVar(&g.prepareReadOnly, `prepare-read-only`, false, `Prepare and perform only read statements.`)
 		g.flags.BoolVar(&g.writesUseSelect1, `sel1-writes`, false,
 			`Use SELECT 1 as the first statement of transactional writes with a sleep after SELECT 1.`)
+		g.flags.BoolVar(&g.printStatements, `print-statements`, false,
+			`Print every SQL statement before executing it.`)
 		g.flags.BoolVar(&g.longRunningTxn, `long-running-txn`, false,
 			`Use a long-running transaction for running lock contention scenarios. If run with `+
 				`--sfu-writes or --sel1-writes, it will use those writes in the long-running transaction; `+
@@ -605,6 +609,16 @@ type kvOp struct {
 	numEmptyResults  *atomic.Int64
 }
 
+func (o *kvOp) printStatement(stmt string, args ...interface{}) {
+	if o.config.printStatements {
+		if len(args) == 0 {
+			fmt.Printf("[KV] Executing: %s\n", stmt)
+		} else {
+			fmt.Printf("[KV] Executing: %s with args: %v\n", stmt, args)
+		}
+	}
+}
+
 func (o *kvOp) run(ctx context.Context) (retErr error) {
 	if o.config.timeout > 0 {
 		var cancel func()
@@ -613,6 +627,7 @@ func (o *kvOp) run(ctx context.Context) (retErr error) {
 	}
 
 	if o.qosStmt != nil {
+		o.printStatement(fmt.Sprintf("SET default_transaction_quality_of_service = %s", o.config.txnQoS))
 		_, err := o.qosStmt.Exec(ctx)
 		if err != nil {
 			return err
@@ -627,11 +642,24 @@ func (o *kvOp) run(ctx context.Context) (retErr error) {
 		start := timeutil.Now()
 		readStmt := o.readStmt
 		opName := `read`
+		var stmtStr string
+		if o.config.enum {
+			stmtStr = "SELECT k, v, e FROM kv WHERE k IN (...)"
+		} else {
+			stmtStr = "SELECT k, v FROM kv WHERE k IN (...)"
+		}
 
 		if o.g.rand().Intn(100) < o.config.followerReadPercent {
 			readStmt = o.followerReadStmt
 			opName = `follower-read`
+			if o.config.enum {
+				stmtStr = "SELECT k, v, e FROM kv AS OF SYSTEM TIME follower_read_timestamp() WHERE k IN (...)"
+			} else {
+				stmtStr = "SELECT k, v FROM kv AS OF SYSTEM TIME follower_read_timestamp() WHERE k IN (...)"
+			}
 		}
+
+		o.printStatement(stmtStr, args...)
 		rows, err := readStmt.Query(ctx, args...)
 		if err != nil {
 			return err
@@ -656,6 +684,7 @@ func (o *kvOp) run(ctx context.Context) (retErr error) {
 		for i := 0; i < o.config.batchSize; i++ {
 			args[i] = o.g.readKey()
 		}
+		o.printStatement("DELETE FROM kv WHERE k IN (...)", args...)
 		_, err := o.delStmt.Exec(ctx, args...)
 		if err != nil {
 			return err
@@ -670,8 +699,10 @@ func (o *kvOp) run(ctx context.Context) (retErr error) {
 		var err error
 		if o.config.spanLimit > 0 {
 			arg := o.g.readKey()
+			o.printStatement(fmt.Sprintf("SELECT count(v) FROM [SELECT v FROM kv WHERE k >= $1 ORDER BY k LIMIT %d]", o.config.spanLimit), arg)
 			_, err = o.spanStmt.Exec(ctx, arg)
 		} else {
+			o.printStatement("SELECT count(v) FROM [SELECT v FROM kv]")
 			_, err = o.spanStmt.Exec(ctx)
 		}
 		if err != nil {
@@ -722,6 +753,7 @@ func (o *kvOp) run(ctx context.Context) (retErr error) {
 		for i := 0; i < iterations; i++ {
 			writeArgs, sfuArgs := makeWriteBatchArgs()
 			if o.config.writesUseSelect1 {
+				o.printStatement("SELECT 1")
 				rows, err := o.sel1Stmt.QueryTx(ctx, tx)
 				if err != nil {
 					return err
@@ -732,6 +764,7 @@ func (o *kvOp) run(ctx context.Context) (retErr error) {
 				}
 			}
 			if o.config.writesUseSelectForUpdate {
+				o.printStatement("SELECT k, v FROM kv WHERE k IN (...) FOR UPDATE", sfuArgs...)
 				rows, err := o.sfuStmt.QueryTx(ctx, tx, sfuArgs...)
 				if err != nil {
 					return err
@@ -744,6 +777,7 @@ func (o *kvOp) run(ctx context.Context) (retErr error) {
 			}
 			// Simulate a transaction that does other work between the sel1 / SFU and write.
 			time.Sleep(o.config.sfuDelay)
+			o.printStatement("UPSERT INTO kv (k, v) VALUES (...)", writeArgs...)
 			if _, err = o.writeStmt.ExecTx(ctx, tx, writeArgs...); err != nil {
 				// Multiple write transactions can contend and encounter
 				// a serialization failure. We swallow such an error.
@@ -755,6 +789,7 @@ func (o *kvOp) run(ctx context.Context) (retErr error) {
 		}
 	} else {
 		writeArgs, _ := makeWriteBatchArgs()
+		o.printStatement("UPSERT INTO kv (k, v) VALUES (...)", writeArgs...)
 		_, err = o.writeStmt.Exec(ctx, writeArgs...)
 	}
 	if err != nil {

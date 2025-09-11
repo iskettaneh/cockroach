@@ -538,6 +538,25 @@ var (
 		Unit:        metric.Unit_COUNT,
 	}
 
+	metaFollowerReadsWaitSleepCount = metric.Metadata{
+		Name:        "follower_reads.wait_sleep_count",
+		Help:        "Number of times we slept 1ms while waiting for lease applied index during follower reads",
+		Measurement: "Sleep Events",
+		Unit:        metric.Unit_COUNT,
+	}
+
+	metaFollowerReadsWaitTimeoutCount = metric.Metadata{
+		Name:        "follower_reads.wait_timeout_count",
+		Help:        "Number of times we exhausted max wait time while waiting for lease applied index during follower reads",
+		Measurement: "Timeout Events",
+		Unit:        metric.Unit_COUNT,
+	}
+	metaFollowerReadsEmptyLeaseCount = metric.Metadata{
+		Name:        "follower_reads.empty_lease_count",
+		Help:        "Number of follower reads that encountered a lock conflict with an empty lease",
+		Measurement: "Empty Lease Events",
+		Unit:        metric.Unit_COUNT,
+	}
 	// Server-side transaction metrics.
 	metaCommitWaitBeforeCommitTriggerCount = metric.Metadata{
 		Name: "txn.commit_waits.before_commit_trigger",
@@ -2759,6 +2778,42 @@ Note that the measurement does not include the duration for replicating the eval
 		Measurement: "Batches",
 		Unit:        metric.Unit_COUNT,
 	}
+	metaReplicaReadBatchOptimisticEvalBytes = metric.Metadata{
+		Name:        "kv.replica_read_batch_evaluate.optimistic_eval.bytes",
+		Help:        `Total bytes returned by read batches that completed with OptimisticEval.`,
+		Measurement: "Bytes",
+		Unit:        metric.Unit_BYTES,
+	}
+	metaReplicaReadBatchPessimisticEvalBytes = metric.Metadata{
+		Name:        "kv.replica_read_batch_evaluate.pessimistic_eval.bytes",
+		Help:        `Total bytes returned by read batches that completed with PessimisticEval.`,
+		Measurement: "Bytes",
+		Unit:        metric.Unit_BYTES,
+	}
+	metaReplicaReadBatchPessimisticAfterFailedOptimisticEvalBytes = metric.Metadata{
+		Name:        "kv.replica_read_batch_evaluate.pessimistic_after_failed_optimistic_eval.bytes",
+		Help:        `Total bytes returned by read batches that completed with PessimisticAfterFailedOptimisticEval.`,
+		Measurement: "Bytes",
+		Unit:        metric.Unit_BYTES,
+	}
+	metaReplicaReadBatchForcedOptimisticEvalCount = metric.Metadata{
+		Name:        "kv.replica_read_batch_evaluate.forced_optimistic_eval.count",
+		Help:        `Number of read batches that were forced to use optimistic evaluation.`,
+		Measurement: "Batches",
+		Unit:        metric.Unit_COUNT,
+	}
+	metaReplicaReadBatchOptimisticEvalCountForLimit = metric.Metadata{
+		Name:        "kv.replica_read_batch_evaluate.optimistic_eval.count_for_limit",
+		Help:        `Number of read batches that were forced to use optimistic evaluation for limit.`,
+		Measurement: "Batches",
+		Unit:        metric.Unit_COUNT,
+	}
+	metaReplicaReadBatchOptimisticEvalCount = metric.Metadata{
+		Name:        "kv.replica_read_batch_evaluate.optimistic_eval.count",
+		Help:        `Number of read batches that were forced to use optimistic evaluation for skip locked.`,
+		Measurement: "Batches",
+		Unit:        metric.Unit_COUNT,
+	}
 	metaDiskReadCount = metric.Metadata{
 		Name:        "storage.disk.read.count",
 		Unit:        metric.Unit_COUNT,
@@ -2929,7 +2984,10 @@ type StoreMetrics struct {
 	RecentReplicaQueriesPerSecond  *metric.ManualWindowHistogram
 
 	// Follower read metrics.
-	FollowerReadsCount *metric.Counter
+	FollowerReadsCount             *metric.Counter
+	FollowerReadsWaitSleepCount    *metric.Counter
+	FollowerReadsWaitTimeoutCount  *metric.Counter
+	FollowerReadsEmptyLeaseCounter *metric.Counter
 
 	// Server-side transaction metrics.
 	CommitWaitsBeforeCommitTrigger                           *metric.Counter
@@ -3280,6 +3338,14 @@ type StoreMetrics struct {
 
 	ReplicaReadBatchDroppedLatchesBeforeEval *metric.Counter
 	ReplicaReadBatchWithoutInterleavingIter  *metric.Counter
+
+	// Metrics tracking bytes returned by read batches based on evaluation kind
+	ReplicaReadBatchOptimisticEvalBytes                       *metric.Counter
+	ReplicaReadBatchPessimisticEvalBytes                      *metric.Counter
+	ReplicaReadBatchPessimisticAfterFailedOptimisticEvalBytes *metric.Counter
+	ReplicaReadBatchForcedOptimisticEvalCount                 *metric.Counter
+	ReplicaReadBatchOptimisticEvalCount                       *metric.Counter
+	ReplicaReadBatchOptimisticEvalCountForLimit               *metric.Counter
 
 	SplitsWithEstimatedStats     *metric.Counter
 	SplitEstimatedTotalBytesDiff *metric.Counter
@@ -3662,7 +3728,10 @@ func newStoreMetrics(histogramWindow time.Duration) *StoreMetrics {
 		),
 
 		// Follower reads metrics.
-		FollowerReadsCount: metric.NewCounter(metaFollowerReadsCount),
+		FollowerReadsCount:             metric.NewCounter(metaFollowerReadsCount),
+		FollowerReadsWaitSleepCount:    metric.NewCounter(metaFollowerReadsWaitSleepCount),
+		FollowerReadsWaitTimeoutCount:  metric.NewCounter(metaFollowerReadsWaitTimeoutCount),
+		FollowerReadsEmptyLeaseCounter: metric.NewCounter(metaFollowerReadsEmptyLeaseCount),
 
 		// Server-side transaction metrics.
 		CommitWaitsBeforeCommitTrigger:                           metric.NewCounter(metaCommitWaitBeforeCommitTriggerCount),
@@ -4079,6 +4148,13 @@ func newStoreMetrics(histogramWindow time.Duration) *StoreMetrics {
 
 		ReplicaReadBatchDroppedLatchesBeforeEval: metric.NewCounter(metaReplicaReadBatchDroppedLatchesBeforeEval),
 		ReplicaReadBatchWithoutInterleavingIter:  metric.NewCounter(metaReplicaReadBatchWithoutInterleavingIter),
+
+		ReplicaReadBatchOptimisticEvalBytes:                       metric.NewCounter(metaReplicaReadBatchOptimisticEvalBytes),
+		ReplicaReadBatchPessimisticEvalBytes:                      metric.NewCounter(metaReplicaReadBatchPessimisticEvalBytes),
+		ReplicaReadBatchPessimisticAfterFailedOptimisticEvalBytes: metric.NewCounter(metaReplicaReadBatchPessimisticAfterFailedOptimisticEvalBytes),
+		ReplicaReadBatchForcedOptimisticEvalCount:                 metric.NewCounter(metaReplicaReadBatchForcedOptimisticEvalCount),
+		ReplicaReadBatchOptimisticEvalCount:                       metric.NewCounter(metaReplicaReadBatchOptimisticEvalCount),
+		ReplicaReadBatchOptimisticEvalCountForLimit:               metric.NewCounter(metaReplicaReadBatchOptimisticEvalCountForLimit),
 
 		DiskReadBytes:              metric.NewCounter(metaDiskReadBytes),
 		DiskReadCount:              metric.NewCounter(metaDiskReadCount),

@@ -328,6 +328,12 @@ This counts the number of ranges with an active rangefeed that are performing ca
 		Measurement: "Requests",
 		Unit:        metric.Unit_COUNT,
 	}
+	metaDistSenderNearestPolicyCrossZoneCount = metric.Metadata{
+		Name:        "distsender.rpc.nearest_policy_cross_zone",
+		Help:        "Number of requests with NEAREST routing policy that were sent outside the local zone",
+		Measurement: "Requests",
+		Unit:        metric.Unit_COUNT,
+	}
 )
 
 // metamorphicRouteToLeaseholderFirst is used to control the behavior of the
@@ -447,6 +453,7 @@ type DistSenderMetrics struct {
 	ProxyForwardErrCount               *metric.Counter
 	MethodCounts                       [kvpb.NumMethods]*metric.Counter
 	ErrCounts                          [kvpb.NumErrors]*metric.Counter
+	NearestPolicyCrossZoneCount        *metric.Counter
 	CircuitBreaker                     DistSenderCircuitBreakerMetrics
 	DistSenderRangeFeedMetrics
 }
@@ -496,6 +503,7 @@ func MakeDistSenderMetrics(locality roachpb.Locality) DistSenderMetrics {
 		RangeLookups:                       metric.NewCounter(metaDistSenderRangeLookups),
 		SlowRPCs:                           metric.NewGauge(metaDistSenderSlowRPCs),
 		SlowReplicaRPCs:                    metric.NewCounter(metaDistSenderSlowReplicaRPCs),
+		NearestPolicyCrossZoneCount:        metric.NewCounter(metaDistSenderNearestPolicyCrossZoneCount),
 		CircuitBreaker:                     makeDistSenderCircuitBreakerMetrics(),
 		ProxySentCount:                     metric.NewCounter(metaDistSenderProxySentCount),
 		ProxyErrCount:                      metric.NewCounter(metaDistSenderProxyErrCount),
@@ -701,7 +709,10 @@ type DistSender struct {
 	// batchInterceptor is set for tenants; when set, information about all
 	// BatchRequests and BatchResponses are passed through this interceptor, which
 	// can potentially throttle requests.
-	kvInterceptor multitenant.TenantSideKVInterceptor
+
+	// localityComparisonLogLimiter rate limits the locality comparison logging to once per second.
+	localityComparisonLogLimiter log.EveryN
+	kvInterceptor                multitenant.TenantSideKVInterceptor
 
 	// disableFirstRangeUpdates disables updates of the first range via
 	// gossip. Used by tests which want finer control of the contents of the
@@ -810,16 +821,17 @@ func NewDistSender(cfg DistSenderConfig) *DistSender {
 		}
 	}
 	ds := &DistSender{
-		st:            cfg.Settings,
-		stopper:       cfg.Stopper,
-		clock:         cfg.Clock,
-		nodeDescs:     cfg.NodeDescs,
-		nodeIDGetter:  nodeIDGetter,
-		metrics:       MakeDistSenderMetrics(cfg.Locality),
-		kvInterceptor: cfg.KVInterceptor,
-		locality:      cfg.Locality,
-		healthFunc:    cfg.HealthFunc,
-		latencyFunc:   cfg.LatencyFunc,
+		st:                           cfg.Settings,
+		stopper:                      cfg.Stopper,
+		clock:                        cfg.Clock,
+		nodeDescs:                    cfg.NodeDescs,
+		nodeIDGetter:                 nodeIDGetter,
+		metrics:                      MakeDistSenderMetrics(cfg.Locality),
+		kvInterceptor:                cfg.KVInterceptor,
+		locality:                     cfg.Locality,
+		healthFunc:                   cfg.HealthFunc,
+		latencyFunc:                  cfg.LatencyFunc,
+		localityComparisonLogLimiter: log.Every(500 * time.Millisecond),
 	}
 	if ds.st == nil {
 		ds.st = cluster.MakeTestingClusterSettings()
@@ -1098,7 +1110,7 @@ func (ds *DistSender) initAndVerifyBatch(ctx context.Context, ba *kvpb.BatchRequ
 			foundReverse = true
 
 		case *kvpb.QueryIntentRequest, *kvpb.EndTxnRequest,
-			*kvpb.GetRequest, *kvpb.ResolveIntentRequest, *kvpb.DeleteRequest, *kvpb.PutRequest:
+			*kvpb.GetRequest, *kvpb.ResolveIntentRequest, *kvpb.DeleteRequest, *kvpb.PutRequest, *kvpb.EstablishResolvedTimestampRequest:
 			// Accepted point requests that can be in batches with limit. No
 			// need to set disallowedReq.
 
@@ -2729,6 +2741,14 @@ func (ds *DistSender) sendToReplicas(
 		}
 
 		comparisonResult := ds.getLocalityComparison(ctx, ds.nodeIDGetter(), ba.Replica.NodeID)
+		if comparisonResult != roachpb.LocalityComparisonType_SAME_REGION_SAME_ZONE && ba.RoutingPolicy == kvpb.RoutingPolicy_NEAREST {
+			// Increment the requests that weren't served locally despite having the NEAREST routing policy.
+			ds.metrics.NearestPolicyCrossZoneCount.Inc(1)
+		}
+		// if ds.localityComparisonLogLimiter.ShouldLog() {
+		// 	log.Infof(ctx, "sending a batch with the following info: %+v", ba)
+		// 	log.Infof(ctx, "getting locality comparison for dist sender node %d and replica node %d showed comparisonResult: %+v", ds.nodeIDGetter(), ba.Replica.NodeID, comparisonResult)
+		// }
 		ds.metrics.updateCrossLocalityMetricsOnReplicaAddressedBatchRequest(comparisonResult, int64(ba.Size()))
 
 		// Determine whether we should proxy this request through a follower to
@@ -2997,6 +3017,10 @@ func (ds *DistSender) sendToReplicas(
 					ambiguousError = br.Error.GoError()
 				}
 			case *kvpb.NotLeaseHolderError:
+				// Every 500ms, log the leaseholder error.
+				if ds.localityComparisonLogLimiter.ShouldLog() {
+					log.Infof(ctx, "IBRAHIM NotLeaseHolderError: %+v", tErr)
+				}
 				ds.metrics.NotLeaseHolderErrCount.Inc(1)
 				// Update the leaseholder in the range cache. Naively this would also
 				// happen when the next RPC comes back, but we don't want to wait out

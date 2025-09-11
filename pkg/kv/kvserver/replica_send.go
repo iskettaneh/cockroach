@@ -1172,6 +1172,7 @@ func (r *Replica) collectSpans(
 	// whether to actually do optimistic evaluation.
 	hasScans := false
 	numGets := 0
+	forceOptimisticEval := false
 
 	// For non-local, MVCC spans we annotate them with the request timestamp
 	// during declaration. This is the timestamp used during latch acquisitions.
@@ -1191,12 +1192,29 @@ func (r *Replica) collectSpans(
 			if err != nil {
 				return nil, nil, concurrency.PessimisticEval, err
 			}
+			// if inner.Method() == kvpb.EstablishResolvedTimestamp {
+			// 	forceOptimisticEval = true
+
+			// 	if !considerOptEval {
+			// 		r.store.metrics.ReplicaReadBatchOptimisticEvalCount.Inc(1)
+			// 	} else if !considerOptEvalForLimit {
+			// 		r.store.metrics.ReplicaReadBatchOptimisticEvalCountForLimit.Inc(1)
+			// 	}
+			// }
+
 			if considerOptEvalForLimit {
 				switch inner.(type) {
 				case *kvpb.ScanRequest, *kvpb.ReverseScanRequest:
 					hasScans = true
 				case *kvpb.GetRequest:
 					numGets++
+				case *kvpb.EstablishResolvedTimestampRequest:
+					mySpan := inner.Header().Span()
+					if mySpan.Key.Next().Equal(mySpan.EndKey) {
+						numGets++
+					} else {
+						hasScans = true
+					}
 				}
 			}
 		} else {
@@ -1255,6 +1273,12 @@ func (r *Replica) collectSpans(
 	if optEvalForSkipLocked || optEvalForLimit {
 		requestEvalKind = concurrency.OptimisticEval
 	}
+
+	if forceOptimisticEval && requestEvalKind == concurrency.OptimisticEval {
+		r.store.metrics.ReplicaReadBatchForcedOptimisticEvalCount.Inc(1)
+	}
+
+	//requestEvalKind = concurrency.PessimisticEval
 
 	return latchSpans, lockSpans, requestEvalKind, nil
 }

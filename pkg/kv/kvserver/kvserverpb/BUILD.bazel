@@ -25,6 +25,7 @@ go_library(
 proto_library(
     name = "kvserverpb_proto",
     srcs = [
+        "follower_lease_coordination.proto",
         "internal_raft.proto",
         "lease_status.proto",
         "proposer_kv.proto",

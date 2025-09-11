@@ -9,7 +9,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/cockroachdb/cockroach/pkg/kv"
 	"github.com/cockroachdb/cockroach/pkg/kv/kvbase"
 	"github.com/cockroachdb/cockroach/pkg/kv/kvpb"
 	"github.com/cockroachdb/cockroach/pkg/roachpb"
@@ -18,6 +17,7 @@ import (
 	"github.com/cockroachdb/cockroach/pkg/util/log"
 	"github.com/cockroachdb/cockroach/pkg/util/tracing"
 	"github.com/cockroachdb/cockroach/pkg/util/tracing/tracingpb"
+	"github.com/cockroachdb/errors"
 	"github.com/cockroachdb/redact"
 )
 
@@ -58,10 +58,13 @@ func BatchCanBeEvaluatedOnFollower(ctx context.Context, ba *kvpb.BatchRequest) b
 	// leaseholder.
 	tsFromServerClock := ba.Txn == nil && (ba.Timestamp.IsEmpty() || ba.TimestampFromServerClock != nil)
 	if tsFromServerClock {
+		// log.Infof(ctx, "BatchCanBeEvaluatedOnFollower: rejecting due to timestamp from server clock (txn: %v, timestamp: %s, from_server_clock: %v)",
+		// 	ba.Txn != nil, ba.Timestamp, ba.TimestampFromServerClock != nil)
 		return false
 	}
 	if len(ba.Requests) == 0 {
 		// No requests to evaluate.
+		// log.Infof(ctx, "BatchCanBeEvaluatedOnFollower: rejecting due to empty batch")
 		return false
 	}
 	// Each request in the batch needs to have clearly defined semantics when
@@ -75,7 +78,12 @@ func BatchCanBeEvaluatedOnFollower(ctx context.Context, ba *kvpb.BatchRequest) b
 			// cannot propose writes to Raft. The request also needs to be
 			// non-locking, because unreplicated locks are only held on the
 			// leaseholder.
-			if !kvpb.IsReadOnly(r) || kvpb.IsLocking(r) {
+			if !kvpb.IsReadOnly(r) {
+				// log.Infof(ctx, "BatchCanBeEvaluatedOnFollower: rejecting due to transactional request %s not being read-only", r.Method())
+				return false
+			}
+			if kvpb.IsLocking(r) {
+				// log.Infof(ctx, "BatchCanBeEvaluatedOnFollower: rejecting due to transactional request %s being locking", r.Method())
 				return false
 			}
 		case r.Method() == kvpb.Export:
@@ -90,9 +98,11 @@ func BatchCanBeEvaluatedOnFollower(ctx context.Context, ba *kvpb.BatchRequest) b
 				// with following reads allowed, will attempt to route all the export requests to
 				// the gateway node. This leads to one node doing all the work while the others sit
 				// idle. Return false to prevent follower reads for fingerprinting
+				// log.Infof(ctx, "BatchCanBeEvaluatedOnFollower: rejecting due to export request with fingerprinting")
 				return false
 			}
 		default:
+			// log.Infof(ctx, "BatchCanBeEvaluatedOnFollower: rejecting due to unsupported request method %s", r.Method())
 			return false
 		}
 	}
@@ -144,9 +154,12 @@ func (r *Replica) canServeFollowerRead(
 		// Check if consistent follower reads are enabled and try to coordinate
 		// with the leaseholder to establish a resolved timestamp.
 		if ConsistentFollowerReadsEnabled.Get(&r.store.cfg.Settings.SV) {
-			if r.tryConsistentFollowerRead(ctx, ba, desc, leaseholderNodeId) {
+			if err := r.tryConsistentFollowerRead(ctx, ba, desc, leaseholderNodeId); err == nil {
 				// Successfully established resolved timestamp and served the read
 				return true
+			} else {
+				r.store.Metrics().FollowerReadsEmptyLeaseCounter.Inc(1)
+				return false
 			}
 		}
 
@@ -209,45 +222,51 @@ func (r *Replica) tryConsistentFollowerRead(
 	ba *kvpb.BatchRequest,
 	desc *roachpb.RangeDescriptor,
 	leaseholderNodeId roachpb.NodeID,
-) bool {
+) error {
 	// Check if we're already processing an EstablishResolvedTimestamp request
 	// to prevent infinite recursion
 	if len(ba.Requests) > 0 {
 		for _, ru := range ba.Requests {
 			if _, ok := ru.GetInner().(*kvpb.EstablishResolvedTimestampRequest); ok {
 				// log.Infof(ctx, "IBRAHIM FALSE: already processing an EstablishResolvedTimestamp request")
-				return false
+				return errors.New("already processing an EstablishResolvedTimestamp request")
 			}
 		}
 	}
 
-	// Step 1: Find the leaseholder replica descriptor by iterating through all replicas
-	var leaseholderStoreID roachpb.StoreID
-	found := false
-	for _, replica := range desc.Replicas().Descriptors() {
-		if replica.NodeID == leaseholderNodeId {
-			leaseholderStoreID = replica.StoreID
-			found = true
-			break
-		}
-	}
-	if !found {
-		log.Eventf(ctx, "leaseholder store not found in range descriptor")
-		// log.Infof(ctx, "IBRAHIM FALSE: leaseholder store not found in range descriptor")
-		return false
-	}
+	// // Step 1: Find the leaseholder replica descriptor by iterating through all replicas
+	// var leaseholderStoreID roachpb.StoreID
+	// found := false
+	// for _, replica := range desc.Replicas().Descriptors() {
+	// 	if replica.NodeID == leaseholderNodeId {
+	// 		leaseholderStoreID = replica.StoreID
+	// 		found = true
+	// 		break
+	// 	}
+	// }
+	// if !found {
+	// 	log.Eventf(ctx, "leaseholder store not found in range descriptor")
+	// 	// log.Infof(ctx, "IBRAHIM FALSE: leaseholder store not found in range descriptor")
+	// 	return false
+	// }
 
-	// Check if we're trying to send to ourselves - this could cause infinite recursion
-	if leaseholderStoreID == r.store.StoreID() {
-		log.Eventf(ctx, "leaseholder is our own store, skipping EstablishResolvedTimestamp")
-		// log.Infof(ctx, "IBRAHIM FALSE: leaseholder is our own store, skipping EstablishResolvedTimestamp")
-		return false
-	}
+	// // Check if we're trying to send to ourselves - this could cause infinite recursion
+	// if leaseholderStoreID == r.store.StoreID() {
+	// 	log.Eventf(ctx, "leaseholder is our own store, skipping EstablishResolvedTimestamp")
+	// 	// log.Infof(ctx, "IBRAHIM FALSE: leaseholder is our own store, skipping EstablishResolvedTimestamp")
+	// 	return false
+	// }
 
 	////
 
-	// Create separate EstablishResolvedTimestamp for each request
-	var establishReqs []*kvpb.EstablishResolvedTimestampRequest
+	establishBa := &kvpb.BatchRequest{}
+	establishBa.Header.Timestamp = ba.Header.Timestamp
+	establishBa.Header.RangeID = ba.Header.RangeID
+	establishBa.Header.MaxSpanRequestKeys = ba.Header.MaxSpanRequestKeys
+	establishBa.Header.TargetBytes = ba.Header.TargetBytes
+
+	// // Create separate EstablishResolvedTimestamp for each request
+	// var establishReqs []*kvpb.EstablishResolvedTimestampRequest
 
 	for _, ru := range ba.Requests {
 		req := ru.GetInner()
@@ -265,22 +284,28 @@ func (r *Replica) tryConsistentFollowerRead(
 				Key:    establishSpan.Key,
 				EndKey: establishSpan.EndKey,
 			},
-			Txn:       ba.Txn,
-			Timestamp: ba.Timestamp,
-			Span:      establishSpan,
 		}
-		establishReqs = append(establishReqs, establishReq)
+		establishBa.Add(establishReq)
+		// establishReqs = append(establishReqs, establishReq)
 	}
 
 	// Add all establish requests to the batch
-	establishBa := &kvpb.BatchRequest{
-		Header: kvpb.Header{
-			RangeID: desc.RangeID,
-		},
-	}
-	for _, req := range establishReqs {
-		establishBa.Add(req)
-	}
+
+	// establishBa.Header.Timestamp = ba.Timestamp
+	// establishBa.Header.MaxSpanRequestKeys = ba.MaxSpanRequestKeys
+	// establishBa.Header.TargetBytes = ba.TargetBytes
+	// if ba.MaxSpanRequestKeys > 0 {
+	// 	establishBa.Header.MaxSpanRequestKeys = ba.MaxSpanRequestKeys + 1000
+	// }
+
+	// if ba.MaxSpanRequestKeys > 0 {
+	// 	log.Infof(ctx, "IBRAHIM DEBUG: ba.MaxSpanRequestKeys = %d, establishBa.MaxSpanRequestKeys = %d",
+	// 		ba.MaxSpanRequestKeys, establishBa.MaxSpanRequestKeys)
+	// }
+
+	// for _, req := range establishReqs {
+	// 	establishBa.Add(req)
+	// }
 
 	////
 
@@ -313,19 +338,19 @@ func (r *Replica) tryConsistentFollowerRead(
 	// }
 
 	// Set transaction context if this is a transactional request
-	if ba.Txn != nil {
-		establishBa.Txn = ba.Txn
-	} else {
-		// For non-transactional requests, set the timestamp
-		establishBa.Header.Timestamp = ba.Timestamp
-	}
+	// if ba.Txn != nil {
+	// 	establishBa.Txn = ba.Txn
+	// } else {
+	// 	// For non-transactional requests, set the timestamp
+	// 	establishBa.Header.Timestamp = ba.Timestamp
+	// }
 
 	// establishBa.Add(establishReq)
 	// if ba.Txn != nil {
 	// 	establishBa.Txn = ba.Txn
 	// }
 
-	log.Eventf(ctx, "sending EstablishResolvedTimestamp request to leaseholder store %d", leaseholderStoreID)
+	// log.Eventf(ctx, "sending EstablishResolvedTimestamp request to leaseholder store %d", leaseholderStoreID)
 	// log.Infof(ctx, "sending EstablishResolvedTimestamp request to leaseholder store %d", leaseholderStoreID)
 	// log.Eventf(ctx, "request span: %s, range: %d", establishReq.Span, desc.RangeID)
 
@@ -337,40 +362,45 @@ func (r *Replica) tryConsistentFollowerRead(
 	// Add a timeout to prevent hanging requests
 	requestCtx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
+	br, pErr = r.store.db.NonTransactionalSender().Send(requestCtx, establishBa)
+	// if ba.Txn != nil {
 
-	if ba.Txn != nil {
-		// For transactional requests, use the transactional sender
-		err := r.store.db.Txn(requestCtx, func(ctx context.Context, txn *kv.Txn) error {
-			// Create a new batch within the transaction
-			batch := txn.NewBatch()
-			batch.Header = establishBa.Header
-			for _, req := range establishReqs {
-				batch.AddRawRequest(req)
-			}
+	// 	establishBa.Txn = ba.Txn.Clone()
+	// 	distSender := r.store.DB().GetFactory().NonTransactionalSender()
+	// 	br, pErr = distSender.Send(requestCtx, establishBa)
 
-			// Run the batch
-			err := txn.Run(ctx, batch)
-			if err != nil {
-				return err
-			}
+	// 	// // For transactional requests, use the transactional sender
+	// 	// err := r.store.db.Txn(requestCtx, func(ctx context.Context, txn *kv.Txn) error {
+	// 	// 	// Create a new batch within the transaction
+	// 	// 	batch := txn.NewBatch()
+	// 	// 	batch.Header = establishBa.Header
+	// 	// 	for _, req := range establishReqs {
+	// 	// 		batch.AddRawRequest(req)
+	// 	// 	}
 
-			// Extract the response
-			br = batch.RawResponse()
-			return nil
-		})
-		if err != nil {
-			pErr = kvpb.NewError(err)
-		}
-	} else {
-		// For non-transactional requests, use the non-transactional sender
-		br, pErr = r.store.db.NonTransactionalSender().Send(requestCtx, establishBa)
-	}
+	// 	// 	// Run the batch
+	// 	// 	err := txn.Run(ctx, batch)
+	// 	// 	if err != nil {
+	// 	// 		return err
+	// 	// 	}
+
+	// 	// 	// Extract the response
+	// 	// 	br = batch.RawResponse()
+	// 	// 	return nil
+	// 	// })
+	// 	// if err != nil {
+	// 	// 	pErr = kvpb.NewError(err)
+	// 	// }
+	// } else {
+	// 	// For non-transactional requests, use the non-transactional sender
+	// 	br, pErr = r.store.db.NonTransactionalSender().Send(requestCtx, establishBa)
+	// }
 
 	if pErr != nil {
 		log.Eventf(ctx, "EstablishResolvedTimestamp request failed: %v", pErr)
 		// log.Infof(ctx, "EstablishResolvedTimestamp request failed: %v", pErr)
 		// log.Infof(ctx, "IBRAHIM FALSE: EstablishResolvedTimestamp request failed: %v", pErr)
-		return false
+		return errors.Errorf("EstablishResolvedTimestamp request failed: %v", pErr)
 	}
 
 	// Iterate through all responses and record the max lease applied index
@@ -393,7 +423,8 @@ func (r *Replica) tryConsistentFollowerRead(
 
 	for {
 		// Check our current lease applied index
-		currentLAI := r.GetLeaseAppliedIndex()
+		// currentLAI := r.GetLeaseAppliedIndex()
+		currentLAI := r.shMu.state.LeaseAppliedIndex
 		if currentLAI >= maxLeaseAppliedIndex {
 			// We've caught up! We can now safely serve the read
 			break
@@ -407,7 +438,8 @@ func (r *Replica) tryConsistentFollowerRead(
 			// maxLeaseAppliedIndex, currentLAI)
 			// log.Infof(ctx, "timeout waiting for lease applied index %d (current: %d)",
 			// 	maxLeaseAppliedIndex, currentLAI)
-			return false
+			r.store.Metrics().FollowerReadsWaitTimeoutCount.Inc(1)
+			return errors.New("timeout waiting for lease applied index")
 		}
 
 		// Check if context was cancelled
@@ -416,9 +448,10 @@ func (r *Replica) tryConsistentFollowerRead(
 			log.Eventf(ctx, "context cancelled while waiting for lease applied index")
 			// log.Infof(ctx, "IBRAHIM FALSE: context cancelled while waiting for lease applied index")
 			// log.Infof(ctx, "context cancelled while waiting for lease applied index")
-			return false
-		case <-time.After(1 * time.Millisecond):
-			// Brief sleep before checking again
+			return errors.New("context cancelled while waiting for lease applied index")
+		case <-time.After(time.Millisecond):
+			// Brief sleep with exponential backoff
+			r.store.Metrics().FollowerReadsWaitSleepCount.Inc(1)
 		}
 	}
 
@@ -434,5 +467,5 @@ func (r *Replica) tryConsistentFollowerRead(
 		sp.RecordStructured(&kvpb.UsedFollowerRead{})
 	}
 
-	return true
+	return nil
 }

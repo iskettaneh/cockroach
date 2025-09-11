@@ -253,6 +253,19 @@ func (rs ReplicaSlice) OptimizeReplicaOrder(
 
 	// Sort replicas by latency and then attribute affinity.
 	slices.SortFunc(rs, func(a, b ReplicaInfo) int {
+		// Always prioritize replicas on the same node as the current nodeID first.
+		// This ensures local replicas are always preferred regardless of other factors.
+		if nodeID != 0 {
+			aIsLocal := a.NodeID == nodeID
+			bIsLocal := b.NodeID == nodeID
+			if aIsLocal != bIsLocal {
+				if aIsLocal {
+					return -1
+				}
+				return +1
+			}
+		}
+
 		// Always sort healthy nodes before unhealthy nodes.
 		if a.healthy != b.healthy {
 			if a.healthy {

@@ -2473,15 +2473,6 @@ message QueryResolvedTimestampResponse {
 // can then wait for its Raft log to catch up to this index before serving the read.
 message EstablishResolvedTimestampRequest {
   RequestHeader header = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
-
-  // Transaction is needed for deadlock detection when grabbing latches.
-  Transaction txn = 2;
-
-  // Timestamp is the timestamp at which we want to establish the resolved timestamp.
-  util.hlc.Timestamp timestamp = 3 [(gogoproto.nullable) = false];
-
-  // Span is the key span for which we want to establish the resolved timestamp.
-  Span span = 4 [(gogoproto.nullable) = false];
 }
 
 // EstablishResolvedTimestampResponse is the response to an EstablishResolvedTimestampRequest.

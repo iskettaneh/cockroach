@@ -79,6 +79,7 @@ PROTO_FILES = [
     "//pkg/kv/kvserver/concurrency/lock:lock_waiter.proto",
     "//pkg/kv/kvserver/concurrency/lock:locking.proto",
     "//pkg/kv/kvserver/kvflowcontrol/kvflowcontrolpb:kvflowcontrol.proto",
+    "//pkg/kv/kvserver/kvserverpb:follower_lease_coordination.proto",
     "//pkg/kv/kvserver/kvserverpb:internal_raft.proto",
     "//pkg/kv/kvserver/kvserverpb:lease_status.proto",
     "//pkg/kv/kvserver/kvserverpb:proposer_kv.proto",
