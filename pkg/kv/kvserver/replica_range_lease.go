@@ -99,7 +99,7 @@ var LeaderLeasesEnabled = settings.RegisterBoolSetting(
 		"with kv.raft.leader_fortification.fraction_enabled instead. The setting is only "+
 		"available for rare cases where an operator wants to disable leader leases without "+
 		"disabling the raft leader fortification.",
-	true,
+	false,
 )
 
 // ExpirationLeasesMaxReplicasPerNode converts from expiration back to epoch
