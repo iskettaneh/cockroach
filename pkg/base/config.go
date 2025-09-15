@@ -65,7 +65,7 @@ const (
 	// uses the DefaultClass RPC class, and is thus subject to head-of-line
 	// blocking by other RPC traffic which can cause very high latencies under
 	// heavy load (several seconds).
-	defaultRangeLeaseRenewalFraction = 0.5
+	defaultRangeLeaseRenewalFraction = 0.6667
 
 	// livenessRenewalFraction specifies what fraction the node liveness renewal
 	// duration should be of the node liveness duration. For example, with a value
@@ -77,7 +77,7 @@ const (
 	// (2*600ms) and 1 RTO (900ms), with a 900ms buffer. The write is committed
 	// 1/2 RTT before this. Liveness RPCs including Raft messages are sent via
 	// SystemClass, and thus avoid head-of-line blocking by general RPC traffic.
-	livenessRenewalFraction = 0.5
+	livenessRenewalFraction = 0.6667
 
 	// DefaultDescriptorLeaseDuration is the default mean duration a
 	// lease will be acquired for. The actual duration is jittered using
@@ -217,7 +217,7 @@ var (
 	// (6.03s to 7.20s). With negligible RTT, the average latency is 4.5s for
 	// lease acquisition and 2.5s for Raft elections.
 	defaultRangeLeaseDuration = envutil.EnvOrDefaultDuration(
-		"COCKROACH_RANGE_LEASE_DURATION", 6*time.Second)
+		"COCKROACH_RANGE_LEASE_DURATION", 3*time.Second)
 
 	// DefaultRPCHeartbeatTimeout is the default RPC heartbeat timeout. It is set
 	// very high at 3 * NetworkTimeout for several reasons: the gRPC transport may
