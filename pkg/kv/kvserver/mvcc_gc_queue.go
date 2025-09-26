@@ -57,7 +57,7 @@ const (
 	// the same rage when triggered by a low score threshold. This cooldown time
 	// is reduced proportionally to score and becomes 0 when score reaches a
 	// mvccGCKeyScoreNoCooldownThreshold score.
-	mvccGCQueueCooldownDuration = 2 * time.Hour
+	mvccGCQueueCooldownDuration = 20 * time.Minute
 	// mvccGCQueueIntentCooldownDuration is the duration to wait between MVCC GC
 	// attempts of the same range when triggered solely by intents. This is to
 	// prevent continually spinning on intents that belong to active transactions,
@@ -478,7 +478,7 @@ func makeMVCCGCQueueScoreImpl(
 	r.FuzzFactor = 0.95 + 0.05*rand.New(rand.NewSource(fuzzSeed)).Float64()
 
 	// Compute priority.
-	valScore := r.DeadFraction * r.ValuesScalableScore
+	valScore := r.ValuesScalableScore
 	r.FinalScore = r.FuzzFactor * (valScore + r.IntentScore)
 
 	// Check GC queueing eligibility using cooldown discounted by score.
@@ -708,7 +708,7 @@ func (mgcq *mvccGCQueue) process(
 	txnCleanupThreshold := gc.TxnCleanupThreshold.Get(&repl.store.ClusterSettings().SV)
 	clearRangeMinKeys := gc.ClearRangeMinKeys.Get(&repl.store.ClusterSettings().SV)
 
-	info, err := gc.Run(ctx, desc, snap, gcTimestamp, newThreshold,
+	_, err = gc.Run(ctx, desc, snap, gcTimestamp, newThreshold,
 		gc.RunOptions{
 			LockAgeThreshold:                     lockAgeThreshold,
 			MaxLocksPerIntentCleanupBatch:        maxLocksPerCleanupBatch,
@@ -764,44 +764,44 @@ func (mgcq *mvccGCQueue) process(
 		return false, err
 	}
 
-	scoreAfter := makeMVCCGCQueueScore(
-		ctx, repl, repl.store.Clock().Now(), lastGC, conf.TTL(), canAdvanceGCThreshold)
-	log.VEventf(ctx, 2, "MVCC stats after GC: %+v", repl.GetMVCCStats())
-	log.VEventf(ctx, 2, "GC score after GC: %s", scoreAfter)
-	updateStoreMetricsWithGCInfo(mgcq.store.metrics, info)
-	// If the score after running through the queue indicates that this
-	// replica should be re-queued for GC it most likely means that there
-	// is something wrong with the stats. One such known issue is
-	// https://github.com/cockroachdb/cockroach/issues/82920. To fix this we
-	// recompute stats, it's an expensive operation but it's better to recompute
-	// them then to spin the GC queue.
-	// Note: the score is not recomputed as if the GC queue was going to run again,
-	// because we are reusing the old lastGC and canAdvanceGCThreshold. This helps
-	// avoid issues with e.g. cooldown timers and focuses the recomputation on the
-	// difference in stats after GC.
-
-	if scoreAfter.ShouldQueue {
-		// The scores are very long, so splitting into multiple lines manually for
-		// readability.
-		//
-		// NB: there are likely situations in which this check triggers incorrectly,
-		// for example when the GC hint triggers GC but a protected timestamp
-		// prevents the GC threshold from advancing. In that case, not only did we
-		// run a GC cycle without improving anything, but we also pile up a stats
-		// recomputation. This is hopefully too rare to matter.
-		log.Dev.Infof(ctx, "GC still needed following GC, recomputing MVCC stats")
-		log.Dev.Infof(ctx, "old score %s", r)
-		log.Dev.Infof(ctx, "new score %s", scoreAfter)
-		req := kvpb.RecomputeStatsRequest{
-			RequestHeader: kvpb.RequestHeader{Key: desc.StartKey.AsRawKey()},
-		}
-		var b kv.Batch
-		b.AddRawRequest(&req)
-		err := repl.store.db.Run(ctx, &b)
-		if err != nil {
-			log.Dev.Errorf(ctx, "failed to recompute stats with error=%s", err)
-		}
-	}
+	//scoreAfter := makeMVCCGCQueueScore(
+	//	ctx, repl, repl.store.Clock().Now(), lastGC, conf.TTL(), canAdvanceGCThreshold)
+	//log.VEventf(ctx, 2, "MVCC stats after GC: %+v", repl.GetMVCCStats())
+	//log.VEventf(ctx, 2, "GC score after GC: %s", scoreAfter)
+	//updateStoreMetricsWithGCInfo(mgcq.store.metrics, info)
+	//// If the score after running through the queue indicates that this
+	//// replica should be re-queued for GC it most likely means that there
+	//// is something wrong with the stats. One such known issue is
+	//// https://github.com/cockroachdb/cockroach/issues/82920. To fix this we
+	//// recompute stats, it's an expensive operation but it's better to recompute
+	//// them then to spin the GC queue.
+	//// Note: the score is not recomputed as if the GC queue was going to run again,
+	//// because we are reusing the old lastGC and canAdvanceGCThreshold. This helps
+	//// avoid issues with e.g. cooldown timers and focuses the recomputation on the
+	//// difference in stats after GC.
+	//
+	//if scoreAfter.ShouldQueue {
+	//	// The scores are very long, so splitting into multiple lines manually for
+	//	// readability.
+	//	//
+	//	// NB: there are likely situations in which this check triggers incorrectly,
+	//	// for example when the GC hint triggers GC but a protected timestamp
+	//	// prevents the GC threshold from advancing. In that case, not only did we
+	//	// run a GC cycle without improving anything, but we also pile up a stats
+	//	// recomputation. This is hopefully too rare to matter.
+	//	log.Dev.Infof(ctx, "GC still needed following GC, recomputing MVCC stats")
+	//	log.Dev.Infof(ctx, "old score %s", r)
+	//	log.Dev.Infof(ctx, "new score %s", scoreAfter)
+	//	req := kvpb.RecomputeStatsRequest{
+	//		RequestHeader: kvpb.RequestHeader{Key: desc.StartKey.AsRawKey()},
+	//	}
+	//	var b kv.Batch
+	//	b.AddRawRequest(&req)
+	//	err := repl.store.db.Run(ctx, &b)
+	//	if err != nil {
+	//		log.Dev.Errorf(ctx, "failed to recompute stats with error=%s", err)
+	//	}
+	//}
 
 	return true, nil
 }

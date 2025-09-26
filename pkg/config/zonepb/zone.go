@@ -256,7 +256,7 @@ func DefaultZoneConfig() ZoneConfig {
 		RangeMinBytes: proto.Int64(128 << 20), // 128 MB
 		RangeMaxBytes: proto.Int64(512 << 20), // 512 MB
 		GC: &GCPolicy{
-			TTLSeconds: 4 * 60 * 60, // 4 hrs
+			TTLSeconds: 10 * 60, // 10 minutes
 		},
 		// The default zone is supposed to have empty VoterConstraints.
 		NullVoterConstraintsIsEmpty: true,
