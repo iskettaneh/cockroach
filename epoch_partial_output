@@ -1,0 +1,520 @@
+Locating and verifying binaries for os="linux", arch="amd64"
+
+Found the following binaries:
+	cockroach "amd64" at: /home/ibrahim_kettaneh_cockroachlabs_c/cockroach_failover
+	workload "amd64" at: /home/ibrahim_kettaneh_cockroachlabs_c/remote2/cockroach/bin/workload
+	libraries "amd64" at: /home/ibrahim_kettaneh_cockroachlabs_c/remote2/cockroach/lib/libgeos.so, /home/ibrahim_kettaneh_cockroachlabs_c/remote2/cockroach/lib/libgeos_c.so
+AMD64 clusters will be provisioned with probability 1.00
+
+Running tests which match regex "^failover/partial/lease-leader$" and are compatible with cloud "gce".
+
+fallback runner logs in: artifacts/roachtest.crdb.log
+2025/09/29 01:44:34 run.go:388: test runner logs in: artifacts/_runner-logs/test_runner-1759110274.log
+test runner logs in: artifacts/_runner-logs/test_runner-1759110274.log
+HTTP server listening on port 34781 on all network interfaces: http://:34781/
+2025/09/29 01:44:34 run.go:150: global random seed: -274225998970175457
+2025/09/29 01:44:34 test_runner.go:398: test_run_id: ibrahim_kettaneh_cockroachlabs_c-1759110274
+test_run_id: ibrahim_kettaneh_cockroachlabs_c-1759110274
+[w0] 2025/09/29 01:44:34 work_pool.go:198: Acquired quota for 14 CPUs
+[w0] 2025/09/29 01:44:34 cluster.go:3204: Using randomly chosen arch="amd64", failover/partial/lease-leader
+2025/09/29 01:44:34 test_runner.go:574: Creating new cluster for test failover/partial/lease-leader: n7cpu2 (arch="amd64")
+2025/09/29 01:44:34 cluster.go:994: Attempting cluster creation (attempt #1/3)
+2025/09/29 01:44:34 roachprod.go:106: WARN: using `ibrahimkettanehcockroachlabsc' as username instead of `ibrahim_kettaneh_cockroachlabs_c'
+2025/09/29 01:44:37 roachprod.go:1750: Creating cluster ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2 with 7 nodes...
+2025/09/29 01:44:37 gcloud.go:1778: Creating 6 instances, distributed across [us-east1-b]
+2025/09/29 01:44:52 gcloud.go:2467: Propagating labels across all disks
+2025/09/29 01:44:55 gcloud.go:1778: Creating 1 instances, distributed across [us-east1-b]
+2025/09/29 01:45:09 gcloud.go:2467: Propagating labels across all disks
+2025/09/29 01:45:11 roachprod.go:1766: Created cluster ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2; setting up SSH...
+2025/09/29 01:45:11 cluster_cloud.go:172: ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2: [gce:cockroach-ephemeral] 
+2025/09/29 01:45:11 cluster_cloud.go:178: 12h14m48s remaining
+Name                                                     DNS                                                                                     Private IP    Public IP       Machine Type   CPU Arch  CPU Family  Provision Model  
+ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2-0001  ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2-0001.us-east1-b.cockroach-ephemeral  10.142.0.115  35.243.182.48   n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2-0002  ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2-0002.us-east1-b.cockroach-ephemeral  10.142.0.138  35.185.5.11     n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2-0003  ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2-0003.us-east1-b.cockroach-ephemeral  10.142.0.139  35.243.191.91   n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2-0004  ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2-0004.us-east1-b.cockroach-ephemeral  10.142.0.126  34.139.165.118  n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2-0005  ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2-0005.us-east1-b.cockroach-ephemeral  10.142.0.140  35.185.84.158   n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2-0006  ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2-0006.us-east1-b.cockroach-ephemeral  10.142.0.141  35.196.74.51    n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2-0007  ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2-0007.us-east1-b.cockroach-ephemeral  10.142.0.218  34.74.71.229    n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2: waiting for nodes to start
+generating ssh key
+distributing ssh key
+scanning hosts
+distributing known_hosts
+adding additional authorized keys
+[w0] 2025/09/29 01:46:19 test_runner.go:806: Created new cluster for test failover/partial/lease-leader: ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2 (arch="amd64")
+[w0] 2025/09/29 01:46:19 test_runner.go:892: Starting test: failover/partial/lease-leader:1 on cluster=ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2 (arch="amd64")
+2025/09/29 01:46:19 test_impl.go:184: Benchmark test, running with standard cockroach
+2025/09/29 01:46:19 cluster.go:722: test status: uploading file
+[w0] 2025/09/29 01:46:20 cluster_synced.go:1762: ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2: putting (scp) /home/ibrahim_kettaneh_cockroachlabs_c/cockroach_failover ./cockroach on nodes [1 2 3 4 5 6 7]
+[w0] 2025/09/29 01:46:31 spinner.go:330:    1: done
+[w0] 2025/09/29 01:46:31 spinner.go:330:    2: done
+[w0] 2025/09/29 01:46:31 spinner.go:330:    3: done
+[w0] 2025/09/29 01:46:31 spinner.go:330:    4: done
+[w0] 2025/09/29 01:46:31 spinner.go:330:    5: done
+[w0] 2025/09/29 01:46:31 spinner.go:330:    6: done
+[w0] 2025/09/29 01:46:31 spinner.go:330:    7: done
+2025/09/29 01:46:31 cluster.go:722: test status: 
+2025/09/29 01:46:31 cluster.go:722: test status: running test
+2025/09/29 01:46:36 test_runner.go:1429: === RUN   failover/partial/lease-leader  [metrics: https://go.crdb.dev/roachtest-grafana/ibrahim-kettaneh-cockroachlabs-c-1759110274/failover-partial-lease-leader/1759110396677/1759112196677]
+=== RUN   failover/partial/lease-leader  [metrics: https://go.crdb.dev/roachtest-grafana/ibrahim-kettaneh-cockroachlabs-c-1759110274/failover-partial-lease-leader/1759110396677/1759112196677]
+2025/09/29 01:46:37 cluster.go:722: test status: starting nodes :1-3
+2025/09/29 01:46:38 cluster_synced.go:1597: ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2: checking certs.tar
+ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2: initializing certs
+ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2: distributing certs
+2025/09/29 01:46:43 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2 (system): starting cockroach processes
+2025/09/29 01:46:43 cockroach.go:936: starting node 1
+2025/09/29 01:46:44 cockroach.go:1391: ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2: initializing cluster
+2025/09/29 01:46:45 cockroach.go:1400: Cluster successfully initialized
+2025/09/29 01:46:45 cockroach.go:936: starting node 2
+2025/09/29 01:46:46 cockroach.go:936: starting node 3
+2025/09/29 01:46:47 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2 (system): setting cluster settings
+2025/09/29 01:46:47 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+2025/09/29 01:46:48 cockroach.go:1474: SET CLUSTER SETTING
+NOTICE: "kv.expiration_leases_only.enabled" is now an alias for "kv.lease.expiration_leases_only.enabled", the preferred setting name
+SET CLUSTER SETTING
+SET CLUSTER SETTING
+SET CLUSTER SETTING
+NOTICE: "debug.panic_on_failed_assertions" is now an alias for "debug.panic_on_failed_assertions.enabled", the preferred setting name
+SET CLUSTER SETTING
+SET CLUSTER SETTING
+ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2: executing sql
+2025/09/29 01:46:49 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/29 01:46:49 client.go:310: Prometheus credentials obtained from Env
+2025/09/29 01:46:49 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2
+2025/09/29 01:46:50 cluster_synced.go:2098: ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2: getting (scp) ./certs /tmp/roachtest-certs1610969163/certs on nodes [1]
+2025/09/29 01:46:50 spinner.go:330:    1: done
+2025/09/29 01:46:50 node_stability.go:117: waiting for initial up-replication...
+2025/09/29 01:46:50 node_stability.go:142: up-replication complete
+2025/09/29 01:46:50 cluster.go:722: test status: starting nodes :4-6
+2025/09/29 01:46:51 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2 (system): starting cockroach processes
+2025/09/29 01:46:51 cockroach.go:936: starting node 4
+2025/09/29 01:46:52 cockroach.go:936: starting node 5
+2025/09/29 01:46:53 cockroach.go:936: starting node 6
+2025/09/29 01:46:55 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2 (system): setting cluster settings
+2025/09/29 01:46:55 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2: executing sql
+2025/09/29 01:46:56 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/29 01:46:56 client.go:310: Prometheus credentials obtained from Env
+2025/09/29 01:46:56 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2
+2025/09/29 01:46:56 failover.go:716: creating workload database
+2025/09/29 01:46:56 cluster.go:2513: running cmd `./cockroach workload init k...` on nodes [:6]
+2025/09/29 01:46:56 cluster.go:2515: details in run_014656.341767026_n6_cockroach-workload-i.log
+2025/09/29 01:46:57 failover.go:1893: moving 1 ranges off of n2 (database_name = 'kv')
+2025/09/29 01:46:59 failover.go:1893: moving 1 ranges off of n2 (database_name = 'kv')
+2025/09/29 01:47:00 failover.go:1893: moving 1 ranges off of n3 (database_name = 'kv')
+2025/09/29 01:47:01 failover.go:1893: moving 1 ranges off of n4 (database_name != 'kv')
+2025/09/29 01:47:02 failover.go:1893: moving 1 ranges off of n5 (database_name != 'kv')
+2025/09/29 01:47:03 failover.go:730: running workload
+2025/09/29 01:47:03 monitor.go:325: Monitor event: n4: cockroach process for system interface is running (PID: 4356)
+2025/09/29 01:47:03 monitor.go:325: Monitor event: n6: cockroach process for system interface is running (PID: 4245)
+2025/09/29 01:47:03 monitor.go:325: Monitor event: n1: cockroach process for system interface is running (PID: 4495)
+2025/09/29 01:47:04 monitor.go:325: Monitor event: n5: cockroach process for system interface is running (PID: 4267)
+2025/09/29 01:47:04 monitor.go:325: Monitor event: n2: cockroach process for system interface is running (PID: 4217)
+2025/09/29 01:47:04 monitor.go:325: Monitor event: n3: cockroach process for system interface is running (PID: 4190)
+2025/09/29 01:47:24 failover.go:1921: moving 7 leases to n4 (database_name = 'kv')
+2025/09/29 01:47:25 failover.go:768: !!!!!! Sleeping for 147.840956ms
+2025/09/29 01:47:25 failover.go:776: failing n4 to n5 (blackhole lease/leader)
+2025/09/29 01:47:25 cluster.go:2513: running cmd `sudo iptables -A INPUT -p t...` on nodes [:4]
+2025/09/29 01:47:25 cluster.go:2515: details in run_014725.725164970_n4_sudo-iptables-A-INPU.log
+2025/09/29 01:47:26 cluster.go:2513: running cmd `sudo iptables -A OUTPUT -p ...` on nodes [:4]
+2025/09/29 01:47:26 cluster.go:2515: details in run_014726.057592402_n4_sudo-iptables-A-OUTP.log
+2025/09/29 01:47:26 cluster.go:2513: running cmd `sudo iptables -A OUTPUT -p ...` on nodes [:4]
+2025/09/29 01:47:26 cluster.go:2515: details in run_014726.378603980_n4_sudo-iptables-A-OUTP.log
+2025/09/29 01:47:26 cluster.go:2513: running cmd `sudo iptables -A INPUT -p t...` on nodes [:4]
+2025/09/29 01:47:26 cluster.go:2515: details in run_014726.702980897_n4_sudo-iptables-A-INPU.log
+2025/09/29 01:47:27 failover.go:776: failing n4 to n6 (blackhole lease/leader)
+2025/09/29 01:47:27 cluster.go:2513: running cmd `sudo iptables -A INPUT -p t...` on nodes [:4]
+2025/09/29 01:47:27 cluster.go:2515: details in run_014727.035959350_n4_sudo-iptables-A-INPU.log
+2025/09/29 01:47:27 cluster.go:2513: running cmd `sudo iptables -A OUTPUT -p ...` on nodes [:4]
+2025/09/29 01:47:27 cluster.go:2515: details in run_014727.361430617_n4_sudo-iptables-A-OUTP.log
+2025/09/29 01:47:27 cluster.go:2513: running cmd `sudo iptables -A OUTPUT -p ...` on nodes [:4]
+2025/09/29 01:47:27 cluster.go:2515: details in run_014727.677205921_n4_sudo-iptables-A-OUTP.log
+2025/09/29 01:47:27 cluster.go:2513: running cmd `sudo iptables -A INPUT -p t...` on nodes [:4]
+2025/09/29 01:47:27 cluster.go:2515: details in run_014727.988736868_n4_sudo-iptables-A-INPU.log
+2025/09/29 01:47:28 failover.go:781: Starting recovery measurement at 2025-09-29 01:47:27.035954276 +0000 UTC m=+173.306251823
+2025/09/29 01:47:28 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:28 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:28 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:29 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:29 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:29 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:29 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:29 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:30 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:30 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:30 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:30 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:31 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:31 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:31 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:31 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:31 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:32 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:32 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:32 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:32 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:32 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:33 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:33 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:33 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:33 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:33 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:34 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:34 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:34 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:34 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:47:34 failover.go:793: !!!!! Recovery completed after 7.733618555s - query succeeded
+2025/09/29 01:47:34 failover.go:803: recovering n4 to n5 (blackhole lease/leader)
+2025/09/29 01:47:34 cluster.go:2513: running cmd `sudo iptables -F` on nodes [:4]
+2025/09/29 01:47:34 cluster.go:2515: details in run_014734.769650481_n4_sudo-iptables-F.log
+2025/09/29 01:47:35 failover.go:803: recovering n4 to n6 (blackhole lease/leader)
+2025/09/29 01:47:35 cluster.go:2513: running cmd `sudo iptables -F` on nodes [:4]
+2025/09/29 01:47:35 cluster.go:2515: details in run_014735.092587132_n4_sudo-iptables-F.log
+2025/09/29 01:47:55 failover.go:1921: moving 7 leases to n5 (database_name = 'kv')
+2025/09/29 01:47:57 failover.go:768: !!!!!! Sleeping for 568.960852ms
+2025/09/29 01:47:57 failover.go:776: failing n5 to n4 (blackhole lease/leader)
+2025/09/29 01:47:57 cluster.go:2513: running cmd `sudo iptables -A INPUT -p t...` on nodes [:5]
+2025/09/29 01:47:57 cluster.go:2515: details in run_014757.803330590_n5_sudo-iptables-A-INPU.log
+2025/09/29 01:47:58 cluster.go:2513: running cmd `sudo iptables -A OUTPUT -p ...` on nodes [:5]
+2025/09/29 01:47:58 cluster.go:2515: details in run_014758.496614741_n5_sudo-iptables-A-OUTP.log
+2025/09/29 01:47:58 cluster.go:2513: running cmd `sudo iptables -A OUTPUT -p ...` on nodes [:5]
+2025/09/29 01:47:58 cluster.go:2515: details in run_014758.820411219_n5_sudo-iptables-A-OUTP.log
+2025/09/29 01:47:59 cluster.go:2513: running cmd `sudo iptables -A INPUT -p t...` on nodes [:5]
+2025/09/29 01:47:59 cluster.go:2515: details in run_014759.150380637_n5_sudo-iptables-A-INPU.log
+2025/09/29 01:47:59 failover.go:776: failing n5 to n6 (blackhole lease/leader)
+2025/09/29 01:47:59 cluster.go:2513: running cmd `sudo iptables -A INPUT -p t...` on nodes [:5]
+2025/09/29 01:47:59 cluster.go:2515: details in run_014759.470809996_n5_sudo-iptables-A-INPU.log
+2025/09/29 01:47:59 cluster.go:2513: running cmd `sudo iptables -A OUTPUT -p ...` on nodes [:5]
+2025/09/29 01:47:59 cluster.go:2515: details in run_014759.794772686_n5_sudo-iptables-A-OUTP.log
+2025/09/29 01:48:00 cluster.go:2513: running cmd `sudo iptables -A OUTPUT -p ...` on nodes [:5]
+2025/09/29 01:48:00 cluster.go:2515: details in run_014800.130117456_n5_sudo-iptables-A-OUTP.log
+2025/09/29 01:48:00 cluster.go:2513: running cmd `sudo iptables -A INPUT -p t...` on nodes [:5]
+2025/09/29 01:48:00 cluster.go:2515: details in run_014800.457942160_n5_sudo-iptables-A-INPU.log
+2025/09/29 01:48:00 failover.go:781: Starting recovery measurement at 2025-09-29 01:47:59.470805006 +0000 UTC m=+205.741102553
+2025/09/29 01:48:00 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:01 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:01 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:01 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:01 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:02 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:02 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:02 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:02 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:02 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:03 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:03 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:03 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:03 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:03 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:04 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:04 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:04 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:04 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:04 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:05 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:05 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:05 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:05 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:05 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:06 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:06 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:06 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:06 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:07 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:07 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:07 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:07 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:07 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:08 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:08 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:08 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:08 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:08 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:09 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:09 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:09 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:09 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:09 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:10 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:10 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:10 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:10 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:10 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:11 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:11 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:11 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:11 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:11 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:12 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:12 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:12 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:12 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:13 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:13 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:13 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:13 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:13 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:14 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:14 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:14 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:14 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:14 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:15 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:15 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:15 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:15 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:15 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:16 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:16 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:16 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:16 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:16 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:17 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:17 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:17 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:17 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:17 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:18 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:18 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:18 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:18 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:19 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:19 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:19 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:19 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:19 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:20 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:20 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:20 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:20 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:20 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:21 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:21 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:21 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:21 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:21 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:22 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:22 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:22 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:22 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:22 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:23 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:23 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:23 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:23 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:24 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:24 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:24 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:24 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:24 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:25 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:25 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:25 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:25 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:25 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:26 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:26 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:26 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:26 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:26 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:27 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:27 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:27 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:27 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:28 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:28 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:28 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:28 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:28 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:29 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:29 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:29 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:29 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:29 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:30 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:30 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:30 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:30 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:30 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:31 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:31 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:31 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:31 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:31 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:32 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:32 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:32 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:32 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:32 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:33 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:33 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:33 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:33 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:34 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:34 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:34 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:34 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:34 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:35 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:35 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:35 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:35 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:35 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:36 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:36 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:36 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:36 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:36 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:37 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:37 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:37 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:37 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:37 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:38 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:38 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:38 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:38 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:38 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:39 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:39 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:39 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:39 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:40 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:40 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:40 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:40 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:40 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:41 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:41 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:41 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:41 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:41 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:42 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:42 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:42 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:42 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:42 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:43 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:43 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:43 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:43 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:43 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:44 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:44 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:44 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:44 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:45 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:45 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:45 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:45 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:45 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:46 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:46 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:46 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:46 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:46 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:47 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:47 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:47 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:47 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:47 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:48 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:48 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:48 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:48 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:48 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:49 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:49 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:49 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:49 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:49 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:50 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:50 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:50 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:50 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:51 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:51 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:51 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:51 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:51 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:52 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:52 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:52 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:52 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:52 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:53 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:53 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:53 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:53 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:53 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:54 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:54 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:54 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:54 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:54 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:55 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:55 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:55 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:55 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:56 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:56 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:56 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:56 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:56 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:57 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:57 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:57 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:57 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:57 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:58 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:58 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:58 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:58 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:58 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:59 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:59 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:59 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:59 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:48:59 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:49:00 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:49:00 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:49:00 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:49:00 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:49:00 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:49:01 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:49:01 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:49:01 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:49:01 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 01:49:02 failover.go:797: !!!!! Recovery error: pq: query execution canceled
+2025/09/29 11:46:36 test_impl.go:478: test failure #1: full stack retained in failure_1.log: (test_runner.go:1450).runTest: test timed out (10h0m0s)
+2025/09/29 11:46:36 test_runner.go:1486: skipping post test assertions as test failed
+2025/09/29 11:46:36 test_runner.go:1489: running test teardown (test-teardown.log)
+2025/09/29 11:57:22 monitor.go:325: Monitor event: n4: cockroach process for system interface died (exit code 137)
+2025/09/29 11:57:29 test_runner.go:1212: metrics: https://go.crdb.dev/roachtest-grafana/ibrahim-kettaneh-cockroachlabs-c-1759110274/failover-partial-lease-leader/1759110396677/1759147163284
+2025/09/29 11:57:31 github.go:332: skipping GitHub issue posting (GitHub API token not set)
+2025/09/29 11:57:31 test_runner.go:1291: --- FAIL: failover/partial/lease-leader (36646.61s)
+(test_runner.go:1450).runTest: test timed out (10h0m0s)
+test artifacts and logs in: artifacts/failover/partial/lease-leader/run_1
+--- FAIL: failover/partial/lease-leader (36646.61s)
+(test_runner.go:1450).runTest: test timed out (10h0m0s)
+test artifacts and logs in: artifacts/failover/partial/lease-leader/run_1
+[w0] 2025/09/29 11:57:31 test_runner.go:1018: test failed: failover/partial/lease-leader (run 1)
+[w0] 2025/09/29 11:57:31 test_runner.go:1037: destroying cluster ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2 [tag:] (7 nodes) because: failover/partial/lease-leader (1) - (test_runner.go:1450).runTest: test timed out (10h0m0s)
+[w0] 2025/09/29 11:57:31 cluster.go:1826: destroying cluster ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2 [tag:] (7 nodes)...
+[w0] 2025/09/29 11:57:38 roachprod.go:1577: Destroying cluster ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2 with 7 nodes
+Destroying Prometheus configs
+[w0] 2025/09/29 11:57:38 client.go:310: Prometheus credentials obtained from Env
+Destroying DNS entries
+Destroying VMs
+[w0] 2025/09/29 11:58:07 roachprod.go:1563: OK
+[w0] 2025/09/29 11:58:07 cluster.go:1836: destroying cluster ibrahimkettanehcockroachlabsc-1759110274-01-n7cpu2 [tag:] (7 nodes)... done
+[w0] 2025/09/29 11:58:07 test_runner.go:731: Releasing quota for 14 CPUs
+[w0] 2025/09/29 11:58:07 test_runner.go:743: No work remaining; runWorker is bailing out...
+No work remaining; runWorker is bailing out...
+[w0] 2025/09/29 11:58:07 test_runner.go:642: Worker exiting; no cluster to destroy.
+2025/09/29 11:58:07 test_runner.go:460: FAIL (1 fails)
+FAIL (1 fails)
+2025/09/29 11:58:07 test_runner.go:474: map[824694268736:{}] tests failed
+map[824694268736:{}] tests failed
+2025/09/29 11:58:07 run.go:202: runTests destroying all clusters

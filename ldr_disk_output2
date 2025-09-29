@@ -1,0 +1,995 @@
+Locating and verifying binaries for os="linux", arch="amd64"
+
+Found the following binaries:
+	cockroach "amd64" at: /home/ibrahim_kettaneh_cockroachlabs_c/remote2/cockroach/cockroach
+	workload "amd64" at: /home/ibrahim_kettaneh_cockroachlabs_c/remote2/cockroach/bin/workload
+	libraries "amd64" at: /home/ibrahim_kettaneh_cockroachlabs_c/remote2/cockroach/lib/libgeos.so, /home/ibrahim_kettaneh_cockroachlabs_c/remote2/cockroach/lib/libgeos_c.so
+AMD64 clusters will be provisioned with probability 1.00
+
+Running tests which match regex "failover/non-system/disk-stall/lease=leader" and are compatible with cloud "gce".
+
+fallback runner logs in: artifacts/roachtest.crdb.log
+2025/09/28 18:01:37 run.go:388: test runner logs in: artifacts/_runner-logs/test_runner-1759082497.log
+test runner logs in: artifacts/_runner-logs/test_runner-1759082497.log
+HTTP server listening on port 36333 on all network interfaces: http://:36333/
+2025/09/28 18:01:37 run.go:150: global random seed: -1439237737573571837
+2025/09/28 18:01:37 test_runner.go:398: test_run_id: ibrahim_kettaneh_cockroachlabs_c-1759082497
+test_run_id: ibrahim_kettaneh_cockroachlabs_c-1759082497
+[w0] 2025/09/28 18:01:37 work_pool.go:198: Acquired quota for 14 CPUs
+[w0] 2025/09/28 18:01:37 cluster.go:3204: Using randomly chosen arch="amd64", failover/non-system/disk-stall/lease=leader
+2025/09/28 18:01:37 test_runner.go:574: Creating new cluster for test failover/non-system/disk-stall/lease=leader: n7cpu2 (arch="amd64")
+2025/09/28 18:01:37 cluster.go:994: Attempting cluster creation (attempt #1/3)
+2025/09/28 18:01:37 roachprod.go:106: WARN: using `ibrahimkettanehcockroachlabsc' as username instead of `ibrahim_kettaneh_cockroachlabs_c'
+2025/09/28 18:01:43 roachprod.go:1750: Creating cluster ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 with 7 nodes...
+2025/09/28 18:01:43 gcloud.go:1778: Creating 6 instances, distributed across [us-east1-c]
+2025/09/28 18:02:02 gcloud.go:2467: Propagating labels across all disks
+2025/09/28 18:02:05 gcloud.go:1778: Creating 1 instances, distributed across [us-east1-c]
+2025/09/28 18:02:14 gcloud.go:2467: Propagating labels across all disks
+2025/09/28 18:02:16 roachprod.go:1766: Created cluster ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2; setting up SSH...
+2025/09/28 18:02:16 cluster_cloud.go:172: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: [gce:cockroach-ephemeral] 
+2025/09/28 18:02:16 cluster_cloud.go:178: 12h57m43s remaining
+Name                                                     DNS                                                                                     Private IP   Public IP      Machine Type   CPU Arch  CPU Family  Provision Model  
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2-0001  ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2-0001.us-east1-c.cockroach-ephemeral  10.142.0.65  35.196.74.51   n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2-0002  ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2-0002.us-east1-c.cockroach-ephemeral  10.142.0.76  34.23.46.167   n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2-0003  ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2-0003.us-east1-c.cockroach-ephemeral  10.142.0.86  34.75.26.190   n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2-0004  ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2-0004.us-east1-c.cockroach-ephemeral  10.142.0.70  34.73.89.105   n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2-0005  ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2-0005.us-east1-c.cockroach-ephemeral  10.142.0.87  34.74.71.229   n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2-0006  ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2-0006.us-east1-c.cockroach-ephemeral  10.142.0.89  34.26.14.84    n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2-0007  ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2-0007.us-east1-c.cockroach-ephemeral  10.142.0.95  35.243.250.31  n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: waiting for nodes to start
+generating ssh key
+distributing ssh key
+scanning hosts
+distributing known_hosts
+adding additional authorized keys
+[w0] 2025/09/28 18:03:18 test_runner.go:806: Created new cluster for test failover/non-system/disk-stall/lease=leader: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (arch="amd64")
+[w0] 2025/09/28 18:03:18 cluster.go:1105: saving cluster ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 [tag:] (7 nodes) for debugging (--debug specified)
+[w0] 2025/09/28 18:03:18 test_runner.go:892: Starting test: failover/non-system/disk-stall/lease=leader:1 on cluster=ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (arch="amd64")
+2025/09/28 18:03:18 test_impl.go:184: Benchmark test, running with standard cockroach
+2025/09/28 18:03:18 cluster.go:722: test status: uploading file
+[w0] 2025/09/28 18:03:18 cluster_synced.go:1762: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: putting (scp) /home/ibrahim_kettaneh_cockroachlabs_c/remote2/cockroach/cockroach ./cockroach on nodes [1 2 3 4 5 6 7]
+[w0] 2025/09/28 18:03:29 spinner.go:330:    1: done
+[w0] 2025/09/28 18:03:29 spinner.go:330:    2: done
+[w0] 2025/09/28 18:03:29 spinner.go:330:    3: done
+[w0] 2025/09/28 18:03:29 spinner.go:330:    4: done
+[w0] 2025/09/28 18:03:29 spinner.go:330:    5: done
+[w0] 2025/09/28 18:03:29 spinner.go:330:    6: done
+[w0] 2025/09/28 18:03:29 spinner.go:330:    7: done
+2025/09/28 18:03:29 cluster.go:722: test status: 
+2025/09/28 18:03:29 cluster.go:722: test status: running test
+2025/09/28 18:03:34 test_runner.go:1429: === RUN   failover/non-system/disk-stall/lease=leader  [metrics: https://go.crdb.dev/roachtest-grafana/ibrahim-kettaneh-cockroachlabs-c-1759082497/failover-non-system-disk-stall-lease-leader/1759082614448/1759084414448]
+=== RUN   failover/non-system/disk-stall/lease=leader  [metrics: https://go.crdb.dev/roachtest-grafana/ibrahim-kettaneh-cockroachlabs-c-1759082497/failover-non-system-disk-stall-lease-leader/1759082614448/1759084414448]
+2025/09/28 18:03:34 disk_stall.go:238: Setup() details in run_180334.772973244_n1-6_Setup.log
+2025/09/28 18:04:05 cluster.go:722: test status: starting nodes :1-6
+2025/09/28 18:04:07 cluster_synced.go:1597: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: checking certs.tar
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: initializing certs
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: distributing certs
+2025/09/28 18:04:12 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:04:12 cockroach.go:936: starting node 1
+2025/09/28 18:04:13 cockroach.go:1391: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: initializing cluster
+2025/09/28 18:04:13 cockroach.go:1400: Cluster successfully initialized
+2025/09/28 18:04:13 cockroach.go:936: starting node 2
+2025/09/28 18:04:14 cockroach.go:936: starting node 3
+2025/09/28 18:04:16 cockroach.go:936: starting node 4
+2025/09/28 18:04:17 cockroach.go:936: starting node 5
+2025/09/28 18:04:18 cockroach.go:936: starting node 6
+2025/09/28 18:04:19 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:04:19 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+2025/09/28 18:04:20 cockroach.go:1474: SET CLUSTER SETTING
+NOTICE: "debug.panic_on_failed_assertions" is now an alias for "debug.panic_on_failed_assertions.enabled", the preferred setting name
+SET CLUSTER SETTING
+SET CLUSTER SETTING
+NOTICE: "kv.expiration_leases_only.enabled" is now an alias for "kv.lease.expiration_leases_only.enabled", the preferred setting name
+SET CLUSTER SETTING
+SET CLUSTER SETTING
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:04:21 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:04:21 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:04:21 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:04:21 cluster_synced.go:2098: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: getting (scp) ./certs /tmp/roachtest-certs2783501539/certs on nodes [1]
+2025/09/28 18:04:22 spinner.go:330:    1: done
+2025/09/28 18:04:22 node_stability.go:117: waiting for initial up-replication...
+2025/09/28 18:04:22 node_stability.go:142: up-replication complete
+2025/09/28 18:04:22 failover.go:980: creating workload database
+2025/09/28 18:04:22 cluster.go:2513: running cmd `./cockroach workload init k...` on nodes [:7]
+2025/09/28 18:04:22 cluster.go:2515: details in run_180422.653963247_n7_cockroach-workload-i.log
+2025/09/28 18:04:23 failover.go:1893: moving 1 ranges off of n1 (database_name = 'kv')
+2025/09/28 18:04:24 failover.go:1893: moving 1 ranges off of n1 (database_name = 'kv')
+2025/09/28 18:04:25 failover.go:1893: moving 1 ranges off of n1 (database_name = 'kv')
+2025/09/28 18:04:26 failover.go:1893: moving 1 ranges off of n1 (database_name = 'kv')
+2025/09/28 18:04:27 failover.go:1893: moving 1 ranges off of n1 (database_name = 'kv')
+2025/09/28 18:04:29 failover.go:1893: moving 1 ranges off of n1 (database_name = 'kv')
+2025/09/28 18:04:30 failover.go:1893: moving 1 ranges off of n1 (database_name = 'kv')
+2025/09/28 18:04:31 failover.go:1893: moving 1 ranges off of n1 (database_name = 'kv')
+2025/09/28 18:04:32 failover.go:1893: moving 1 ranges off of n1 (database_name = 'kv')
+2025/09/28 18:04:33 failover.go:1893: moving 1 ranges off of n1 (database_name = 'kv')
+2025/09/28 18:04:34 failover.go:993: running workload
+2025/09/28 18:04:35 monitor.go:325: Monitor event: n6: cockroach process for system interface is running (PID: 5016)
+2025/09/28 18:04:35 monitor.go:325: Monitor event: n4: cockroach process for system interface is running (PID: 4994)
+2025/09/28 18:04:35 monitor.go:325: Monitor event: n3: cockroach process for system interface is running (PID: 4977)
+2025/09/28 18:04:35 monitor.go:325: Monitor event: n5: cockroach process for system interface is running (PID: 5044)
+2025/09/28 18:04:35 monitor.go:325: Monitor event: n1: cockroach process for system interface is running (PID: 5349)
+2025/09/28 18:04:35 monitor.go:325: Monitor event: n2: cockroach process for system interface is running (PID: 5039)
+2025/09/28 18:05:35 failover.go:1921: moving 1 leases to n4 (database_name = 'kv')
+2025/09/28 18:05:41 failover.go:1024: failing n4 (disk-stall)
+2025/09/28 18:05:41 disk_stall.go:238: Stall() details in run_180541.993803648_n4_Stall.log
+2025/09/28 18:05:42 failover.go:1029: Starting recovery measurement at 2025-09-28 18:05:41.993798962 +0000 UTC m=+245.553545475
+2025/09/28 18:05:43 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:05:43 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:05:44 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:05:44 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:05:45 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:05:45 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:05:46 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:05:46 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:05:47 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:05:47 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:05:47 failover.go:1041: !!!!! Recovery completed after 5.804224249s - query succeeded
+2025/09/28 18:05:47 failover.go:1048: recovering n4 (disk-stall)
+2025/09/28 18:05:47 disk_stall.go:238: Unstall() details in run_180547.798103957_n4_Unstall.log
+2025/09/28 18:05:48 cluster.go:722: test status: stopping nodes :4
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: stopping
+2025/09/28 18:05:48 monitor.go:325: Monitor event: n4: cockroach process for system interface died (exit code 137): expected
+2025/09/28 18:05:49 cluster.go:722: test status: starting nodes :4
+2025/09/28 18:05:50 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:05:50 cockroach.go:936: starting node 4
+2025/09/28 18:05:50 monitor.go:325: Monitor event: n4: cockroach process for system interface is running (PID: 5846)
+2025/09/28 18:05:51 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:05:51 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:05:53 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:05:53 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:05:53 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:06:59 failover.go:1024: failing n5 (disk-stall)
+2025/09/28 18:06:59 disk_stall.go:238: Stall() details in run_180659.399979582_n5_Stall.log
+2025/09/28 18:07:00 failover.go:1029: Starting recovery measurement at 2025-09-28 18:06:59.399975822 +0000 UTC m=+322.959722331
+2025/09/28 18:07:00 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:07:01 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:07:01 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:07:02 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:07:02 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:07:03 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:07:03 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:07:04 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:07:04 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:07:05 failover.go:1041: !!!!! Recovery completed after 5.62443876s - query succeeded
+2025/09/28 18:07:05 failover.go:1048: recovering n5 (disk-stall)
+2025/09/28 18:07:05 disk_stall.go:238: Unstall() details in run_180705.024530464_n5_Unstall.log
+2025/09/28 18:07:05 cluster.go:722: test status: stopping nodes :5
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: stopping
+2025/09/28 18:07:06 monitor.go:325: Monitor event: n5: cockroach process for system interface died (exit code 137): expected
+2025/09/28 18:07:06 cluster.go:722: test status: starting nodes :5
+2025/09/28 18:07:07 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:07:07 cockroach.go:936: starting node 5
+2025/09/28 18:07:09 monitor.go:325: Monitor event: n5: cockroach process for system interface is running (PID: 6346)
+2025/09/28 18:07:09 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:07:09 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:07:10 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:07:10 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:07:10 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:08:11 failover.go:1921: moving 1 leases to n6 (database_name = 'kv')
+2025/09/28 18:08:17 failover.go:1024: failing n6 (disk-stall)
+2025/09/28 18:08:17 disk_stall.go:238: Stall() details in run_180817.790742939_n6_Stall.log
+2025/09/28 18:08:18 failover.go:1029: Starting recovery measurement at 2025-09-28 18:08:17.790739115 +0000 UTC m=+401.350485624
+2025/09/28 18:08:18 failover.go:1041: !!!!! Recovery completed after 713.650224ms - query succeeded
+2025/09/28 18:08:18 failover.go:1048: recovering n6 (disk-stall)
+2025/09/28 18:08:18 disk_stall.go:238: Unstall() details in run_180818.504478182_n6_Unstall.log
+2025/09/28 18:08:18 cluster.go:722: test status: stopping nodes :6
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: stopping
+2025/09/28 18:08:20 cluster.go:722: test status: starting nodes :6
+2025/09/28 18:08:20 monitor.go:325: Monitor event: n6: cockroach process for system interface died (exit code 137): expected
+2025/09/28 18:08:20 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:08:20 cockroach.go:936: starting node 6
+2025/09/28 18:08:22 monitor.go:325: Monitor event: n6: cockroach process for system interface is running (PID: 6738)
+2025/09/28 18:08:22 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:08:22 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:08:23 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:08:23 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:08:23 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:09:24 failover.go:1921: moving 1 leases to n4 (database_name = 'kv')
+2025/09/28 18:09:31 failover.go:1024: failing n4 (disk-stall)
+2025/09/28 18:09:31 disk_stall.go:238: Stall() details in run_180931.330250189_n4_Stall.log
+2025/09/28 18:09:32 failover.go:1029: Starting recovery measurement at 2025-09-28 18:09:31.330246357 +0000 UTC m=+474.889992876
+2025/09/28 18:09:32 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:09:33 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:09:33 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:09:34 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:09:34 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:09:35 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:09:35 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:09:36 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:09:36 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:09:36 failover.go:1041: !!!!! Recovery completed after 5.421011223s - query succeeded
+2025/09/28 18:09:36 failover.go:1048: recovering n4 (disk-stall)
+2025/09/28 18:09:36 disk_stall.go:238: Unstall() details in run_180936.751374348_n4_Unstall.log
+2025/09/28 18:09:37 cluster.go:722: test status: stopping nodes :4
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: stopping
+2025/09/28 18:09:37 monitor.go:325: Monitor event: n4: cockroach process for system interface died (exit code 137): expected
+2025/09/28 18:09:38 cluster.go:722: test status: starting nodes :4
+2025/09/28 18:09:39 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:09:39 cockroach.go:936: starting node 4
+2025/09/28 18:09:39 monitor.go:325: Monitor event: n4: cockroach process for system interface is running (PID: 7588)
+2025/09/28 18:09:40 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:09:40 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:09:41 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:09:41 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:09:41 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:10:48 failover.go:1024: failing n5 (disk-stall)
+2025/09/28 18:10:48 disk_stall.go:238: Stall() details in run_181048.348325206_n5_Stall.log
+2025/09/28 18:10:49 failover.go:1029: Starting recovery measurement at 2025-09-28 18:10:48.34832148 +0000 UTC m=+551.908067988
+2025/09/28 18:10:49 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:10:50 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:10:50 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:10:51 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:10:51 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:10:52 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:10:52 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:10:53 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:10:53 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:10:54 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:10:54 failover.go:1041: !!!!! Recovery completed after 5.849789076s - query succeeded
+2025/09/28 18:10:54 failover.go:1048: recovering n5 (disk-stall)
+2025/09/28 18:10:54 disk_stall.go:238: Unstall() details in run_181054.198209172_n5_Unstall.log
+2025/09/28 18:10:54 cluster.go:722: test status: stopping nodes :5
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: stopping
+2025/09/28 18:10:55 monitor.go:325: Monitor event: n5: cockroach process for system interface died (exit code 137): expected
+2025/09/28 18:10:55 cluster.go:722: test status: starting nodes :5
+2025/09/28 18:10:56 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:10:56 cockroach.go:936: starting node 5
+2025/09/28 18:10:57 monitor.go:325: Monitor event: n5: cockroach process for system interface is running (PID: 8068)
+2025/09/28 18:10:58 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:10:58 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:10:59 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:10:59 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:10:59 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:12:00 failover.go:1921: moving 1 leases to n6 (database_name = 'kv')
+2025/09/28 18:12:07 failover.go:1024: failing n6 (disk-stall)
+2025/09/28 18:12:07 disk_stall.go:238: Stall() details in run_181207.069910994_n6_Stall.log
+2025/09/28 18:12:07 failover.go:1029: Starting recovery measurement at 2025-09-28 18:12:07.069907393 +0000 UTC m=+630.629653901
+2025/09/28 18:12:08 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:12:08 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:12:09 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:12:09 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:12:10 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:12:10 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:12:11 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:12:11 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:12:12 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:12:12 failover.go:1041: !!!!! Recovery completed after 5.575250813s - query succeeded
+2025/09/28 18:12:12 failover.go:1048: recovering n6 (disk-stall)
+2025/09/28 18:12:12 disk_stall.go:238: Unstall() details in run_181212.645272281_n6_Unstall.log
+2025/09/28 18:12:12 cluster.go:722: test status: stopping nodes :6
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: stopping
+2025/09/28 18:12:13 monitor.go:325: Monitor event: n6: cockroach process for system interface died (exit code 137): expected
+2025/09/28 18:12:14 cluster.go:722: test status: starting nodes :6
+2025/09/28 18:12:14 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:12:14 cockroach.go:936: starting node 6
+2025/09/28 18:12:15 monitor.go:325: Monitor event: n6: cockroach process for system interface is running (PID: 8501)
+2025/09/28 18:12:16 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:12:16 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:12:17 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:12:17 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:12:17 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:13:24 failover.go:1024: failing n4 (disk-stall)
+2025/09/28 18:13:24 disk_stall.go:238: Stall() details in run_181324.271480040_n4_Stall.log
+2025/09/28 18:13:24 failover.go:1029: Starting recovery measurement at 2025-09-28 18:13:24.271476474 +0000 UTC m=+707.831222982
+2025/09/28 18:13:25 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:25 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:26 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:27 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:27 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:28 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:28 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:29 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:29 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:30 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:30 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:31 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:31 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:32 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:32 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:33 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:33 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:13:33 failover.go:1041: !!!!! Recovery completed after 9.45883512s - query succeeded
+2025/09/28 18:13:33 failover.go:1048: recovering n4 (disk-stall)
+2025/09/28 18:13:33 disk_stall.go:238: Unstall() details in run_181333.730446167_n4_Unstall.log
+2025/09/28 18:13:34 cluster.go:722: test status: stopping nodes :4
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: stopping
+2025/09/28 18:13:35 monitor.go:325: Monitor event: n4: cockroach process for system interface died (exit code 137): expected
+2025/09/28 18:13:35 cluster.go:722: test status: starting nodes :4
+2025/09/28 18:13:36 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:13:36 cockroach.go:936: starting node 4
+2025/09/28 18:13:37 monitor.go:325: Monitor event: n4: cockroach process for system interface is running (PID: 9371)
+2025/09/28 18:13:37 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:13:37 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:13:38 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:13:38 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:13:38 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:14:39 failover.go:1921: moving 1 leases to n5 (database_name = 'kv')
+2025/09/28 18:14:45 failover.go:1024: failing n5 (disk-stall)
+2025/09/28 18:14:45 disk_stall.go:238: Stall() details in run_181445.681081090_n5_Stall.log
+2025/09/28 18:14:46 failover.go:1029: Starting recovery measurement at 2025-09-28 18:14:45.681077951 +0000 UTC m=+789.240824460
+2025/09/28 18:14:46 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:14:47 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:14:47 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:14:48 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:14:48 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:14:49 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:14:49 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:14:50 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:14:50 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:14:51 failover.go:1041: !!!!! Recovery completed after 5.639243308s - query succeeded
+2025/09/28 18:14:51 failover.go:1048: recovering n5 (disk-stall)
+2025/09/28 18:14:51 disk_stall.go:238: Unstall() details in run_181451.320431183_n5_Unstall.log
+2025/09/28 18:14:51 cluster.go:722: test status: stopping nodes :5
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: stopping
+2025/09/28 18:14:52 monitor.go:325: Monitor event: n5: cockroach process for system interface died (exit code 137): expected
+2025/09/28 18:14:53 cluster.go:722: test status: starting nodes :5
+2025/09/28 18:14:53 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:14:53 cockroach.go:936: starting node 5
+2025/09/28 18:14:55 monitor.go:325: Monitor event: n5: cockroach process for system interface is running (PID: 9844)
+2025/09/28 18:14:55 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:14:55 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:14:56 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:14:56 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:14:56 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:15:57 failover.go:1921: moving 1 leases to n6 (database_name = 'kv')
+2025/09/28 18:16:04 failover.go:1024: failing n6 (disk-stall)
+2025/09/28 18:16:04 disk_stall.go:238: Stall() details in run_181604.301822535_n6_Stall.log
+2025/09/28 18:16:05 failover.go:1029: Starting recovery measurement at 2025-09-28 18:16:04.301818735 +0000 UTC m=+867.861565243
+2025/09/28 18:16:05 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:16:06 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:16:06 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:16:07 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:16:07 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:16:08 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:16:08 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:16:09 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:16:09 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:16:09 failover.go:1041: !!!!! Recovery completed after 5.367199919s - query succeeded
+2025/09/28 18:16:09 failover.go:1048: recovering n6 (disk-stall)
+2025/09/28 18:16:09 disk_stall.go:238: Unstall() details in run_181609.669180907_n6_Unstall.log
+2025/09/28 18:16:10 cluster.go:722: test status: stopping nodes :6
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: stopping
+2025/09/28 18:16:11 cluster.go:722: test status: starting nodes :6
+2025/09/28 18:16:11 monitor.go:325: Monitor event: n6: cockroach process for system interface died (exit code 137): expected
+2025/09/28 18:16:11 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:16:11 cockroach.go:936: starting node 6
+2025/09/28 18:16:13 monitor.go:325: Monitor event: n6: cockroach process for system interface is running (PID: 10280)
+2025/09/28 18:16:13 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:16:13 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:16:14 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:16:14 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:16:15 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:17:15 failover.go:1921: moving 1 leases to n4 (database_name = 'kv')
+2025/09/28 18:17:22 failover.go:1024: failing n4 (disk-stall)
+2025/09/28 18:17:22 disk_stall.go:238: Stall() details in run_181722.300633970_n4_Stall.log
+2025/09/28 18:17:22 failover.go:1029: Starting recovery measurement at 2025-09-28 18:17:22.300629069 +0000 UTC m=+945.860375578
+2025/09/28 18:17:23 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:17:23 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:17:24 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:17:25 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:17:25 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:17:26 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:17:26 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:17:27 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:17:27 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:17:27 failover.go:1041: !!!!! Recovery completed after 5.356468676s - query succeeded
+2025/09/28 18:17:27 failover.go:1048: recovering n4 (disk-stall)
+2025/09/28 18:17:27 disk_stall.go:238: Unstall() details in run_181727.657213709_n4_Unstall.log
+2025/09/28 18:17:27 cluster.go:722: test status: stopping nodes :4
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: stopping
+2025/09/28 18:17:29 monitor.go:325: Monitor event: n4: cockroach process for system interface died (exit code 137): expected
+2025/09/28 18:17:29 cluster.go:722: test status: starting nodes :4
+2025/09/28 18:17:29 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:17:29 cockroach.go:936: starting node 4
+2025/09/28 18:17:31 monitor.go:325: Monitor event: n4: cockroach process for system interface is running (PID: 11135)
+2025/09/28 18:17:31 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:17:31 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:17:32 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:17:32 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:17:32 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:18:38 failover.go:1024: failing n5 (disk-stall)
+2025/09/28 18:18:38 disk_stall.go:238: Stall() details in run_181838.484407771_n5_Stall.log
+2025/09/28 18:18:39 failover.go:1029: Starting recovery measurement at 2025-09-28 18:18:38.484389891 +0000 UTC m=+1022.044136399
+2025/09/28 18:18:39 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:18:40 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:18:40 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:18:41 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:18:41 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:18:42 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:18:42 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:18:43 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:18:43 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:18:44 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:18:44 failover.go:1041: !!!!! Recovery completed after 6.06206814s - query succeeded
+2025/09/28 18:18:44 failover.go:1048: recovering n5 (disk-stall)
+2025/09/28 18:18:44 disk_stall.go:238: Unstall() details in run_181844.546560981_n5_Unstall.log
+2025/09/28 18:18:44 cluster.go:722: test status: stopping nodes :5
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: stopping
+2025/09/28 18:18:46 monitor.go:325: Monitor event: n5: cockroach process for system interface died (exit code 137): expected
+2025/09/28 18:18:46 cluster.go:722: test status: starting nodes :5
+2025/09/28 18:18:46 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:18:46 cockroach.go:936: starting node 5
+2025/09/28 18:18:48 monitor.go:325: Monitor event: n5: cockroach process for system interface is running (PID: 11596)
+2025/09/28 18:18:48 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:18:48 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:18:50 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:18:50 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:18:50 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:19:55 failover.go:1024: failing n6 (disk-stall)
+2025/09/28 18:19:55 disk_stall.go:238: Stall() details in run_181955.805541758_n6_Stall.log
+2025/09/28 18:19:56 failover.go:1029: Starting recovery measurement at 2025-09-28 18:19:55.805538298 +0000 UTC m=+1099.365284806
+2025/09/28 18:19:57 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:19:57 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:19:58 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:19:58 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:19:59 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:19:59 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:20:00 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:20:00 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:20:01 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:20:01 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:20:01 failover.go:1041: !!!!! Recovery completed after 5.78782623s - query succeeded
+2025/09/28 18:20:01 failover.go:1048: recovering n6 (disk-stall)
+2025/09/28 18:20:01 disk_stall.go:238: Unstall() details in run_182001.593459108_n6_Unstall.log
+2025/09/28 18:20:01 cluster.go:722: test status: stopping nodes :6
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: stopping
+2025/09/28 18:20:02 monitor.go:325: Monitor event: n6: cockroach process for system interface died (exit code 137): expected
+2025/09/28 18:20:03 cluster.go:722: test status: starting nodes :6
+2025/09/28 18:20:03 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:20:03 cockroach.go:936: starting node 6
+2025/09/28 18:20:04 monitor.go:325: Monitor event: n6: cockroach process for system interface is running (PID: 12022)
+2025/09/28 18:20:05 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:20:05 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:20:06 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:20:06 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:20:06 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:21:07 failover.go:1921: moving 1 leases to n4 (database_name = 'kv')
+2025/09/28 18:21:14 failover.go:1024: failing n4 (disk-stall)
+2025/09/28 18:21:14 disk_stall.go:238: Stall() details in run_182114.007114445_n4_Stall.log
+2025/09/28 18:21:14 failover.go:1029: Starting recovery measurement at 2025-09-28 18:21:14.007110052 +0000 UTC m=+1177.566856560
+2025/09/28 18:21:15 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:21:15 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:21:16 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:21:16 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:21:17 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:21:17 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:21:18 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:21:18 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:21:19 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:21:19 failover.go:1041: !!!!! Recovery completed after 5.592223737s - query succeeded
+2025/09/28 18:21:19 failover.go:1048: recovering n4 (disk-stall)
+2025/09/28 18:21:19 disk_stall.go:238: Unstall() details in run_182119.599457115_n4_Unstall.log
+2025/09/28 18:21:19 cluster.go:722: test status: stopping nodes :4
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: stopping
+2025/09/28 18:21:21 monitor.go:325: Monitor event: n4: cockroach process for system interface died (exit code 137): expected
+2025/09/28 18:21:21 cluster.go:722: test status: starting nodes :4
+2025/09/28 18:21:21 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:21:21 cockroach.go:936: starting node 4
+2025/09/28 18:21:23 monitor.go:325: Monitor event: n4: cockroach process for system interface is running (PID: 12884)
+2025/09/28 18:21:23 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:21:23 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:21:24 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:21:24 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:21:24 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:22:30 failover.go:1024: failing n5 (disk-stall)
+2025/09/28 18:22:30 disk_stall.go:238: Stall() details in run_182230.988156550_n5_Stall.log
+2025/09/28 18:22:31 failover.go:1029: Starting recovery measurement at 2025-09-28 18:22:30.988152373 +0000 UTC m=+1254.547898887
+2025/09/28 18:22:32 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:22:32 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:22:33 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:22:33 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:22:34 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:22:34 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:22:35 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:22:35 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:22:36 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:22:36 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:22:36 failover.go:1041: !!!!! Recovery completed after 5.83930947s - query succeeded
+2025/09/28 18:22:36 failover.go:1048: recovering n5 (disk-stall)
+2025/09/28 18:22:36 disk_stall.go:238: Unstall() details in run_182236.827564669_n5_Unstall.log
+2025/09/28 18:22:37 cluster.go:722: test status: stopping nodes :5
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: stopping
+2025/09/28 18:22:37 monitor.go:325: Monitor event: n5: cockroach process for system interface died (exit code 137): expected
+2025/09/28 18:22:38 cluster.go:722: test status: starting nodes :5
+2025/09/28 18:22:39 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:22:39 cockroach.go:936: starting node 5
+2025/09/28 18:22:40 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:22:40 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+2025/09/28 18:22:40 monitor.go:325: Monitor event: n5: cockroach process for system interface is running (PID: 13345)
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:22:42 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:22:42 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:22:42 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:23:48 failover.go:1024: failing n6 (disk-stall)
+2025/09/28 18:23:48 disk_stall.go:238: Stall() details in run_182348.474230962_n6_Stall.log
+2025/09/28 18:23:49 failover.go:1029: Starting recovery measurement at 2025-09-28 18:23:48.474227193 +0000 UTC m=+1332.033973701
+2025/09/28 18:23:49 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:23:50 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:23:50 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:23:51 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:23:51 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:23:52 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:23:52 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:23:53 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:23:53 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:23:54 failover.go:1045: !!!!! Recovery error: pq: query execution canceled
+2025/09/28 18:23:54 failover.go:1041: !!!!! Recovery completed after 6.166853982s - query succeeded
+2025/09/28 18:23:54 failover.go:1048: recovering n6 (disk-stall)
+2025/09/28 18:23:54 disk_stall.go:238: Unstall() details in run_182354.641203701_n6_Unstall.log
+2025/09/28 18:23:54 cluster.go:722: test status: stopping nodes :6
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: stopping
+2025/09/28 18:23:55 monitor.go:325: Monitor event: n6: cockroach process for system interface died (exit code 137): expected
+2025/09/28 18:23:56 cluster.go:722: test status: starting nodes :6
+2025/09/28 18:23:56 cockroach.go:620: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): starting cockroach processes
+2025/09/28 18:23:56 cockroach.go:936: starting node 6
+2025/09/28 18:23:58 monitor.go:325: Monitor event: n6: cockroach process for system interface is running (PID: 13784)
+2025/09/28 18:23:58 cockroach.go:1464: ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2 (system): setting cluster settings
+2025/09/28 18:23:58 cockroach.go:1498: INFO: (cluster="ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2") using COCKROACH_DEV_LICENSE: valid_until_unix_sec:2030058253 type:Enterprise organization_name:"Cockroach Labs - Production Testing" 
+ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2: executing sql
+2025/09/28 18:23:59 cockroach.go:1458: log into DB console with user=roachprod password=cockroachdb
+2025/09/28 18:23:59 client.go:310: Prometheus credentials obtained from Env
+2025/09/28 18:23:59 client.go:160: invoking PUT for URL: https://grafana.testeng.crdb.io/promhelpers/v1/instance-configs/ibrahimkettanehcockroachlabsc-1759082497-01-n7cpu2
+2025/09/28 18:24:37 run.go:327: Signaled received. Canceling workers and waiting up to 5s for them.
+2025/09/28 18:24:37 monitor.go:325: Monitor event: n6: error: EOF
+2025/09/28 18:24:37 test_impl.go:478: test failure #1: full stack retained in failure_1.log: (failover.go:2004).sleepFor: sleep failed: context canceled
+2025/09/28 18:24:37 test_impl.go:478: test failure #2: full stack retained in failure_2.log: (monitor.go:267).Wait: monitor failure: monitor user task failed: t.Fatal() was called
+EOF [owner=test-eng]
+2025/09/28 18:24:37 disk_stall.go:238: Cleanup() details in run_182437.044889529_n1-6_Cleanup.log
+2025/09/28 18:24:37 test_impl.go:478: test failure #3: full stack retained in failure_3.log: (disk_stall.go:183).Cleanup: failed to cleanup disk stall: context canceled
+2025/09/28 18:24:37 test_runner.go:2413: terminating stray tasks
+2025/09/28 18:24:37 test_runner.go:1440: test completed with failure(s)
+2025/09/28 18:24:37 test_runner.go:1486: skipping post test assertions as test failed
+2025/09/28 18:24:37 test_runner.go:1489: running test teardown (test-teardown.log)
+2025/09/28 18:24:42 run.go:337: 5s elapsed. Will brutally destroy all clusters.
+2025/09/28 18:24:42 run.go:343: CtrlC handler destroying all clusters
+2025/09/28 18:24:42 run.go:353: Done destroying all clusters.
+2025/09/28 18:24:42 run.go:355: all stacks:
+
+goroutine 72 [running]:
+github.com/cockroachdb/cockroach/pkg/util/allstacks.GetWithBuf({0x0?, 0x0?, 0x0?})
+	pkg/util/allstacks/allstacks.go:31 +0x74
+github.com/cockroachdb/cockroach/pkg/util/allstacks.Get(...)
+	pkg/util/allstacks/allstacks.go:18
+main.CtrlC.func1()
+	pkg/cmd/roachtest/run.go:355 +0x3a5
+created by main.CtrlC in goroutine 1
+	pkg/cmd/roachtest/run.go:321 +0xfe
+
+goroutine 1 [semacquire, 23 minutes]:
+sync.runtime_Semacquire(0xc002021700?)
+	GOROOT/src/runtime/sema.go:71 +0x25
+sync.(*WaitGroup).Wait(0xc00428f410?)
+	GOROOT/src/sync/waitgroup.go:118 +0x48
+main.(*testRunner).Run(0xc003a15830, {0xac2eb08, 0xc00262f4a0}, {0xc003a3d688, _, _}, _, _, {0x1, {0x0, ...}, ...}, ...)
+	pkg/cmd/roachtest/test_runner.go:451 +0xaaa
+main.runTests(0x9e5b410, 0xc0001947c0)
+	pkg/cmd/roachtest/run.go:187 +0xb8f
+main.main.func3(0xc0041a2908, {0xc001ea5260, 0x1, 0x3})
+	pkg/cmd/roachtest/main.go:181 +0xcb
+github.com/spf13/cobra.(*Command).execute(0xc0041a2908, {0xc001ea5080, 0x3, 0x3})
+	external/com_github_spf13_cobra/command.go:916 +0x862
+github.com/spf13/cobra.(*Command).ExecuteC(0xc0041a2008)
+	external/com_github_spf13_cobra/command.go:1044 +0x3a5
+github.com/spf13/cobra.(*Command).Execute(...)
+	external/com_github_spf13_cobra/command.go:968
+main.main()
+	pkg/cmd/roachtest/main.go:248 +0x6fd
+
+goroutine 50 [select]:
+go.opencensus.io/stats/view.(*worker).start(0xc001770000)
+	external/io_opencensus_go/stats/view/worker.go:292 +0x9f
+created by go.opencensus.io/stats/view.init.0 in goroutine 1
+	external/io_opencensus_go/stats/view/worker.go:34 +0x8d
+
+goroutine 52 [IO wait, 23 minutes]:
+internal/poll.runtime_pollWait(0x7f939c7ea010, 0x72)
+	GOROOT/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0xc001881f00?, 0xc0016c6c50?, 0x0)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).ReadMsg(0xc001881f00, {0xc0016c6c50, 0x10, 0x10}, {0xc0016d0628, 0x1000, 0x1000}, 0x40000000)
+	GOROOT/src/internal/poll/fd_unix.go:302 +0x385
+net.(*netFD).readMsg(0xc001881f00, {0xc0016c6c50?, 0xc?, 0x8d07000000?}, {0xc0016d0628?, 0xac75a10?, 0x0?}, 0x1?)
+	GOROOT/src/net/fd_posix.go:78 +0x31
+net.(*UnixConn).readMsg(0xc001702620, {0xc0016c6c50?, 0x44e30b?, 0x7f93e33c81a8?}, {0xc0016d0628?, 0xc000d59dd0?, 0x4a97bd?})
+	GOROOT/src/net/unixsock_posix.go:115 +0x45
+net.(*UnixConn).ReadMsgUnix(0xc001702620, {0xc0016c6c50?, 0x30?, 0x50?}, {0xc0016d0628?, 0x7f93e33c81a8?, 0x18?})
+	GOROOT/src/net/unixsock.go:143 +0x36
+github.com/godbus/dbus.(*oobReader).Read(0xc0016d0608, {0xc0016c6c50?, 0xc000d59e30?, 0x449225?})
+	external/com_github_godbus_dbus/transport_unix.go:21 +0x3c
+io.ReadAtLeast({0xabd6100, 0xc0016d0608}, {0xc0016c6c50, 0x10, 0x10}, 0x10)
+	GOROOT/src/io/io.go:335 +0x90
+io.ReadFull(...)
+	GOROOT/src/io/io.go:354
+github.com/godbus/dbus.(*unixTransport).ReadMessage(0xc001716af8)
+	external/com_github_godbus_dbus/transport_unix.go:91 +0xfe
+github.com/godbus/dbus.(*Conn).inWorker(0xc0017c8d80)
+	external/com_github_godbus_dbus/conn.go:294 +0x35
+created by github.com/godbus/dbus.(*Conn).Auth in goroutine 1
+	external/com_github_godbus_dbus/auth.go:118 +0x8ee
+
+goroutine 54 [chan receive]:
+github.com/cockroachdb/cockroach/pkg/util/log.flushDaemon()
+	pkg/util/log/log_flush.go:123 +0x4e
+created by github.com/cockroachdb/cockroach/pkg/util/log.init.5 in goroutine 1
+	pkg/util/log/log_flush.go:78 +0x1a
+
+goroutine 55 [chan receive, 23 minutes]:
+github.com/cockroachdb/cockroach/pkg/util/log.signalFlusher()
+	pkg/util/log/log_flush.go:147 +0x85
+created by github.com/cockroachdb/cockroach/pkg/util/log.init.5 in goroutine 1
+	pkg/util/log/log_flush.go:79 +0x26
+
+goroutine 40 [syscall]:
+os/signal.signal_recv()
+	GOROOT/src/runtime/sigqueue.go:152 +0x29
+os/signal.loop()
+	GOROOT/src/os/signal/signal_unix.go:23 +0x13
+created by os/signal.Notify.func1.1 in goroutine 55
+	GOROOT/src/os/signal/signal.go:151 +0x1f
+
+goroutine 56 [chan receive]:
+github.com/cockroachdb/cockroach/pkg/util/goschedstats.init.0.func1()
+	pkg/util/goschedstats/runnable_enabled.go:144 +0xe5
+created by github.com/cockroachdb/cockroach/pkg/util/goschedstats.init.0 in goroutine 1
+	pkg/util/goschedstats/runnable_enabled.go:136 +0x1a
+
+goroutine 70 [IO wait, 23 minutes]:
+internal/poll.runtime_pollWait(0x7f939c7e9cc8, 0x72)
+	GOROOT/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0xc002739080?, 0x10?, 0x0)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Accept(0xc002739080)
+	GOROOT/src/internal/poll/fd_unix.go:620 +0x295
+net.(*netFD).accept(0xc002739080)
+	GOROOT/src/net/fd_unix.go:172 +0x29
+net.(*TCPListener).accept(0xc0020215c0)
+	GOROOT/src/net/tcpsock_posix.go:159 +0x1e
+net.(*TCPListener).Accept(0xc0020215c0)
+	GOROOT/src/net/tcpsock.go:372 +0x30
+net/http.(*Server).Serve(0xc003311680, {0xac012e0, 0xc0020215c0})
+	GOROOT/src/net/http/server.go:3330 +0x30c
+net/http.Serve(...)
+	GOROOT/src/net/http/server.go:2858
+main.(*testRunner).runHTTPServer.func1()
+	pkg/cmd/roachtest/test_runner.go:1943 +0x45
+created by main.(*testRunner).runHTTPServer in goroutine 1
+	pkg/cmd/roachtest/test_runner.go:1942 +0x1ef
+
+goroutine 71 [IO wait, 23 minutes]:
+internal/poll.runtime_pollWait(0x7f939c7e9ef8, 0x72)
+	GOROOT/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0xc00275a000?, 0x10?, 0x0)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Accept(0xc00275a000)
+	GOROOT/src/internal/poll/fd_unix.go:620 +0x295
+net.(*netFD).accept(0xc00275a000)
+	GOROOT/src/net/fd_unix.go:172 +0x29
+net.(*TCPListener).accept(0xc00205a080)
+	GOROOT/src/net/tcpsock_posix.go:159 +0x1e
+net.(*TCPListener).Accept(0xc00205a080)
+	GOROOT/src/net/tcpsock.go:372 +0x30
+net/http.(*Server).Serve(0xc0041694a0, {0xac012e0, 0xc00205a080})
+	GOROOT/src/net/http/server.go:3330 +0x30c
+net/http.(*Server).ListenAndServe(0xc0041694a0)
+	GOROOT/src/net/http/server.go:3259 +0x71
+net/http.ListenAndServe(...)
+	GOROOT/src/net/http/server.go:3514
+main.runTests.func1()
+	pkg/cmd/roachtest/run.go:152 +0x1b4
+created by main.runTests in goroutine 1
+	pkg/cmd/roachtest/run.go:151 +0xa49
+
+goroutine 73 [select]:
+main.(*testRunner).collectArtifacts(0xc003a15830, {0xac2eb08, 0xc00262f4a0}, 0xc002605040, 0xc003a4c308, 0x0, 0x34630b8a000)
+	pkg/cmd/roachtest/test_runner.go:1866 +0x1a7
+main.(*testRunner).teardownTest(0xc003a15830, {0xac2eb08, 0xc00262f4a0}, 0xc002605040, 0xc003a4c308, 0x0)
+	pkg/cmd/roachtest/test_runner.go:1673 +0xca
+main.(*testRunner).runTest(0xc003a15830, {0xac2eb08, 0xc00262f4a0}, 0xc002605040, 0x1, 0x20bde7364000?, 0xc003a4c308, {0xaba7b60, 0xc00011c028}, 0xc0045676e0, ...)
+	pkg/cmd/roachtest/test_runner.go:1494 +0x14c8
+main.(*testRunner).runWorker(0xc003a15830, {0xac2eb08, _}, {_, _}, _, _, _, _, {0x1, ...}, ...)
+	pkg/cmd/roachtest/test_runner.go:1008 +0x26a5
+main.(*testRunner).Run.func1({0xac2eb08, 0xc00262f4a0})
+	pkg/cmd/roachtest/test_runner.go:415 +0x425
+github.com/cockroachdb/cockroach/pkg/util/stop.(*Stopper).RunAsyncTaskEx.func1({0xac2eb08, 0xc00262f4a0})
+	pkg/util/stop/stopper.go:438 +0x8a
+created by github.com/cockroachdb/cockroach/pkg/util/stop.(*Stopper).RunAsyncTaskEx in goroutine 1
+	pkg/util/stop/stopper.go:436 +0x137
+
+goroutine 2069 [IO wait]:
+internal/poll.runtime_pollWait(0x7f939c7e9de0, 0x72)
+	GOROOT/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0xc00275a400?, 0xc0001e1500?, 0x0)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0xc00275a400, {0xc0001e1500, 0x1500, 0x1500})
+	GOROOT/src/internal/poll/fd_unix.go:165 +0x27a
+net.(*netFD).Read(0xc00275a400, {0xc0001e1500?, 0x103d95e0?, 0xc0036ee9d0?})
+	GOROOT/src/net/fd_posix.go:55 +0x25
+net.(*conn).Read(0xc003e505b0, {0xc0001e1500?, 0xc001ce2fe0?, 0x745753?})
+	GOROOT/src/net/net.go:189 +0x45
+crypto/tls.(*atLeastReader).Read(0xc0044038a8, {0xc0001e1500?, 0x0?, 0xc0044038a8?})
+	GOROOT/src/crypto/tls/conn.go:809 +0x3b
+bytes.(*Buffer).ReadFrom(0xc0044a30b8, {0xabaa660, 0xc0044038a8})
+	GOROOT/src/bytes/buffer.go:211 +0x98
+crypto/tls.(*Conn).readFromUntil(0xc0044a2e08, {0xaba8460, 0xc003e505b0}, 0xc0036eea40?)
+	GOROOT/src/crypto/tls/conn.go:831 +0xde
+crypto/tls.(*Conn).readRecordOrCCS(0xc0044a2e08, 0x0)
+	GOROOT/src/crypto/tls/conn.go:629 +0x3cf
+crypto/tls.(*Conn).readRecord(...)
+	GOROOT/src/crypto/tls/conn.go:591
+crypto/tls.(*Conn).Read(0xc0044a2e08, {0xc00335f000, 0x1000, 0xc000274108?})
+	GOROOT/src/crypto/tls/conn.go:1385 +0x150
+net/http.(*persistConn).Read(0xc0033497a0, {0xc00335f000?, 0x7de365?, 0x8812b20?})
+	GOROOT/src/net/http/transport.go:2052 +0x4a
+bufio.(*Reader).fill(0xc0046dc840)
+	GOROOT/src/bufio/bufio.go:110 +0x103
+bufio.(*Reader).Peek(0xc0046dc840, 0x1)
+	GOROOT/src/bufio/bufio.go:148 +0x53
+net/http.(*persistConn).readLoop(0xc0033497a0)
+	GOROOT/src/net/http/transport.go:2205 +0x185
+created by net/http.(*Transport).dialConn in goroutine 2063
+	GOROOT/src/net/http/transport.go:1874 +0x154f
+
+goroutine 1790 [select, 20 minutes]:
+database/sql.(*DB).connectionOpener(0xc003d8d1e0, {0xac2eb08, 0xc00272cf00})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1338
+	GOROOT/src/database/sql/sql.go:833 +0x130
+
+goroutine 3267 [select, 6 minutes]:
+database/sql.(*DB).connectionOpener(0xc0031b40d0, {0xac2eb08, 0xc001f9a3c0})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1894
+	GOROOT/src/database/sql/sql.go:833 +0x130
+
+goroutine 2070 [select]:
+net/http.(*persistConn).writeLoop(0xc0033497a0)
+	GOROOT/src/net/http/transport.go:2519 +0xe7
+created by net/http.(*Transport).dialConn in goroutine 2063
+	GOROOT/src/net/http/transport.go:1875 +0x15a5
+
+goroutine 2298 [select, 17 minutes]:
+database/sql.(*DB).connectionOpener(0xc003139520, {0xac2eb08, 0xc0026daf00})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1894
+	GOROOT/src/database/sql/sql.go:833 +0x130
+
+goroutine 2816 [select, 4 minutes]:
+database/sql.(*DB).connectionOpener(0xc002254680, {0xac2eb08, 0xc00168ef00})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1894
+	GOROOT/src/database/sql/sql.go:833 +0x130
+
+goroutine 3907 [select]:
+net/http.(*persistConn).writeLoop(0xc00346c240)
+	GOROOT/src/net/http/transport.go:2519 +0xe7
+created by net/http.(*Transport).dialConn in goroutine 3836
+	GOROOT/src/net/http/transport.go:1875 +0x15a5
+
+goroutine 3902 [IO wait]:
+internal/poll.runtime_pollWait(0x7f9390ebfc10, 0x72)
+	GOROOT/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0xc00381b3e0?, 0xc004d96000?, 0x1)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0xc00381b3e0, {0xc004d96000, 0x8000, 0x8000})
+	GOROOT/src/internal/poll/fd_unix.go:165 +0x27a
+os.(*File).read(...)
+	GOROOT/src/os/file_posix.go:29
+os.(*File).Read(0xc001702378, {0xc004d96000?, 0x84ce6a0?, 0x8983101?})
+	GOROOT/src/os/file.go:124 +0x52
+io.copyBuffer({0xaba9060, 0xc00262f130}, {0xaba8fc0, 0xc0030b2a78}, {0x0, 0x0, 0x0})
+	GOROOT/src/io/io.go:429 +0x191
+io.Copy(...)
+	GOROOT/src/io/io.go:388
+os.genericWriteTo(0xc001702378?, {0xaba9060, 0xc00262f130})
+	GOROOT/src/os/file.go:275 +0x4f
+os.(*File).WriteTo(0xc001702378, {0xaba9060, 0xc00262f130})
+	GOROOT/src/os/file.go:253 +0x9c
+io.copyBuffer({0xaba9060, 0xc00262f130}, {0xaba7b80, 0xc001702378}, {0x0, 0x0, 0x0})
+	GOROOT/src/io/io.go:411 +0x9d
+io.Copy(...)
+	GOROOT/src/io/io.go:388
+os/exec.(*Cmd).writerDescriptor.func1()
+	GOROOT/src/os/exec/exec.go:580 +0x34
+os/exec.(*Cmd).Start.func2(0xc001a85170?)
+	GOROOT/src/os/exec/exec.go:733 +0x2c
+created by os/exec.(*Cmd).Start in goroutine 3857
+	GOROOT/src/os/exec/exec.go:732 +0x98b
+
+goroutine 3901 [IO wait]:
+internal/poll.runtime_pollWait(0x7f9390ebfd28, 0x72)
+	GOROOT/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0xc00381b320?, 0xc0038f42d0?, 0x1)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0xc00381b320, {0xc0038f42d0, 0x1d30, 0x1d30})
+	GOROOT/src/internal/poll/fd_unix.go:165 +0x27a
+os.(*File).read(...)
+	GOROOT/src/os/file_posix.go:29
+os.(*File).Read(0xc001702360, {0xc0038f42d0?, 0x0?, 0x4000?})
+	GOROOT/src/os/file.go:124 +0x52
+bytes.(*Buffer).ReadFrom(0xc0025ecf30, {0xaba8fc0, 0xc004798838})
+	GOROOT/src/bytes/buffer.go:211 +0x98
+io.copyBuffer({0xaba7ca0, 0xc0025ecf30}, {0xaba8fc0, 0xc004798838}, {0x0, 0x0, 0x0})
+	GOROOT/src/io/io.go:415 +0x151
+io.Copy(...)
+	GOROOT/src/io/io.go:388
+os.genericWriteTo(0xc001702360?, {0xaba7ca0, 0xc0025ecf30})
+	GOROOT/src/os/file.go:275 +0x4f
+os.(*File).WriteTo(0xc001702360, {0xaba7ca0, 0xc0025ecf30})
+	GOROOT/src/os/file.go:253 +0x9c
+io.copyBuffer({0xaba7ca0, 0xc0025ecf30}, {0xaba7b80, 0xc001702360}, {0x0, 0x0, 0x0})
+	GOROOT/src/io/io.go:411 +0x9d
+io.Copy(...)
+	GOROOT/src/io/io.go:388
+os/exec.(*Cmd).writerDescriptor.func1()
+	GOROOT/src/os/exec/exec.go:580 +0x34
+os/exec.(*Cmd).Start.func2(0x5?)
+	GOROOT/src/os/exec/exec.go:733 +0x2c
+created by os/exec.(*Cmd).Start in goroutine 3857
+	GOROOT/src/os/exec/exec.go:732 +0x98b
+
+goroutine 3906 [IO wait]:
+internal/poll.runtime_pollWait(0x7f9390ebf120, 0x72)
+	GOROOT/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0xc002821980?, 0xc003416a00?, 0x0)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0xc002821980, {0xc003416a00, 0x1500, 0x1500})
+	GOROOT/src/internal/poll/fd_unix.go:165 +0x27a
+net.(*netFD).Read(0xc002821980, {0xc003416a00?, 0x10?, 0xc0031eb9d0?})
+	GOROOT/src/net/fd_posix.go:55 +0x25
+net.(*conn).Read(0xc002e1a478, {0xc003416a00?, 0xc00248bb20?, 0x745753?})
+	GOROOT/src/net/net.go:189 +0x45
+crypto/tls.(*atLeastReader).Read(0xc003cd6fa8, {0xc003416a00?, 0x0?, 0xc003cd6fa8?})
+	GOROOT/src/crypto/tls/conn.go:809 +0x3b
+bytes.(*Buffer).ReadFrom(0xc0030db0b8, {0xabaa660, 0xc003cd6fa8})
+	GOROOT/src/bytes/buffer.go:211 +0x98
+crypto/tls.(*Conn).readFromUntil(0xc0030dae08, {0xaba8460, 0xc002e1a478}, 0xc0031eba40?)
+	GOROOT/src/crypto/tls/conn.go:831 +0xde
+crypto/tls.(*Conn).readRecordOrCCS(0xc0030dae08, 0x0)
+	GOROOT/src/crypto/tls/conn.go:629 +0x3cf
+crypto/tls.(*Conn).readRecord(...)
+	GOROOT/src/crypto/tls/conn.go:591
+crypto/tls.(*Conn).Read(0xc0030dae08, {0xc003983000, 0x1000, 0xc000274108?})
+	GOROOT/src/crypto/tls/conn.go:1385 +0x150
+net/http.(*persistConn).Read(0xc00346c240, {0xc003983000?, 0x7de365?, 0x8812b20?})
+	GOROOT/src/net/http/transport.go:2052 +0x4a
+bufio.(*Reader).fill(0xc00347f4a0)
+	GOROOT/src/bufio/bufio.go:110 +0x103
+bufio.(*Reader).Peek(0xc00347f4a0, 0x1)
+	GOROOT/src/bufio/bufio.go:148 +0x53
+net/http.(*persistConn).readLoop(0xc00346c240)
+	GOROOT/src/net/http/transport.go:2205 +0x185
+created by net/http.(*Transport).dialConn in goroutine 3836
+	GOROOT/src/net/http/transport.go:1874 +0x154f
+
+goroutine 3857 [syscall]:
+syscall.Syscall6(0xf7, 0x3, 0x32, 0xc003a6ce58, 0x4, 0xc0000c90e0, 0x0)
+	GOROOT/src/syscall/syscall_linux.go:95 +0x39
+os.(*Process).pidfdWait(0xc004496e88?)
+	GOROOT/src/os/pidfd_linux.go:110 +0x236
+os.(*Process).wait(0x50?)
+	GOROOT/src/os/exec_unix.go:27 +0x25
+os.(*Process).Wait(...)
+	GOROOT/src/os/exec.go:358
+os/exec.(*Cmd).Wait(0xc001842d80)
+	GOROOT/src/os/exec/exec.go:906 +0x45
+os/exec.(*Cmd).Run(0xc001842d80)
+	GOROOT/src/os/exec/exec.go:610 +0x2d
+os/exec.(*Cmd).Output(0xc001842d80)
+	GOROOT/src/os/exec/exec.go:1000 +0xb6
+github.com/cockroachdb/cockroach/pkg/roachprod/vm/gce.runJSONCommand({0xc003a6d3f8, 0x5, 0x5}, {0x83db5c0, 0xc001702308})
+	pkg/roachprod/vm/gce/gcloud.go:141 +0xba
+github.com/cockroachdb/cockroach/pkg/roachprod/vm/gce.(*Provider).GetVMSpecs(0xc000147040, 0xc003eb6ba0, {0xc004995008, 0x7, 0x96978a0?})
+	pkg/roachprod/vm/gce/gcloud.go:487 +0x313
+main.(*clusterImpl).FetchVMSpecs.func1({0xac2eb08?, 0xc00262f4a0?})
+	pkg/cmd/roachtest/cluster.go:1450 +0x305
+github.com/cockroachdb/cockroach/pkg/util/timeutil.RunWithTimeout({0xac2eb08?, 0xc00262f4a0?}, {0x97fce3c, 0xa}, 0x45d964b800, 0xc003a6db60)
+	pkg/util/timeutil/timeout.go:28 +0x97
+main.(*clusterImpl).FetchVMSpecs(0xc003a4c308, {0xac2eb08, 0xc00262f4a0}, 0xc003eb6ba0)
+	pkg/cmd/roachtest/cluster.go:1441 +0x172
+main.(*testRunner).collectArtifacts.func1({0xac2eb08, 0xc00262f4a0})
+	pkg/cmd/roachtest/test_runner.go:1861 +0xaa6
+github.com/cockroachdb/cockroach/pkg/util/stop.(*Stopper).RunAsyncTaskEx.func1({0xac2eb08, 0xc00262f4a0})
+	pkg/util/stop/stopper.go:438 +0x8a
+created by github.com/cockroachdb/cockroach/pkg/util/stop.(*Stopper).RunAsyncTaskEx in goroutine 73
+	pkg/util/stop/stopper.go:436 +0x137
+
+goroutine 2078 [select, 19 minutes]:
+database/sql.(*DB).connectionOpener(0xc003139860, {0xac2eb08, 0xc002488820})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1894
+	GOROOT/src/database/sql/sql.go:833 +0x130
+
+goroutine 1954 [select, 19 minutes]:
+database/sql.(*DB).connectionOpener(0xc00451e0d0, {0xac2eb08, 0xc001f9a0a0})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1894
+	GOROOT/src/database/sql/sql.go:833 +0x130
+
+goroutine 2435 [select, 14 minutes]:
+database/sql.(*DB).connectionOpener(0xc00412b520, {0xac2eb08, 0xc00262e8c0})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1894
+	GOROOT/src/database/sql/sql.go:833 +0x130
+
+goroutine 2234 [select, 17 minutes]:
+database/sql.(*DB).connectionOpener(0xc00307f2b0, {0xac2eb08, 0xc002e422d0})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1894
+	GOROOT/src/database/sql/sql.go:833 +0x130
+
+goroutine 2998 [select, 8 minutes]:
+database/sql.(*DB).connectionOpener(0xc004baf110, {0xac2eb08, 0xc0026da370})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1894
+	GOROOT/src/database/sql/sql.go:833 +0x130
+
+goroutine 3138 [select, 8 minutes]:
+database/sql.(*DB).connectionOpener(0xc000dc2680, {0xac2eb08, 0xc00255cd70})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1894
+	GOROOT/src/database/sql/sql.go:833 +0x130
+
+goroutine 2583 [select, 12 minutes]:
+database/sql.(*DB).connectionOpener(0xc0048f45b0, {0xac2eb08, 0xc00168e690})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1894
+	GOROOT/src/database/sql/sql.go:833 +0x130
+
+goroutine 3392 [select, 4 minutes]:
+database/sql.(*DB).connectionOpener(0xc0030c75f0, {0xac2eb08, 0xc00267ed70})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1894
+	GOROOT/src/database/sql/sql.go:833 +0x130
+
+goroutine 2217 [select, 12 minutes]:
+database/sql.(*DB).connectionOpener(0xc000061860, {0xac2eb08, 0xc00181c3c0})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1894
+	GOROOT/src/database/sql/sql.go:833 +0x130
+
+goroutine 2870 [select, 10 minutes]:
+database/sql.(*DB).connectionOpener(0xc00451eea0, {0xac2eb08, 0xc00255c460})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1894
+	GOROOT/src/database/sql/sql.go:833 +0x130
+
+goroutine 3552 [select, 2 minutes]:
+database/sql.(*DB).connectionOpener(0xc001dccea0, {0xac2eb08, 0xc001f9a410})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1894
+	GOROOT/src/database/sql/sql.go:833 +0x130
+
+goroutine 3766 [select]:
+database/sql.(*DB).connectionOpener(0xc003d7a5b0, {0xac2eb08, 0xc0026da3c0})
+	GOROOT/src/database/sql/sql.go:1253 +0x87
+created by database/sql.OpenDB in goroutine 1894
+	GOROOT/src/database/sql/sql.go:833 +0x130
+

@@ -1,0 +1,321 @@
+Locating and verifying binaries for os="linux", arch="amd64"
+
+Found the following binaries:
+	cockroach "amd64" at: /home/ibrahim_kettaneh_cockroachlabs_c/remote2/cockroach/cockroach
+	workload "amd64" at: /home/ibrahim_kettaneh_cockroachlabs_c/remote2/cockroach/bin/workload
+	libraries "amd64" at: /home/ibrahim_kettaneh_cockroachlabs_c/remote2/cockroach/lib/libgeos.so, /home/ibrahim_kettaneh_cockroachlabs_c/remote2/cockroach/lib/libgeos_c.so
+AMD64 clusters will be provisioned with probability 1.00
+
+Running tests which match regex "failover/non-system/disk-stall/lease=leader" and are compatible with cloud "gce".
+
+fallback runner logs in: artifacts/roachtest.crdb.log
+2025/09/05 12:52:46 run.go:388: test runner logs in: artifacts/_runner-logs/test_runner-1757076766.log
+test runner logs in: artifacts/_runner-logs/test_runner-1757076766.log
+HTTP server listening on port 41135 on all network interfaces: http://:41135/
+2025/09/05 12:52:46 run.go:150: global random seed: -3010692928760810256
+2025/09/05 12:52:46 test_runner.go:398: test_run_id: ibrahim_kettaneh_cockroachlabs_c-1757076766
+test_run_id: ibrahim_kettaneh_cockroachlabs_c-1757076766
+[w0] 2025/09/05 12:52:46 work_pool.go:198: Acquired quota for 14 CPUs
+[w0] 2025/09/05 12:52:46 cluster.go:3204: Using randomly chosen arch="amd64", failover/non-system/disk-stall/lease=leader
+2025/09/05 12:52:46 test_runner.go:574: Creating new cluster for test failover/non-system/disk-stall/lease=leader: n7cpu2 (arch="amd64")
+2025/09/05 12:52:46 cluster.go:994: Attempting cluster creation (attempt #1/3)
+2025/09/05 12:52:46 roachprod.go:106: WARN: using `ibrahimkettanehcockroachlabsc' as username instead of `ibrahim_kettaneh_cockroachlabs_c'
+2025/09/05 12:52:56 roachprod.go:1750: Creating cluster ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2 with 7 nodes...
+2025/09/05 12:52:56 gcloud.go:1778: Creating 6 instances, distributed across [us-east1-b]
+2025/09/05 12:53:06 gcloud.go:2467: Propagating labels across all disks
+2025/09/05 12:53:09 gcloud.go:1778: Creating 1 instances, distributed across [us-east1-b]
+2025/09/05 12:53:18 gcloud.go:2467: Propagating labels across all disks
+2025/09/05 12:53:20 roachprod.go:1766: Created cluster ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2; setting up SSH...
+2025/09/05 12:53:20 cluster_cloud.go:172: ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2: [gce:cockroach-ephemeral] 
+2025/09/05 12:53:20 cluster_cloud.go:178: 12h6m39s remaining
+Name                                                     DNS                                                                                     Private IP    Public IP       Machine Type   CPU Arch  CPU Family  Provision Model  
+ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2-0001  ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2-0001.us-east1-b.cockroach-ephemeral  10.142.1.208  34.75.211.126   n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2-0002  ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2-0002.us-east1-b.cockroach-ephemeral  10.142.1.183  34.138.32.23    n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2-0003  ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2-0003.us-east1-b.cockroach-ephemeral  10.142.0.195  35.185.99.174   n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2-0004  ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2-0004.us-east1-b.cockroach-ephemeral  10.142.1.207  34.74.17.83     n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2-0005  ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2-0005.us-east1-b.cockroach-ephemeral  10.142.0.194  35.229.125.209  n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2-0006  ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2-0006.us-east1-b.cockroach-ephemeral  10.142.1.175  35.231.149.108  n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2-0007  ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2-0007.us-east1-b.cockroach-ephemeral  10.142.1.210  35.185.44.179   n2-standard-2  amd64     ice lake    ondemand         
+ibrahimkettanehcockroachlabsc-1757076766-01-n7cpu2: waiting for nodes to start
+2025/09/05 20:18:16 run.go:327: Signaled received. Canceling workers and waiting up to 5s for them.
+2025/09/05 20:18:21 run.go:337: 5s elapsed. Will brutally destroy all clusters.
+2025/09/05 20:18:21 run.go:343: CtrlC handler destroying all clusters
+2025/09/05 20:18:21 run.go:353: Done destroying all clusters.
+2025/09/05 20:18:21 run.go:355: all stacks:
+
+goroutine 75 [running]:
+github.com/cockroachdb/cockroach/pkg/util/allstacks.GetWithBuf({0x0?, 0x0?, 0x0?})
+	pkg/util/allstacks/allstacks.go:31 +0x74
+github.com/cockroachdb/cockroach/pkg/util/allstacks.Get(...)
+	pkg/util/allstacks/allstacks.go:18
+main.CtrlC.func1()
+	pkg/cmd/roachtest/run.go:355 +0x3a5
+created by main.CtrlC in goroutine 1
+	pkg/cmd/roachtest/run.go:321 +0xfe
+
+goroutine 1 [semacquire, 445 minutes]:
+sync.runtime_Semacquire(0xc002118e00?)
+	GOROOT/src/runtime/sema.go:71 +0x25
+sync.(*WaitGroup).Wait(0xc00400f410?)
+	GOROOT/src/sync/waitgroup.go:118 +0x48
+main.(*testRunner).Run(0xc003d1c360, {0xac2eac8, 0xc001ef0460}, {0xc003d1e788, _, _}, _, _, {0x1, {0x0, ...}, ...}, ...)
+	pkg/cmd/roachtest/test_runner.go:451 +0xaaa
+main.runTests(0x9e5b3d0, 0xc001cdda80)
+	pkg/cmd/roachtest/run.go:187 +0xb8f
+main.main.func3(0xc003893b08, {0xc00178eff0, 0x1, 0x3})
+	pkg/cmd/roachtest/main.go:181 +0xcb
+github.com/spf13/cobra.(*Command).execute(0xc003893b08, {0xc00178ef90, 0x3, 0x3})
+	external/com_github_spf13_cobra/command.go:916 +0x862
+github.com/spf13/cobra.(*Command).ExecuteC(0xc003893208)
+	external/com_github_spf13_cobra/command.go:1044 +0x3a5
+github.com/spf13/cobra.(*Command).Execute(...)
+	external/com_github_spf13_cobra/command.go:968
+main.main()
+	pkg/cmd/roachtest/main.go:248 +0x6fd
+
+goroutine 40 [select]:
+go.opencensus.io/stats/view.(*worker).start(0xc0015a1c80)
+	external/io_opencensus_go/stats/view/worker.go:292 +0x9f
+created by go.opencensus.io/stats/view.init.0 in goroutine 1
+	external/io_opencensus_go/stats/view/worker.go:34 +0x8d
+
+goroutine 14 [IO wait, 445 minutes]:
+internal/poll.runtime_pollWait(0x7f90baa48e00, 0x72)
+	GOROOT/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0xc000239b80?, 0xc00031fcf0?, 0x0)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).ReadMsg(0xc000239b80, {0xc00031fcf0, 0x10, 0x10}, {0xc000f3e028, 0x1000, 0x1000}, 0x40000000)
+	GOROOT/src/internal/poll/fd_unix.go:302 +0x385
+net.(*netFD).readMsg(0xc000239b80, {0xc00031fcf0?, 0xc?, 0x8d07000000?}, {0xc000f3e028?, 0xac759d0?, 0x0?}, 0x1?)
+	GOROOT/src/net/fd_posix.go:78 +0x31
+net.(*UnixConn).readMsg(0xc0001a08f0, {0xc00031fcf0?, 0x44e30b?, 0x7f90baa45fe8?}, {0xc000f3e028?, 0xc000259dd0?, 0x4a97bd?})
+	GOROOT/src/net/unixsock_posix.go:115 +0x45
+net.(*UnixConn).ReadMsgUnix(0xc0001a08f0, {0xc00031fcf0?, 0x30?, 0x50?}, {0xc000f3e028?, 0x7f90baa45fe8?, 0x18?})
+	GOROOT/src/net/unixsock.go:143 +0x36
+github.com/godbus/dbus.(*oobReader).Read(0xc000f3e008, {0xc00031fcf0?, 0xc000259e30?, 0x449225?})
+	external/com_github_godbus_dbus/transport_unix.go:21 +0x3c
+io.ReadAtLeast({0xabd60c0, 0xc000f3e008}, {0xc00031fcf0, 0x10, 0x10}, 0x10)
+	GOROOT/src/io/io.go:335 +0x90
+io.ReadFull(...)
+	GOROOT/src/io/io.go:354
+github.com/godbus/dbus.(*unixTransport).ReadMessage(0xc000306e58)
+	external/com_github_godbus_dbus/transport_unix.go:91 +0xfe
+github.com/godbus/dbus.(*Conn).inWorker(0xc0001b55f0)
+	external/com_github_godbus_dbus/conn.go:294 +0x35
+created by github.com/godbus/dbus.(*Conn).Auth in goroutine 1
+	external/com_github_godbus_dbus/auth.go:118 +0x8ee
+
+goroutine 28 [syscall]:
+os/signal.signal_recv()
+	GOROOT/src/runtime/sigqueue.go:152 +0x29
+os/signal.loop()
+	GOROOT/src/os/signal/signal_unix.go:23 +0x13
+created by os/signal.Notify.func1.1 in goroutine 66
+	GOROOT/src/os/signal/signal.go:151 +0x1f
+
+goroutine 16 [chan receive]:
+github.com/cockroachdb/cockroach/pkg/util/log.flushDaemon()
+	pkg/util/log/log_flush.go:123 +0x4e
+created by github.com/cockroachdb/cockroach/pkg/util/log.init.5 in goroutine 1
+	pkg/util/log/log_flush.go:78 +0x1a
+
+goroutine 66 [chan receive, 445 minutes]:
+github.com/cockroachdb/cockroach/pkg/util/log.signalFlusher()
+	pkg/util/log/log_flush.go:147 +0x85
+created by github.com/cockroachdb/cockroach/pkg/util/log.init.5 in goroutine 1
+	pkg/util/log/log_flush.go:79 +0x26
+
+goroutine 67 [chan receive]:
+github.com/cockroachdb/cockroach/pkg/util/goschedstats.init.0.func1()
+	pkg/util/goschedstats/runnable_enabled.go:144 +0xe5
+created by github.com/cockroachdb/cockroach/pkg/util/goschedstats.init.0 in goroutine 1
+	pkg/util/goschedstats/runnable_enabled.go:136 +0x1a
+
+goroutine 243 [sleep]:
+time.Sleep(0x1dcd6500)
+	GOROOT/src/runtime/time.go:300 +0xf2
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).Wait.func1({0xac2eac8, 0xc00243d630}, 0x1)
+	pkg/roachprod/install/cluster_synced.go:1090 +0x174
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1.1.1({0xac2eac8?, 0xc00243d630?})
+	pkg/roachprod/install/cluster_synced.go:2571 +0x3a
+github.com/cockroachdb/cockroach/pkg/roachprod/install.runWithMaybeRetry({0xac2eac8?, 0xc00243d630?}, 0x0?, 0x2?, 0x0?, 0x0?)
+	pkg/roachprod/install/cluster_synced.go:202 +0x10d
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1.1(0x0)
+	pkg/roachprod/install/cluster_synced.go:2569 +0x110
+created by github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1 in goroutine 76
+	pkg/roachprod/install/cluster_synced.go:2565 +0x1e9
+
+goroutine 73 [IO wait, 445 minutes]:
+internal/poll.runtime_pollWait(0x7f90baa48ab8, 0x72)
+	GOROOT/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0xc00261fb00?, 0x10?, 0x0)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Accept(0xc00261fb00)
+	GOROOT/src/internal/poll/fd_unix.go:620 +0x295
+net.(*netFD).accept(0xc00261fb00)
+	GOROOT/src/net/fd_unix.go:172 +0x29
+net.(*TCPListener).accept(0xc002118c00)
+	GOROOT/src/net/tcpsock_posix.go:159 +0x1e
+net.(*TCPListener).Accept(0xc002118c00)
+	GOROOT/src/net/tcpsock.go:372 +0x30
+net/http.(*Server).Serve(0xc002b6c0f0, {0xac012a0, 0xc002118c00})
+	GOROOT/src/net/http/server.go:3330 +0x30c
+net/http.Serve(...)
+	GOROOT/src/net/http/server.go:2858
+main.(*testRunner).runHTTPServer.func1()
+	pkg/cmd/roachtest/test_runner.go:1943 +0x45
+created by main.(*testRunner).runHTTPServer in goroutine 1
+	pkg/cmd/roachtest/test_runner.go:1942 +0x1ef
+
+goroutine 74 [IO wait, 445 minutes]:
+internal/poll.runtime_pollWait(0x7f90baa48ce8, 0x72)
+	GOROOT/src/runtime/netpoll.go:351 +0x85
+internal/poll.(*pollDesc).wait(0xc002648000?, 0x10?, 0x0)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:84 +0x27
+internal/poll.(*pollDesc).waitRead(...)
+	GOROOT/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Accept(0xc002648000)
+	GOROOT/src/internal/poll/fd_unix.go:620 +0x295
+net.(*netFD).accept(0xc002648000)
+	GOROOT/src/net/fd_unix.go:172 +0x29
+net.(*TCPListener).accept(0xc002148000)
+	GOROOT/src/net/tcpsock_posix.go:159 +0x1e
+net.(*TCPListener).Accept(0xc002148000)
+	GOROOT/src/net/tcpsock.go:372 +0x30
+net/http.(*Server).Serve(0xc002b6c1e0, {0xac012a0, 0xc002148000})
+	GOROOT/src/net/http/server.go:3330 +0x30c
+net/http.(*Server).ListenAndServe(0xc002b6c1e0)
+	GOROOT/src/net/http/server.go:3259 +0x71
+net/http.ListenAndServe(...)
+	GOROOT/src/net/http/server.go:3514
+main.runTests.func1()
+	pkg/cmd/roachtest/run.go:152 +0x1b4
+created by main.runTests in goroutine 1
+	pkg/cmd/roachtest/run.go:151 +0xa49
+
+goroutine 76 [select, 445 minutes]:
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE(0x0?, {0xac2eac8, 0xc001ef0460}, 0xc002d2fc20, {0x0, 0x9e5c078, 0x1, {{0x0, 0x0}}, 0x0, ...}, ...)
+	pkg/roachprod/install/cluster_synced.go:2602 +0x448
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).Wait(0xc00249e000, {0xac2eac8, 0xc001ef0460}, 0xc002d2fc20)
+	pkg/roachprod/install/cluster_synced.go:1076 +0x231
+github.com/cockroachdb/cockroach/pkg/roachprod.SetupSSH({0xac2eac8, 0xc001ef0460}, 0xc002d2fc20, {0xc002e609c0, 0x32}, 0x0)
+	pkg/roachprod/roachprod.go:703 +0x713
+github.com/cockroachdb/cockroach/pkg/roachprod.Create({0xac2eac8, 0xc001ef0460}, 0xc002d2fc20, {0xc0015eab40?, 0x996e294?}, {0xc0020ef890, 0x2, 0x2})
+	pkg/roachprod/roachprod.go:1767 +0x71b
+main.(*clusterFactory).newCluster(_, {_, _}, {{0x0, 0x0}, {{0x0, 0x0}, 0x7, 0x1, 0x1, ...}, ...}, ...)
+	pkg/cmd/roachtest/cluster.go:1005 +0x1316
+main.(*testRunner).allocateOrAttachToCluster(_, {_, _}, _, {0x1, {0x0, 0x0}, {0x0, 0x0}, {0xc0015eab40, ...}, ...}, ...)
+	pkg/cmd/roachtest/test_runner.go:585 +0xa1b
+main.(*testRunner).runWorker(0xc003d1c360, {0xac2eac8, _}, {_, _}, _, _, _, _, {0x1, ...}, ...)
+	pkg/cmd/roachtest/test_runner.go:791 +0xc9a
+main.(*testRunner).Run.func1({0xac2eac8, 0xc001ef0460})
+	pkg/cmd/roachtest/test_runner.go:415 +0x425
+github.com/cockroachdb/cockroach/pkg/util/stop.(*Stopper).RunAsyncTaskEx.func1({0xac2eac8, 0xc001ef0460})
+	pkg/util/stop/stopper.go:438 +0x8a
+created by github.com/cockroachdb/cockroach/pkg/util/stop.(*Stopper).RunAsyncTaskEx in goroutine 1
+	pkg/util/stop/stopper.go:436 +0x137
+
+goroutine 244 [sleep]:
+time.Sleep(0x1dcd6500)
+	GOROOT/src/runtime/time.go:300 +0xf2
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).Wait.func1({0xac2eac8, 0xc00243d630}, 0x2)
+	pkg/roachprod/install/cluster_synced.go:1090 +0x174
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1.1.1({0xac2eac8?, 0xc00243d630?})
+	pkg/roachprod/install/cluster_synced.go:2571 +0x3a
+github.com/cockroachdb/cockroach/pkg/roachprod/install.runWithMaybeRetry({0xac2eac8?, 0xc00243d630?}, 0x0?, 0x2?, 0x0?, 0x0?)
+	pkg/roachprod/install/cluster_synced.go:202 +0x10d
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1.1(0x1)
+	pkg/roachprod/install/cluster_synced.go:2569 +0x110
+created by github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1 in goroutine 76
+	pkg/roachprod/install/cluster_synced.go:2565 +0x1e9
+
+goroutine 245 [sleep]:
+time.Sleep(0x1dcd6500)
+	GOROOT/src/runtime/time.go:300 +0xf2
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).Wait.func1({0xac2eac8, 0xc00243d630}, 0x3)
+	pkg/roachprod/install/cluster_synced.go:1090 +0x174
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1.1.1({0xac2eac8?, 0xc00243d630?})
+	pkg/roachprod/install/cluster_synced.go:2571 +0x3a
+github.com/cockroachdb/cockroach/pkg/roachprod/install.runWithMaybeRetry({0xac2eac8?, 0xc00243d630?}, 0x0?, 0x0?, 0x0?, 0x0?)
+	pkg/roachprod/install/cluster_synced.go:202 +0x10d
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1.1(0x2)
+	pkg/roachprod/install/cluster_synced.go:2569 +0x110
+created by github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1 in goroutine 76
+	pkg/roachprod/install/cluster_synced.go:2565 +0x1e9
+
+goroutine 246 [sleep]:
+time.Sleep(0x1dcd6500)
+	GOROOT/src/runtime/time.go:300 +0xf2
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).Wait.func1({0xac2eac8, 0xc00243d630}, 0x4)
+	pkg/roachprod/install/cluster_synced.go:1090 +0x174
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1.1.1({0xac2eac8?, 0xc00243d630?})
+	pkg/roachprod/install/cluster_synced.go:2571 +0x3a
+github.com/cockroachdb/cockroach/pkg/roachprod/install.runWithMaybeRetry({0xac2eac8?, 0xc00243d630?}, 0xc00032ef08?, 0x3?, 0x10000c001a84fc0?, 0x0?)
+	pkg/roachprod/install/cluster_synced.go:202 +0x10d
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1.1(0x3)
+	pkg/roachprod/install/cluster_synced.go:2569 +0x110
+created by github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1 in goroutine 76
+	pkg/roachprod/install/cluster_synced.go:2565 +0x1e9
+
+goroutine 247 [sleep]:
+time.Sleep(0x1dcd6500)
+	GOROOT/src/runtime/time.go:300 +0xf2
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).Wait.func1({0xac2eac8, 0xc00243d630}, 0x5)
+	pkg/roachprod/install/cluster_synced.go:1090 +0x174
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1.1.1({0xac2eac8?, 0xc00243d630?})
+	pkg/roachprod/install/cluster_synced.go:2571 +0x3a
+github.com/cockroachdb/cockroach/pkg/roachprod/install.runWithMaybeRetry({0xac2eac8?, 0xc00243d630?}, 0x1?, 0x37?, 0x0?, 0xa?)
+	pkg/roachprod/install/cluster_synced.go:202 +0x10d
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1.1(0x4)
+	pkg/roachprod/install/cluster_synced.go:2569 +0x110
+created by github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1 in goroutine 76
+	pkg/roachprod/install/cluster_synced.go:2565 +0x1e9
+
+goroutine 248 [sleep]:
+time.Sleep(0x1dcd6500)
+	GOROOT/src/runtime/time.go:300 +0xf2
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).Wait.func1({0xac2eac8, 0xc00243d630}, 0x6)
+	pkg/roachprod/install/cluster_synced.go:1090 +0x174
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1.1.1({0xac2eac8?, 0xc00243d630?})
+	pkg/roachprod/install/cluster_synced.go:2571 +0x3a
+github.com/cockroachdb/cockroach/pkg/roachprod/install.runWithMaybeRetry({0xac2eac8?, 0xc00243d630?}, 0x0?, 0x2?, 0x0?, 0x0?)
+	pkg/roachprod/install/cluster_synced.go:202 +0x10d
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1.1(0x5)
+	pkg/roachprod/install/cluster_synced.go:2569 +0x110
+created by github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1 in goroutine 76
+	pkg/roachprod/install/cluster_synced.go:2565 +0x1e9
+
+goroutine 249 [sleep]:
+time.Sleep(0x1dcd6500)
+	GOROOT/src/runtime/time.go:300 +0xf2
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).Wait.func1({0xac2eac8, 0xc00243d630}, 0x7)
+	pkg/roachprod/install/cluster_synced.go:1090 +0x174
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1.1.1({0xac2eac8?, 0xc00243d630?})
+	pkg/roachprod/install/cluster_synced.go:2571 +0x3a
+github.com/cockroachdb/cockroach/pkg/roachprod/install.runWithMaybeRetry({0xac2eac8?, 0xc00243d630?}, 0x0?, 0xc00032b710?, 0x3?, 0x0?)
+	pkg/roachprod/install/cluster_synced.go:202 +0x10d
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1.1(0x6)
+	pkg/roachprod/install/cluster_synced.go:2569 +0x110
+created by github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func1 in goroutine 76
+	pkg/roachprod/install/cluster_synced.go:2565 +0x1e9
+
+goroutine 250 [semacquire, 445 minutes]:
+sync.runtime_Semacquire(0xc0002bafd0?)
+	GOROOT/src/runtime/sema.go:71 +0x25
+sync.(*WaitGroup).Wait(0xc002b68d80?)
+	GOROOT/src/sync/waitgroup.go:118 +0x48
+github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE.func2()
+	pkg/roachprod/install/cluster_synced.go:2590 +0x6e
+created by github.com/cockroachdb/cockroach/pkg/roachprod/install.(*SyncedCluster).ParallelE in goroutine 76
+	pkg/roachprod/install/cluster_synced.go:2587 +0x2fc
+
+goroutine 251 [select]:
+github.com/cockroachdb/cockroach/pkg/roachprod/ui.(*Spinner).Start.func1()
+	pkg/roachprod/ui/spinner.go:136 +0x126
+created by github.com/cockroachdb/cockroach/pkg/roachprod/ui.(*Spinner).Start in goroutine 76
+	pkg/roachprod/ui/spinner.go:122 +0x18d
+
