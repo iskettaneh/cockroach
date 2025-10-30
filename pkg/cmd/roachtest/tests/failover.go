@@ -270,8 +270,6 @@ func registerFailover(r registry.Registry) {
 				// Don't reuse the cluster for tests that call dmsetup to avoid
 				// spurious flakes from previous runs. See #107865
 				clusterOpts = append(clusterOpts, spec.ReuseNone())
-				// TODO(darryl): Enable FIPS once we can upgrade to Ubuntu 22 and lsblk outputs in the same format.
-				clusterOpts = append(clusterOpts, spec.Arch(spec.AllExceptFIPS))
 				postValidation = registry.PostValidationNoDeadNodes
 				// dmsetup is currently only configured for gce.
 				clouds = registry.OnlyGCE
@@ -700,7 +698,11 @@ func runFailoverPartialLeaseLeader(ctx context.Context, t test.Test, c cluster.C
 	failer.Setup(ctx)
 	defer failer.Cleanup(ctx)
 
-	c.Start(ctx, t.L(), failoverStartOpts(), settings, c.Range(1, 3))
+	startOpts := failoverStartOpts()
+	startOpts.RoachprodOpts.ExtraArgs = []string{"--vmodule=replica_range_lease=3,raft=4,replica_raft_quiesce=3,support_manager=3,requester_state=3,supporter_state=3"}
+	// c.Start(ctx, t.L(), startOpts, settings, c.CRDBNodes())
+
+	c.Start(ctx, t.L(), startOpts, settings, c.Range(1, 3))
 
 	conn := c.Conn(ctx, t.L(), 1)
 	setMaxLifetime(conn)
@@ -713,7 +715,7 @@ func runFailoverPartialLeaseLeader(ctx context.Context, t test.Test, c cluster.C
 	require.NoError(t, roachtestutil.WaitForReplication(ctx, t.L(), conn, 3, roachprod.ExactlyReplicationFactor))
 
 	// Now that system ranges are properly placed on n1-n3, start n4-n6.
-	c.Start(ctx, t.L(), failoverStartOpts(), settings, c.Range(4, 6))
+	c.Start(ctx, t.L(), startOpts, settings, c.Range(4, 6))
 
 	// Create the kv database on n4-n6.
 	t.L().Printf("creating workload database")
@@ -721,7 +723,7 @@ func runFailoverPartialLeaseLeader(ctx context.Context, t test.Test, c cluster.C
 	require.NoError(t, err)
 	configureZone(t, ctx, conn, `DATABASE kv`, zoneConfig{replicas: 3, onlyNodes: []int{4, 5, 6}})
 
-	c.Run(ctx, option.WithNodes(c.Node(6)), `./cockroach workload init kv --splits 9 {pgurl:1}`)
+	c.Run(ctx, option.WithNodes(c.Node(6)), `./cockroach workload init kv {pgurl:1}`)
 
 	// Move ranges to the appropriate nodes. Precreating the database/range and
 	// moving it to the correct nodes first is not sufficient, since workload will
@@ -757,13 +759,15 @@ func runFailoverPartialLeaseLeader(ctx context.Context, t test.Test, c cluster.C
 					}
 				}
 
-				sleepFor(ctx, t, 20*time.Second)
+				sleepFor(ctx, t, 30*time.Second)
 
 				// Ranges may occasionally escape their constraints. Move them to where
 				// they should be.
 				relocateRanges(t, ctx, conn, `database_name = 'kv'`, []int{1, 2, 3}, []int{4, 5, 6})
 				relocateRanges(t, ctx, conn, `database_name != 'kv'`, []int{4, 5, 6}, []int{1, 2, 3})
 				relocateLeases(t, ctx, conn, `database_name = 'kv'`, node)
+
+				sleepFor(ctx, t, 5*time.Second)
 
 				// Randomly sleep up to the lease renewal interval, to vary the time
 				// between the last lease renewal and the failure.
@@ -785,7 +789,7 @@ func runFailoverPartialLeaseLeader(ctx context.Context, t test.Test, c cluster.C
 
 				// Keep sending the query with a timeout of 200ms until it succeeds
 				for {
-					queryCtx, cancel := context.WithTimeout(ctx, 200*time.Millisecond)
+					queryCtx, cancel := context.WithTimeout(ctx, 500*time.Millisecond)
 					_, err := conn.ExecContext(queryCtx, fmt.Sprintf("UPSERT INTO kv.kv VALUES (%d, 'one')", curKey))
 					cancel()
 					curKey++
@@ -959,6 +963,9 @@ func runFailoverNonSystem(
 	settings.Env = append(settings.Env, "COCKROACH_ENABLE_UNSAFE_TEST_BUILTINS=true")
 	settings.Env = append(settings.Env, "COCKROACH_SCAN_MAX_IDLE_TIME=100ms") // speed up replication
 
+	// For Disk stall
+	settings.ClusterSettings["kv.dist_sender.circuit_breakers.mode"] = "all ranges"
+
 	m := c.NewDeprecatedMonitor(ctx, c.CRDBNodes())
 
 	failer := makeFailer(t, c, m, failureMode, settings, rng)
@@ -1010,14 +1017,14 @@ func runFailoverNonSystem(
 		// defer cancelWorkload()
 		for i := 0; i < 100; i++ {
 			for _, node := range []int{4, 5, 6} {
-				sleepFor(ctx, t, 60*time.Second)
+				sleepFor(ctx, t, 30*time.Second)
 
 				// Ranges may occasionally escape their constraints. Move them
 				// to where they should be.
 				relocateRanges(t, ctx, conn, `database_name = 'kv'`, []int{1, 2, 3}, []int{4, 5, 6})
 				relocateRanges(t, ctx, conn, `database_name != 'kv'`, []int{node}, []int{1, 2, 3})
 				relocateLeases(t, ctx, conn, `database_name = 'kv'`, node)
-				sleepFor(ctx, t, 5*time.Second)
+				sleepFor(ctx, t, 30*time.Second)
 				// Randomly sleep up to the lease renewal interval, to vary the time
 				// between the last lease renewal and the failure.
 				sleepFor(ctx, t, randutil.RandDuration(rng, rangeLeaseRenewalDuration))
@@ -1033,7 +1040,7 @@ func runFailoverNonSystem(
 
 				// Keep sending the query with a timeout of 200ms until it succeeds
 				for {
-					queryCtx, cancel := context.WithTimeout(ctx, 500*time.Millisecond)
+					queryCtx, cancel := context.WithTimeout(ctx, 250*time.Millisecond)
 					_, err := conn.ExecContext(queryCtx, fmt.Sprintf("INSERT INTO kv.kv VALUES (%d, 'one')", curKey))
 					cancel()
 					curKey++

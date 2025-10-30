@@ -78,7 +78,7 @@ var (
 		settings.ApplicationLevel,
 		"kv.dist_sender.circuit_breaker.probe.threshold",
 		"duration of errors or stalls after which a replica will be probed",
-		3*time.Second,
+		500*time.Millisecond,
 		settings.WithPublic,
 	)
 
@@ -86,7 +86,7 @@ var (
 		settings.ApplicationLevel,
 		"kv.dist_sender.circuit_breaker.probe.interval",
 		"interval between replica probes",
-		3*time.Second,
+		500*time.Millisecond,
 		settings.WithPublic,
 	)
 
@@ -94,7 +94,7 @@ var (
 		settings.ApplicationLevel,
 		"kv.dist_sender.circuit_breaker.probe.timeout",
 		"timeout for replica probes",
-		3*time.Second,
+		500*time.Millisecond,
 		settings.WithPublic,
 	)
 
@@ -111,7 +111,7 @@ var (
 		"kv.dist_sender.circuit_breaker.cancellation.write_grace_period",
 		"how long after the circuit breaker trips to cancel write requests "+
 			"(these can't retry internally, so should be long enough to allow quorum/lease recovery)",
-		10*time.Second,
+		2*time.Second,
 		settings.WithPublic,
 		// This prevents probes from exiting when idle, which can lead to
 		// buildup of probe goroutines, so cap it at 1 minute.
@@ -129,7 +129,7 @@ const (
 
 	// cbProbeIdleTimeout is the interval with no client requests after which a
 	// failing probe should exit. It will be relaunched on the next request.
-	cbProbeIdleTimeout = 10 * time.Second
+	cbProbeIdleTimeout = 3 * time.Second
 )
 
 // cbRequestCancellationPolicy classifies a batch request.
