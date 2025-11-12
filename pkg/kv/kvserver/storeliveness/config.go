@@ -21,7 +21,7 @@ var (
 	// defaultIdleSupportFromInterval is the default value for
 	// IdleSupportFromInterval.
 	defaultIdleSupportFromInterval = envutil.EnvOrDefaultDuration(
-		"COCKROACH_STORE_LIVENESS_IDLE_SUPPORT_FROM_INTERVAL", time.Minute,
+		"COCKROACH_STORE_LIVENESS_IDLE_SUPPORT_FROM_INTERVAL", 24*time.Hour,
 	)
 )
 

@@ -2256,6 +2256,7 @@ func (s *Store) Start(ctx context.Context, stopper *stop.Stopper) error {
 		slpb.StoreIdent{NodeID: s.nodeDesc.NodeID, StoreID: s.StoreID()}, s.StateEngine(),
 		s.cfg.StoreLiveness.Options, s.cfg.Settings, s.stopper, s.cfg.Clock,
 		s.cfg.StoreLiveness.HeartbeatTicker, s.cfg.StoreLiveness.Transport,
+		s.cfg.StorePool, // Pass StorePool to proactively discover all stores
 		s.cfg.StoreLiveness.SupportManagerKnobs(),
 	)
 	s.cfg.StoreLiveness.Transport.ListenMessages(s.StoreID(), sm)

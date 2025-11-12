@@ -43,7 +43,7 @@ func TestStoreLiveness(t *testing.T) {
 			manual := timeutil.NewManualTime(timeutil.Unix(1, 0))
 			clock := hlc.NewClockForTesting(manual)
 			sender := testMessageSender{}
-			sm := NewSupportManager(storeID, engine, Options{}, settings, stopper, clock, nil, &sender, nil)
+			sm := NewSupportManager(storeID, engine, Options{}, settings, stopper, clock, nil, &sender, nil, nil)
 			require.NoError(t, sm.onRestart(ctx))
 			datadriven.RunTest(
 				t, path, func(t *testing.T, d *datadriven.TestData) string {
@@ -92,7 +92,7 @@ func TestStoreLiveness(t *testing.T) {
 						gracePeriod := dd.ScanArg[time.Duration](t, d, "grace-period")
 						o := Options{SupportWithdrawalGracePeriod: gracePeriod}
 						sm = NewSupportManager(
-							storeID, engine, o, settings, stopper, clock, nil, &sender, nil,
+							storeID, engine, o, settings, stopper, clock, nil, &sender, nil, nil,
 						)
 						manual.AdvanceTo(now.GoTime())
 						require.NoError(t, sm.onRestart(ctx))

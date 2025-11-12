@@ -37,6 +37,12 @@ type MessageSender interface {
 	EnqueueMessage(ctx context.Context, msg slpb.Message) (sent bool)
 }
 
+// StoreProvider is the interface that defines how to get all stores in the
+// cluster. This is used to proactively add all stores to the heartbeat list.
+type StoreProvider interface {
+	GetStores() map[roachpb.StoreID]roachpb.StoreDescriptor
+}
+
 // SupportManager orchestrates requesting and providing Store Liveness support.
 type SupportManager struct {
 	storeID               slpb.StoreIdent
@@ -47,6 +53,7 @@ type SupportManager struct {
 	clock                 *hlc.Clock
 	heartbeatTicker       *timeutil.BroadcastTicker // optional
 	sender                MessageSender
+	storeProvider         StoreProvider // optional
 	receiveQueue          receiveQueue
 	storesToAdd           storesToAdd
 	minWithdrawalTS       hlc.Timestamp
@@ -71,6 +78,7 @@ func NewSupportManager(
 	clock *hlc.Clock,
 	heartbeatTicker *timeutil.BroadcastTicker,
 	sender MessageSender,
+	storeProvider StoreProvider,
 	knobs *SupportManagerKnobs,
 ) *SupportManager {
 	if knobs != nil && knobs.TestEngine != nil && knobs.TestEngine.storeID == storeID {
@@ -85,6 +93,7 @@ func NewSupportManager(
 		clock:                 clock,
 		heartbeatTicker:       heartbeatTicker,
 		sender:                sender,
+		storeProvider:         storeProvider,
 		knobs:                 knobs,
 		receiveQueue:          newReceiveQueue(),
 		storesToAdd:           newStoresToAdd(),
@@ -228,6 +237,29 @@ func (sm *SupportManager) onRestart(ctx context.Context) error {
 	return nil
 }
 
+// addAllStoresProactively adds all stores from the cluster to the heartbeat
+// list. This bypasses the typical lazy approach where stores are added only
+// when SupportFrom is called (i.e., when there's a replica needing support).
+func (sm *SupportManager) addAllStoresProactively(ctx context.Context) {
+	if sm.storeProvider == nil {
+		return
+	}
+
+	stores := sm.storeProvider.GetStores()
+	for storeID, desc := range stores {
+		remoteStoreIdent := slpb.StoreIdent{
+			NodeID:  desc.Node.NodeID,
+			StoreID: storeID,
+		}
+
+		_, ok, _ := sm.requesterStateHandler.getSupportFrom(remoteStoreIdent)
+		if !ok {
+			sm.storesToAdd.addStore(remoteStoreIdent)
+			log.KvExec.VInfof(context.TODO(), 2, "proactively adding store %+v to heartbeat list", remoteStoreIdent)
+		}
+	}
+}
+
 // startLoop contains the main processing goroutine which orchestrates sending
 // heartbeats, responding to messages, withdrawing support, adding and removing
 // stores. Doing so in a single goroutine serializes these actions and
@@ -247,6 +279,9 @@ func (sm *SupportManager) startLoop(ctx context.Context) {
 	idleSupportFromTicker := time.NewTicker(sm.options.IdleSupportFromInterval)
 	defer idleSupportFromTicker.Stop()
 
+	proactiveHeartbeatTicker := time.NewTicker(time.Minute)
+	defer proactiveHeartbeatTicker.Stop()
+
 	for {
 		// NOTE: only listen to the receive queue's signal if we don't already have
 		// stores to add, heartbeats to send, or support to check. This prevents a
@@ -263,6 +298,9 @@ func (sm *SupportManager) startLoop(ctx context.Context) {
 		case <-sm.storesToAdd.sig:
 			sm.maybeAddStores(ctx)
 			sm.sendHeartbeats(ctx)
+
+		case <-proactiveHeartbeatTicker.C:
+			sm.addAllStoresProactively(ctx)
 
 		case <-heartbeatTicker.C:
 			sm.sendHeartbeats(ctx)
