@@ -369,7 +369,10 @@ func getGCEOpts(
 	if volumeSize != 0 {
 		opts.PDVolumeSize = volumeSize
 	}
-	if volumeCount != 0 {
+	if bootDiskOnly {
+		// When bootDiskOnly is true, ensure we don't try to create/label any additional disks
+		opts.PDVolumeCount = 0
+	} else if volumeCount != 0 {
 		opts.PDVolumeCount = volumeCount
 	}
 	opts.SSDCount = localSSDCount
