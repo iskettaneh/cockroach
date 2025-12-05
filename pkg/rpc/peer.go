@@ -172,6 +172,10 @@ type PeerSnap[Conn rpcConn] struct {
 	// INVARIANT: connected > disconnected <=> c.initialHeartbeatDone closed.
 	// (Assuming monotonic local walltime).
 	connected time.Time
+	// connCreatedAt is the timestamp when the current connection was created.
+	// This is used to determine if a connection has exceeded its maximum age
+	// and needs to be rotated.
+	connCreatedAt time.Time
 	// disconnected is zero initially, reset on successful heartbeat, set on
 	// heartbeat teardown if zero. In other words, does not move forward across
 	// subsequent connection failures - it tracks the first disconnect since
@@ -558,6 +562,16 @@ func (p *peer[Conn]) runHeartbeatUntilFailure(
 			// path that reports the error, in order to provide a good UX.
 		}
 
+		// Check if the connection has exceeded its maximum age and needs rotation.
+		now := p.opts.Clock.Now()
+		maxAge := connectionMaxAge.Get(&p.opts.Settings.SV)
+		snap := p.snap()
+		if maxAge > 0 && !snap.connCreatedAt.IsZero() && now.Sub(snap.connCreatedAt) >= maxAge {
+			log.Health.Infof(ctx, "rotating connection after %s (max age: %s)",
+				now.Sub(snap.connCreatedAt).Round(time.Second), maxAge)
+			return errors.New("connection max age exceeded")
+		}
+
 		if err := runSingleHeartbeat(
 			ctx, heartbeatClient, p.k, p.peerMetrics.roundTripLatency, p.remoteClocks,
 			p.opts, p.heartbeatTimeout, PingRequest_NON_BLOCKING,
@@ -565,7 +579,7 @@ func (p *peer[Conn]) runHeartbeatUntilFailure(
 			return err
 		}
 
-		p.onSubsequentHeartbeatSucceeded(ctx, p.opts.Clock.Now())
+		p.onSubsequentHeartbeatSucceeded(ctx, now)
 		heartbeatTimer.Reset(p.heartbeatInterval)
 	}
 }
@@ -592,6 +606,8 @@ func (p *peer[Conn]) onInitialHeartbeatSucceeded(
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.mu.connected = now
+	// Record when this connection was created for rotation purposes
+	p.mu.connCreatedAt = now
 	// If the probe was inactive, the fact that we managed to heartbeat implies
 	// that it ought not have been.
 	p.mu.deleteAfter = 0

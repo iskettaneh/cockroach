@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net"
 	"sync"
+	"time"
 
 	"github.com/cockroachdb/cockroach/pkg/rpc/rpcbase"
 	"github.com/cockroachdb/cockroach/pkg/settings"
@@ -43,6 +44,13 @@ var useDialback = settings.RegisterBoolSetting(
 	"rpc.dialback.enabled",
 	"if true, require bidirectional RPC connections between nodes to prevent one-way network unavailability",
 	true,
+)
+
+var connectionMaxAge = settings.RegisterDurationSetting(
+	settings.SystemVisible,
+	"rpc.connection.max_age",
+	"maximum age of a gRPC connection before it is rotated; set to 0 to disable connection rotation",
+	3*time.Minute, // 7 days
 )
 
 var enableRPCCompression = envutil.EnvOrDefaultBool("COCKROACH_ENABLE_RPC_COMPRESSION", true)
